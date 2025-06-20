@@ -7,7 +7,7 @@ const sequelize = require('./config/db');
 
 // Importar rutas
 const authRoutes = require('./routes/authRoutes');
-const rutasProtegidas = require('./routes/protegidasRoutes'); // ✅ NUEVO
+const rutasProtegidas = require('./routes/protegidasRoutes'); //NUEVO
 
 // Probar conexión a la BD
 sequelize.authenticate()
@@ -20,14 +20,14 @@ app.use(express.json());
 
 // Ruta de prueba raíz
 app.get('/', (req, res) => {
-  res.send('API del sistema de acceso vehicular funcionando 🚗🔐');
+  res.send('API del sistema de acceso vehicular funcionando');
 });
 
 // Rutas públicas
 app.use('/api', authRoutes);
 
 // Rutas protegidas con JWT
-app.use('/api', rutasProtegidas); // ✅ NUEVO
+app.use('/api', rutasProtegidas); //NUEVO
 
 // Puerto del servidor
 const PORT = process.env.PORT || 5000;
