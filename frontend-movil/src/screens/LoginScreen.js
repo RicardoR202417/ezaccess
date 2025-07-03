@@ -1,14 +1,39 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, Platform, Image } from 'react-native';
+import { View, StyleSheet, KeyboardAvoidingView, Platform, Image, Alert } from 'react-native';
 import { TextInput, Button, Text, Title } from 'react-native-paper';
 import * as Animatable from 'react-native-animatable';
+import { API_URL } from '../config'; // Asegúrate de que sea http://10.13.3.104:5000/api
 
 export default function LoginScreen({ navigation }) {
   const [correo, setCorreo] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    navigation.replace('EscaneoNFC'); // flujo actualizado
+  const handleLogin = async () => {
+    if (!correo || !password) {
+      Alert.alert('Campos vacíos', 'Por favor ingresa tu correo y contraseña.');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ correo, contrasena: password }),
+      });
+
+      const data = await response.json();
+      console.log('Respuesta del servidor:', data);
+
+      if (response.ok) {
+        // Aquí podrías guardar el token con AsyncStorage si lo necesitas
+        navigation.replace('Dashboard'); // asegúrate de tener registrado el screen Dashboard
+      } else {
+        Alert.alert('Error', data.mensaje || 'Credenciales inválidas');
+      }
+    } catch (error) {
+      console.error('Error en login:', error);
+      Alert.alert('Error', 'No se pudo conectar con el servidor');
+    }
   };
 
   return (
@@ -18,12 +43,10 @@ export default function LoginScreen({ navigation }) {
     >
       <View style={styles.container}>
         <Animatable.View animation="fadeInDown" duration={1000} style={styles.card}>
-          
           <Image
             source={require('../../assets/logo.png')}
             style={styles.logo}
           />
-
           <Title style={styles.title}>EZACCESS</Title>
           <Text style={styles.subtitle}>Inicio de Sesión</Text>
 

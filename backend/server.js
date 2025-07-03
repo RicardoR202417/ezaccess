@@ -7,7 +7,7 @@ const sequelize = require('./config/db');
 
 // Importar rutas
 const authRoutes = require('./routes/authRoutes');
-const rutasProtegidas = require('./routes/protegidasRoutes'); //NUEVO
+const rutasProtegidas = require('./routes/protegidasRoutes'); // NUEVO
 
 // Probar conexión a la BD
 sequelize.authenticate()
@@ -27,10 +27,12 @@ app.get('/', (req, res) => {
 app.use('/api', authRoutes);
 
 // Rutas protegidas con JWT
-app.use('/api', rutasProtegidas); //NUEVO
+app.use('/api', rutasProtegidas); // NUEVO
 
 // Puerto del servidor
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+
+// CAMBIO IMPORTANTE AQUÍ: Escuchar en 0.0.0.0 para que la app Expo pueda acceder
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Servidor corriendo en http://0.0.0.0:${PORT}`);
 });
