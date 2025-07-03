@@ -1,8 +1,10 @@
+// controllers/authController.js
 const bcrypt = require('bcrypt');
-const Usuario = require('../models/Usuario');
 const jwt = require('jsonwebtoken');
+const Usuario = require('../models/Usuario');
 require('dotenv').config();
 
+// LOGIN
 exports.login = async (req, res) => {
   const { correo, contrasena } = req.body;
 
@@ -24,7 +26,7 @@ exports.login = async (req, res) => {
       return res.status(401).json({ mensaje: 'Contraseña incorrecta' });
     }
 
-    // Generar el token JWT
+    // Generar token JWT
     const token = jwt.sign(
       {
         id: usuario.id_usu,
