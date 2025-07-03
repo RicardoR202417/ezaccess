@@ -9,6 +9,9 @@ exports.login = async (req, res) => {
   const { correo, contrasena } = req.body;
 
   try {
+    console.log('\nIntento de login');
+    console.log('Correo recibido:', correo);
+
     const usuario = await Usuario.findOne({
       where: {
         correo_usu: correo,
@@ -17,12 +20,19 @@ exports.login = async (req, res) => {
     });
 
     if (!usuario) {
+      console.log('Usuario no encontrado o inactivo');
       return res.status(401).json({ mensaje: 'Usuario no encontrado o inactivo' });
     }
+
+    console.log('Usuario encontrado:', usuario.correo_usu);
+    console.log('Tipo:', usuario.tipo_usu);
+    console.log('Hash guardado:', usuario.pass_usu);
+    console.log('Contraseña recibida:', contrasena);
 
     const contraseñaValida = await bcrypt.compare(contrasena, usuario.pass_usu);
 
     if (!contraseñaValida) {
+      console.log('Contraseña incorrecta');
       return res.status(401).json({ mensaje: 'Contraseña incorrecta' });
     }
 
@@ -35,6 +45,8 @@ exports.login = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '1d' }
     );
+
+    console.log('Login exitoso, enviando token...');
 
     res.json({
       mensaje: 'Inicio de sesión exitoso',

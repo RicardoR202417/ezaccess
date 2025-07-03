@@ -11,5 +11,3 @@ router.post('/login', authController.login);
 router.post('/usuarios', authController.registrar);
 
 module.exports = router;
-
-

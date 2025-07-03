@@ -1,35 +1,22 @@
 import React, { useState } from 'react';
-import { Form, Button, Alert } from 'react-bootstrap';
+import { Form, Button } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 
 export default function LoginForm() {
   const [usuario, setUsuario] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const handleLogin = (e) => {
     e.preventDefault();
-    try {
-      const response = await fetch('http://localhost:3000/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ usuario, contrasena: password }),
-      });
 
-      const data = await response.json();
-      if (response.ok) {
-        alert('Sesión iniciada correctamente');
-        // Redirigir a Dashboard
-      } else {
-        setError(data.mensaje || 'Credenciales incorrectas');
-      }
-    } catch (err) {
-      setError('Error de conexión con el servidor');
-    }
+    // 🔓 Simulación directa de login
+    console.log('🔧 Simulación: redirigiendo al dashboard...');
+    navigate('/dashboard');
   };
 
   return (
     <Form onSubmit={handleLogin}>
-      {error && <Alert variant="danger">{error}</Alert>}
       <Form.Group className="mb-3">
         <Form.Label>Usuario</Form.Label>
         <Form.Control
@@ -51,7 +38,7 @@ export default function LoginForm() {
       </Form.Group>
 
       <Button type="submit" className="btn-ez">
-        Iniciar Sesión
+        Ingresar al sistema (modo simulación)
       </Button>
     </Form>
   );
