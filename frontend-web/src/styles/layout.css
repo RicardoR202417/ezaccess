@@ -15,3 +15,16 @@
 .mt-5 {
   margin-top: 3rem;
 }
+.login-box {
+  width: 100%;
+  max-width: 400px;
+}
+.nav-link {
+  transition: background-color 0.3s ease;
+}
+
+.nav-link:hover {
+  background-color: #007bff;
+  color: white !important;
+  border-radius: 5px;
+}

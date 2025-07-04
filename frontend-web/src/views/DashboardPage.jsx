@@ -1,43 +1,46 @@
 import React from 'react';
+import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import NavBarMonitor from '../components/NavBarMonitor';
-import { Container, Row, Col, Card } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 
 export default function DashboardPage() {
+  const navigate = useNavigate();
+
   return (
-    <>
+    <div>
       <NavBarMonitor />
-      <Container>
-        <h2 className="form-title text-center">Panel Principal</h2>
-        <Row className="mt-4">
-          <Col md={6} lg={4} className="mb-4">
-            <Card className="shadow-sm h-100">
+      <Container className="mt-4">
+        <h2 className="mb-4">Panel de Control</h2>
+        <Row>
+          <Col md={4} className="mb-3">
+            <Card className="shadow-sm">
               <Card.Body>
                 <Card.Title>Gestión de Usuarios</Card.Title>
-                <Card.Text>Registra, edita o da de baja usuarios (residentes y monitores).</Card.Text>
-                <a href="/usuarios" className="btn btn-ez">Ir a usuarios</a>
+                <Card.Text>Administra y registra usuarios residentes y monitores del sistema.</Card.Text>
+                <Button variant="primary" onClick={() => navigate('/usuarios')}>Ir a Usuarios</Button>
               </Card.Body>
             </Card>
           </Col>
-          <Col md={6} lg={4} className="mb-4">
-            <Card className="shadow-sm h-100">
+          <Col md={4} className="mb-3">
+            <Card className="shadow-sm">
               <Card.Body>
-                <Card.Title>Mapa de Cajones</Card.Title>
-                <Card.Text>Visualiza el estado en tiempo real y asigna manualmente.</Card.Text>
-                <a href="/cajones" className="btn btn-ez">Ver cajones</a>
+                <Card.Title>Estado de Cajones</Card.Title>
+                <Card.Text>Visualiza los cajones disponibles, ocupados o reservados.</Card.Text>
+                <Button variant="primary" onClick={() => navigate('/cajones')}>Ver Cajones</Button>
               </Card.Body>
             </Card>
           </Col>
-          <Col md={6} lg={4} className="mb-4">
-            <Card className="shadow-sm h-100">
+          <Col md={4} className="mb-3">
+            <Card className="shadow-sm">
               <Card.Body>
                 <Card.Title>Reportes</Card.Title>
-                <Card.Text>Genera reportes por usuario, cajón y periodo.</Card.Text>
-                <a href="/reportes" className="btn btn-ez">Ir a reportes</a>
+                <Card.Text>Consulta estadísticas de uso, frecuencia de entradas y salidas.</Card.Text>
+                <Button variant="primary" onClick={() => navigate('/reportes')}>Ver Reportes</Button>
               </Card.Body>
             </Card>
           </Col>
         </Row>
       </Container>
-    </>
+    </div>
   );
 }

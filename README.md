@@ -1,134 +1,102 @@
-# EZ ACCESS – Sistema Inteligente de Acceso Vehicular
+# EZACCESS - Sistema de Acceso Vehicular Inteligente
 
-## 🎯 Descripción General
+Este proyecto es un sistema de acceso vehicular inteligente para residencias, empresas o escuelas. Permite gestionar el acceso de residentes y visitantes mediante credenciales NFC, sensores IoT y apps móvil y web.
 
-**EZ ACCESS** es un sistema inteligente que automatiza y controla el acceso vehicular en entornos como residencias, escuelas y empresas. Integra una aplicación móvil para residentes, una plataforma web para el personal encargado, dispositivos IoT con tecnología NFC, sensores de proximidad y actuadores físicos, así como bases de datos SQL y NoSQL que permiten una operación eficiente, segura y en tiempo real.
+## 📦 Tecnologías utilizadas
 
----
+- **Frontend Web**: React + Bootstrap
+- **Frontend Móvil**: React Native + Expo + React Native Paper
+- **Backend**: Node.js + Express + Sequelize
+- **Base de datos**: MySQL
+- **IoT**: ESP32 con lector NFC, actuadores, sensores de proximidad
 
-## 🛠 Objetivo
-
-Desarrollar un sistema inteligente de acceso vehicular que refuerce la seguridad, automatice la asignación de espacios y agilice el control de entrada y salida de vehículos en tiempo real.
-
----
-
-## 📌 Alcance
-
-- Aplicación móvil para residentes: acceso NFC, estado del acceso, solicitud de visitantes, consulta de cajón asignado y confirmación de salida.
-- Plataforma web para monitores: gestión de usuarios, asignación de cajones, control de actuadores, generación de reportes e historial de actividad.
-- Dispositivo IoT con lector NFC, actuador de bloqueo y sensores de proximidad para validar identidad y ocupación de cajones.
-- Integración con:
-  - Base de datos relacional (MySQL)
-  - Base de datos no relacional (Redis o MongoDB)
-
----
-
-## 👨‍💻 Tecnologías Utilizadas
-
-- **Frontend Web:** React.js + Bootstrap
-- **Frontend Móvil:** React Native + Expo
-- **Backend:** Node.js + Express
-- **IoT:** ESP32 con lector NFC y sensores
-- **Bases de datos:**
-  - MySQL (estructura principal)
-  - Redis / MongoDB (procesos en tiempo real)
-
----
-
-## 👥 Integrantes del Proyecto
-
-- Ricardo Reséndiz González  
-- Diego Jesús Reyes Rebolledo  
-- Luis Daniel Zamora Ortiz  
-
-**Grupo T232 – UTEQ**  
-**División de Tecnologías de la Automatización e Información**  
-**Materia: Integradora 2**
-
----
-
-## 🗂 Estructura del Repositorio
+## 📁 Estructura del proyecto
 
 ```
-ezaccess/
 ├── backend/
+│   ├── controllers/
+│   ├── middlewares/
+│   ├── models/
+│   ├── routes/
+│   ├── server.js
 ├── frontend-web/
+│   ├── public/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── views/
+│   │   ├── styles/
+│   │   ├── App.jsx
 ├── frontend-movil/
-├── iot/
-├── database/
-└── README.md
+│   ├── assets/
+│   ├── src/
+│   │   ├── screens/
+│   │   ├── components/
+│   │   ├── config.js
 ```
 
----
+## 🚀 Cómo ejecutar el proyecto
 
-## 🔁 Flujo General del Sistema
+### 1. Clonar el repositorio
+```bash
+git clone https://github.com/tu-usuario/ezaccess.git
+```
 
-1. El residente inicia sesión en su app móvil.
-2. Al llegar, escanea su dispositivo NFC en el lector IoT.
-3. El sistema valida el acceso en tiempo real con la base de datos.
-4. Se le asigna un cajón de estacionamiento automáticamente.
-5. El actuador desbloquea el cajón y el sensor de proximidad detecta si fue ocupado.
-6. El monitor supervisa todo desde la app web.
-7. El residente puede confirmar su salida y liberar el cajón.
-
----
-
-## ✅ Requerimientos Funcionales Principales
-
-### Aplicación Web (Monitor):
-- Gestión de usuarios (alta, edición, baja lógica)
-- Asignación automática o manual de cajones
-- Control manual de actuadores
-- Visualización en tiempo real del estado de los cajones
-- Historial de accesos, asignaciones y cambios
-- Generación de reportes estadísticos por usuario, uso, tiempo
-
-### Aplicación Móvil (Residente):
-- Inicio de sesión seguro
-- Consulta de estado de acceso (permitido, denegado)
-- Visualización del cajón asignado
-- Identificación por NFC
-- Solicitud de acceso para visitantes
-- Confirmación de salida
-
----
-
-## 🚀 Instrucciones Básicas para Ejecutar (opcional)
-
-### Backend
+### 2. Backend (Node.js)
 ```bash
 cd backend
+npm install
+nodemon server.js
+```
+
+> Asegúrate de tener MySQL corriendo y haber creado la base de datos `ezaccess`. También configura `.env` con JWT y conexión a la BD.
+
+### 3. Frontend Web
+```bash
+cd frontend-web
 npm install
 npm run dev
 ```
 
-### Frontend Web
-```bash
-cd frontend-web
-npm install
-npm start
-```
+> Se abrirá en http://localhost:5173
 
-### App Móvil
+### 4. Frontend Móvil (Expo)
 ```bash
 cd frontend-movil
+npm install
 npx expo start
 ```
 
-> ⚠️ Asegúrate de tener configuradas las variables de entorno y la base de datos previamente antes de ejecutar cualquier componente.
+> Escanea el QR con Expo Go. Asegúrate de que `API_URL` en `config.js` esté configurado con la IP local de tu PC:
+```js
+export const API_URL = 'http://192.168.X.X:3000/api';
+```
+
+## 🛠️ Funcionalidades implementadas
+
+- Login y logout para residentes (app móvil) y monitores (app web)
+- Registro de nuevos usuarios desde el panel del monitor
+- Gestión de usuarios (CRUD web)
+- Validación de sesión protegida por token (JWT)
+- Diseño profesional con estilos reutilizables
+
+## 📎 Notas importantes
+
+- Los estilos globales están centralizados en `frontend-web/src/styles/`
+- Se utiliza `localStorage` para mantener sesión activa y proteger rutas
+- El backend debe estar corriendo en todo momento para ambas apps
+- Asegúrate de tener conectividad entre tu dispositivo móvil y la IP local del backend
+
+## 🔐 Protección de rutas
+
+- Las vistas protegidas en la web requieren token JWT
+- La app móvil rechaza accesos si no hay sesión válida
+
+## ✅ Recomendaciones
+
+- Utiliza `ThunderClient` o `Postman` para probar el login y registro
+- Para pruebas móviles, desactiva firewall si no permite conexión al puerto 3000
+- Siempre revisar la terminal del backend ante errores 500
 
 ---
 
-## 📄 Licencia
-
-Este proyecto fue desarrollado como parte de la materia **Integradora 2** de la **Universidad Tecnológica de Querétaro (UTEQ)**. Su uso está destinado exclusivamente con fines académicos.
-
----
-
-## 🌐 Enlace de acceso (en desarrollo)
-
-> http://www.ezaccess.com
-
----
-
-¡Gracias por revisar nuestro proyecto!
+© Proyecto desarrollado por el equipo de Integradora 2 - UTEQ 2025

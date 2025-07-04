@@ -1,22 +1,22 @@
-.form-title {
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: var(--primary-color);
-  margin-bottom: 1.5rem;
-  text-align: center;
+.form-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 0;
+  background-color: #f8f9fa;
+  min-height: 100vh;
 }
 
-.btn-ez {
+.form-box {
   width: 100%;
-  padding: 0.7rem;
-  font-weight: 500;
-  border: none;
-  border-radius: 8px;
-  background-color: var(--primary-color);
-  color: white;
-  transition: background-color 0.3s ease;
+  max-width: 400px;
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-.btn-ez:hover {
-  background-color: var(--primary-color-dark);
+.form-title {
+  font-weight: bold;
+  font-size: 1.5rem;
 }

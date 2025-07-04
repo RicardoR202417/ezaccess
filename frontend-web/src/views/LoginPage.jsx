@@ -1,11 +1,17 @@
 import React from 'react';
 import LoginForm from '../components/LoginForm';
+import logo from '../assets/logo.png';
 
 export default function LoginPage() {
   return (
-    <div className="admin-container">
-      <h2 className="form-title">EZACCESS - Ingreso de Monitor</h2>
-      <LoginForm />
+    <div className="form-container d-flex justify-content-center align-items-center vh-100">
+      <div className="form-box p-4 shadow-lg rounded bg-white" style={{ maxWidth: '480px', width: '100%' }}>
+        <div className="text-center mb-4">
+          <img src={logo} alt="Logo del sistema" style={{ width: '100px', height: '100px' }} />
+        </div>
+        <h2 className="form-title text-center mb-3">Inicio de Sesión</h2>
+        <LoginForm />
+      </div>
     </div>
   );
 }
