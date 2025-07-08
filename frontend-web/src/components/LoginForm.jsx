@@ -13,7 +13,7 @@ export default function LoginForm() {
     e.preventDefault();
 
     try {
-      const response = await axios.post('https://ezaccess-backend.onrender.com/', {
+      const response = await axios.post('https://ezaccess-backend.onrender.com/api/login/', {
         correo,
         contrasena
       });
