@@ -7,8 +7,32 @@ Este proyecto es un sistema de acceso vehicular inteligente para residencias, em
 - **Frontend Web**: React + Bootstrap
 - **Frontend Móvil**: React Native + Expo + React Native Paper
 - **Backend**: Node.js + Express + Sequelize
-- **Base de datos**: MySQL
+- **Base de datos**: PostgreSQL y Firebase.
 - **IoT**: ESP32 con lector NFC, actuadores, sensores de proximidad
+
+
+## Como acceder a la base de datos
+
+1.- Tener PostgreSQL instalado
+
+2.- Tener las variables de entorno configuradas en el path general del sistema
+
+3.- Entrar a tu cmd
+
+4.- Es importante tener el archivo de la base de datos en tu computadora (esta en el rive del proyecto) 
+
+5.- Comando para conectarse a la base de datos en la nube 
+psql -h dpg-d1mhp6a4d50c73e3kjhg-a.virginia-postgres.render.com -U root -d ezaccess -p 5432
+
+6.- Contraseña 8l3wTr63IEwEYL7eRBCJwo6W5BiiwTkg copiar y hacer click en click derecho 
+
+7.- Comando para importar el archivo de la base de datos 
+psql -U postgres -d mi_db -h localhost -p 5432 -f "ruta"
+
+
+
+
+
 
 ## 📁 Estructura del proyecto
 
@@ -98,5 +122,17 @@ export const API_URL = 'http://192.168.X.X:3000/api';
 - Siempre revisar la terminal del backend ante errores 500
 
 ---
+
+
+
+## Dominios
+
+-Frontened Web 
+https://ezaccess.onrender.com/
+
+-Backend
+https://ezaccess-backend.onrender.com/
+
+
 
 © Proyecto desarrollado por el equipo de Integradora 2 - UTEQ 2025

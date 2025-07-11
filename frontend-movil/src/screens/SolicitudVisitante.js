@@ -11,7 +11,7 @@ export default function SolicitudVisitante({ navigation }) {
   const [placas, setPlacas] = useState('');
   const [mensaje, setMensaje] = useState('');
 
-  const handleEnviar = () => {
+  const handleEnviar = async () => {
     if (!nombre.trim() || !motivo.trim()) {
       setMensaje('Por favor llena todos los campos obligatorios.');
       return;
@@ -22,12 +22,37 @@ export default function SolicitudVisitante({ navigation }) {
       return;
     }
 
-    setMensaje(`Solicitud enviada para ${nombre}`);
-    setNombre('');
-    setMotivo('');
-    setModoEntrada('peaton');
-    setTipoVehiculo('');
-    setPlacas('');
+    try {
+      const response = await fetch('http://localhost:3000/api/solicitudes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          nombre_sol: nombre,
+          motivo_sol: motivo,
+          tipo_ingreso_sol: modoEntrada,
+          modelo_veh_sol: modoEntrada === 'vehiculo' ? tipoVehiculo : null,
+          placas_veh_sol: modoEntrada === 'vehiculo' ? placas : null
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMensaje(`✅ ${data.mensaje}`);
+        setNombre('');
+        setMotivo('');
+        setModoEntrada('peaton');
+        setTipoVehiculo('');
+        setPlacas('');
+      } else {
+        setMensaje(`❌ Error: ${data.mensaje || 'No se pudo registrar la solicitud'}`);
+      }
+    } catch (error) {
+      console.error('Error al enviar solicitud:', error);
+      setMensaje('❌ Error al conectar con el servidor');
+    }
   };
 
   return (
