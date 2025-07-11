@@ -1,8 +1,16 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, Platform, Image, Alert } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  Image,
+  Alert
+} from 'react-native';
 import { TextInput, Button, Text, Title } from 'react-native-paper';
 import * as Animatable from 'react-native-animatable';
-import { API_URL } from '../config'; // Asegúrate de que sea http://10.13.3.104:5000/api
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '../config';
 
 export default function LoginScreen({ navigation }) {
   const [correo, setCorreo] = useState('');
@@ -18,15 +26,17 @@ export default function LoginScreen({ navigation }) {
       const response = await fetch(`${API_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ correo, contrasena: password }),
+        body: JSON.stringify({ correo, contrasena: password }) // o "password", según tu backend
       });
 
       const data = await response.json();
       console.log('Respuesta del servidor:', data);
 
       if (response.ok) {
-        // Aquí podrías guardar el token con AsyncStorage si lo necesitas
-        navigation.replace('Dashboard'); // asegúrate de tener registrado el screen Dashboard
+        await AsyncStorage.setItem('token', data.token);
+        await AsyncStorage.setItem('usuario', JSON.stringify(data.usuario));
+
+        navigation.replace('Dashboard');
       } else {
         Alert.alert('Error', data.mensaje || 'Credenciales inválidas');
       }

@@ -1,11 +1,19 @@
-import React from 'react';
-import { Provider as PaperProvider } from 'react-native-paper';
-import AppNavigator from './src/navigation/AppNavigator';
+const express = require('express');
+const cors = require('cors'); // 👈 importa cors
 
-export default function App() {
-  return (
-    <PaperProvider>
-      <AppNavigator />
-    </PaperProvider>
-  );
-}
+const app = express();
+
+// ✅ Habilita CORS para todos los orígenes
+app.use(cors());
+
+// Middleware estándar
+app.use(express.json());
+
+// Tus rutas
+app.use('/api', require('./routes/auth')); // O tus rutas reales
+
+// Puerto
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en puerto ${PORT}`);
+});
