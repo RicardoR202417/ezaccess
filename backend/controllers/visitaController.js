@@ -1,6 +1,6 @@
 const SolicitudVisita = require('../models/SolicitudVisita');
 
-// Crear una nueva solicitud de visita
+// Crear nueva solicitud
 exports.crearSolicitud = async (req, res) => {
   const {
     nombre_sol,
@@ -31,16 +31,46 @@ exports.crearSolicitud = async (req, res) => {
   }
 };
 
-// Obtener todas las solicitudes de visita
+// Obtener todas las solicitudes
 exports.obtenerSolicitudes = async (req, res) => {
   try {
-    const solicitudes = await SolicitudVisita.findAll({
-      order: [['fecha_reg_sol', 'DESC']] // Opcional: ordena por fecha más reciente primero
-    });
-
-    res.status(200).json({ solicitudes });
+    const solicitudes = await SolicitudVisita.findAll();
+    res.json({ solicitudes });
   } catch (error) {
     console.error('Error al obtener solicitudes:', error);
-    res.status(500).json({ mensaje: 'Error del servidor al obtener solicitudes' });
+    res.status(500).json({ mensaje: 'Error del servidor' });
+  }
+};
+
+// Actualizar el estado de una solicitud
+exports.actualizarEstado = async (req, res) => {
+  const { id } = req.params;
+  const { nuevoEstado } = req.body;
+
+  const estadosPermitidos = ['aceptada', 'rechazada'];
+
+  if (!estadosPermitidos.includes(nuevoEstado)) {
+    return res.status(400).json({
+      mensaje: 'Estado no válido. Solo se permite: aceptada o rechazada'
+    });
+  }
+
+  try {
+    const solicitud = await SolicitudVisita.findByPk(id);
+
+    if (!solicitud) {
+      return res.status(404).json({ mensaje: 'Solicitud no encontrada' });
+    }
+
+    solicitud.estado_sol = nuevoEstado;
+    await solicitud.save();
+
+    res.json({
+      mensaje: `Estado actualizado a ${nuevoEstado}`,
+      solicitud
+    });
+  } catch (error) {
+    console.error('Error al actualizar estado:', error);
+    res.status(500).json({ mensaje: 'Error del servidor' });
   }
 };
