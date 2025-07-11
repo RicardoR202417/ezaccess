@@ -14,8 +14,10 @@ const visitaRoutes = require('./routes/visitaRoutes');
 app.use(cors({
   origin: [
     'http://localhost:3000',     // frontend web en local
-    'http://localhost:8081',     // React Native web
-    'https://ezaccess-frontend.onrender.com' // frontend web en producción (si aplica)
+    'http://localhost:8081',  
+    'ttp://localhost:5173',   // React Native web
+    'https://ezaccess.onrender.com', 
+    'https://ezaccess-backend.onrender.com' // frontend web en producción (si aplica)
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -46,5 +48,5 @@ const PORT = process.env.PORT || 5000;
 
 // Escuchar en todas las interfaces para permitir acceso desde Expo
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Servidor corriendo en http://0.0.0.0:${PORT}`);
+  console.log(🚀 Servidor corriendo en http://0.0.0.0:${PORT});
 });
