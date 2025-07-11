@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import RegisterForm from '../components/RegisterForm';
-import { Button, Table, Alert } from 'react-bootstrap';
+import { Button, Table } from 'react-bootstrap';
 import NavBarMonitor from '../components/NavBarMonitor';
 
 export default function UsuariosPage() {
@@ -8,9 +8,9 @@ export default function UsuariosPage() {
   const [mostrarSolicitudes, setMostrarSolicitudes] = useState(false);
   const [usuarios, setUsuarios] = useState([]);
   const [solicitudes, setSolicitudes] = useState([]);
-  const [mensaje, setMensaje] = useState('');
 
-  const cargarUsuarios = () => {
+  // Obtener usuarios
+  const obtenerUsuarios = () => {
     fetch('http://localhost:3000/api/usuarios', {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -21,39 +21,46 @@ export default function UsuariosPage() {
       .catch(err => console.error('Error al obtener usuarios', err));
   };
 
-  const cargarSolicitudes = () => {
+  // Obtener solicitudes
+  const obtenerSolicitudes = () => {
     fetch('http://localhost:3000/api/solicitudes', {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
     })
       .then(res => res.json())
-      .then(data => setSolicitudes(data))
+      .then(data => setSolicitudes(data.solicitudes)) // asegúrate que en el backend esté como { solicitudes: [...] }
       .catch(err => console.error('Error al obtener solicitudes', err));
   };
 
-  const actualizarEstado = async (id, nuevoEstado) => {
-    try {
-      const res = await fetch(`http://localhost:3000/api/solicitudes/${id}/estado`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify({ estado: nuevoEstado }),
-      });
-
-      const data = await res.json();
-      setMensaje(data.mensaje || 'Estado actualizado');
-      cargarSolicitudes();
-    } catch (error) {
-      console.error('Error al actualizar estado:', error);
-    }
+  // Actualizar estado de solicitud
+  const actualizarEstadoSolicitud = (id, nuevoEstado) => {
+    fetch(`http://localhost:3000/api/solicitudes/${id}/estado`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify({ nuevoEstado }),
+    })
+      .then(res => res.json())
+      .then(data => {
+        console.log(data.mensaje);
+        obtenerSolicitudes(); // Recargar tabla
+      })
+      .catch(err => console.error('Error al actualizar estado:', err));
   };
 
   useEffect(() => {
-    cargarUsuarios();
+    obtenerUsuarios();
   }, []);
+
+  const toggleSolicitudes = () => {
+    if (!mostrarSolicitudes) {
+      obtenerSolicitudes();
+    }
+    setMostrarSolicitudes(!mostrarSolicitudes);
+  };
 
   return (
     <div>
@@ -61,29 +68,19 @@ export default function UsuariosPage() {
       <div className="container mt-4">
         <h2 className="text-center mb-4">Gestión de Usuarios</h2>
 
-        <div className="d-flex justify-content-end gap-2 mb-3">
-          <Button
-            className="btn-outline-custom"
-            onClick={() => setMostrarFormulario(!mostrarFormulario)}
-          >
+        <div className="d-flex justify-content-end mb-3 gap-2">
+          <Button className="btn-outline-custom" onClick={() => setMostrarFormulario(!mostrarFormulario)}>
             {mostrarFormulario ? 'Ocultar formulario' : 'Registrar nuevo'}
           </Button>
-          <Button
-            className="btn-outline-custom"
-            onClick={() => {
-              setMostrarSolicitudes(!mostrarSolicitudes);
-              if (!mostrarSolicitudes) cargarSolicitudes();
-            }}
-          >
-            {mostrarSolicitudes ? 'Ocultar solicitudes' : 'Ver solicitudes de visita'}
+
+          <Button className="btn-outline-custom" onClick={toggleSolicitudes}>
+            {mostrarSolicitudes ? 'Ocultar solicitudes de visita' : 'Ver solicitudes de visita'}
           </Button>
         </div>
 
-        {mensaje && <Alert variant="info">{mensaje}</Alert>}
-
         {mostrarFormulario && (
           <div className="card p-3 mb-4">
-            <RegisterForm onRegistroExitoso={cargarUsuarios} />
+            <RegisterForm actualizarLista={obtenerUsuarios} />
           </div>
         )}
 
@@ -113,14 +110,14 @@ export default function UsuariosPage() {
         </Table>
 
         {mostrarSolicitudes && (
-          <>
-            <h4 className="mt-5 mb-3">Solicitudes de Visita</h4>
+          <div className="mt-5">
+            <h4>Solicitudes de Visita</h4>
             <Table striped bordered hover responsive>
               <thead>
                 <tr>
                   <th>Nombre</th>
                   <th>Teléfono</th>
-                  <th>Fecha de visita</th>
+                  <th>Fecha de Visita</th>
                   <th>Motivo</th>
                   <th>Estado</th>
                   <th>Acciones</th>
@@ -129,10 +126,10 @@ export default function UsuariosPage() {
               <tbody>
                 {solicitudes.map((sol) => (
                   <tr key={sol.id_sol}>
-                    <td>{`${sol.nombre_sol} ${sol.apellido_pat_sol} ${sol.apellido_mat_sol || ''}`}</td>
-                    <td>{sol.tel_sol || '-'}</td>
+                    <td>{sol.nombre_sol}</td>
+                    <td>{sol.tel_sol || 'Sin número'}</td>
                     <td>{sol.fecha_visita_sol}</td>
-                    <td>{sol.motivo_sol || '-'}</td>
+                    <td>{sol.motivo_sol}</td>
                     <td>{sol.estado_sol}</td>
                     <td>
                       {sol.estado_sol === 'pendiente' ? (
@@ -140,28 +137,30 @@ export default function UsuariosPage() {
                           <Button
                             size="sm"
                             variant="success"
-                            className="me-2"
-                            onClick={() => actualizarEstado(sol.id_sol, 'aceptada')}
+                            className="me-1"
+                            onClick={() => actualizarEstadoSolicitud(sol.id_sol, 'aceptada')}
                           >
                             Aceptar
                           </Button>
                           <Button
                             size="sm"
                             variant="danger"
-                            onClick={() => actualizarEstado(sol.id_sol, 'rechazada')}
+                            onClick={() => actualizarEstadoSolicitud(sol.id_sol, 'rechazada')}
                           >
                             Rechazar
                           </Button>
                         </>
                       ) : (
-                        <span>—</span>
+                        <span className={`text-${sol.estado_sol === 'aceptada' ? 'success' : 'danger'}`}>
+                          {sol.estado_sol.charAt(0).toUpperCase() + sol.estado_sol.slice(1)}
+                        </span>
                       )}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </Table>
-          </>
+          </div>
         )}
       </div>
     </div>
