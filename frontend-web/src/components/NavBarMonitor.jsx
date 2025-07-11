@@ -1,38 +1,29 @@
 import React from 'react';
-import { Navbar, Nav, Container } from 'react-bootstrap';
+import { Navbar, Nav, Container, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
 export default function NavBarMonitor() {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    // Eliminar token y datos del usuario
+  const cerrarSesion = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('usuario');
-
-    // Opcional: notificar al backend
-    fetch('http://localhost:3000/api/logout', {
-      method: 'POST'
-    });
-
-    // Redirigir al login
     navigate('/login');
   };
 
   return (
-    <Navbar bg="light" expand="lg" className="mb-4 shadow-sm">
+    <Navbar bg="light" expand="lg" className="shadow-sm">
       <Container>
         <Navbar.Brand href="/dashboard">EZACCESS</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className="ms-auto">
-            <Nav.Link href="/dashboard">Inicio</Nav.Link>
-            <Nav.Link href="/usuarios">Usuarios</Nav.Link>
-            <Nav.Link href="/cajones">Cajones</Nav.Link>
-            <Nav.Link href="/historial">Historial</Nav.Link>
-            <Nav.Link href="/reportes">Reportes</Nav.Link>
-            <Nav.Link onClick={handleLogout}>Cerrar Sesión</Nav.Link>
+          <Nav className="me-auto">
+            <Nav.Link href="/dashboard" className="btn-outline-custom">Dashboard</Nav.Link>
+            <Nav.Link href="/usuarios" className="btn-outline-custom">Usuarios</Nav.Link>
+            <Nav.Link href="/cajones" className="btn-outline-custom">Cajones</Nav.Link>
+            <Nav.Link href="/reportes" className="btn-outline-custom">Reportes</Nav.Link>
           </Nav>
+          <Button variant="outline-danger" onClick={cerrarSesion}>Cerrar sesión</Button>
         </Navbar.Collapse>
       </Container>
     </Navbar>
