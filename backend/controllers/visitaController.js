@@ -1,5 +1,6 @@
 const SolicitudVisita = require('../models/SolicitudVisita');
 
+// Crear una nueva solicitud de visita
 exports.crearSolicitud = async (req, res) => {
   const {
     nombre_sol,
@@ -27,5 +28,19 @@ exports.crearSolicitud = async (req, res) => {
   } catch (error) {
     console.error('Error al registrar la solicitud:', error);
     res.status(500).json({ mensaje: 'Error del servidor' });
+  }
+};
+
+// Obtener todas las solicitudes de visita
+exports.obtenerSolicitudes = async (req, res) => {
+  try {
+    const solicitudes = await SolicitudVisita.findAll({
+      order: [['fecha_reg_sol', 'DESC']] // Opcional: ordena por fecha más reciente primero
+    });
+
+    res.status(200).json({ solicitudes });
+  } catch (error) {
+    console.error('Error al obtener solicitudes:', error);
+    res.status(500).json({ mensaje: 'Error del servidor al obtener solicitudes' });
   }
 };
