@@ -15,7 +15,6 @@ app.use(cors({
   origin: [
     'http://localhost:3000',     // frontend web en local
     'http://localhost:8081',     // React Native web
-    'http://localhost:5173',
     'https://ezaccess-frontend.onrender.com' // frontend web en producción (si aplica)
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
