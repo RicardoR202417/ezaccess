@@ -14,8 +14,10 @@ const visitaRoutes = require('./routes/visitaRoutes');
 app.use(cors({
   origin: [
     'http://localhost:3000',     // frontend web en local
-    'http://localhost:8081',     // React Native web
-    'https://ezaccess-frontend.onrender.com' // frontend web en producción (si aplica)
+    'http://localhost:8081',  
+    'ttp://localhost:8081',   // React Native web
+    'https://ezaccess.onrender.com', 
+    'https://ezaccess-backend.onrender.com' // frontend web en producción (si aplica)
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
