@@ -19,7 +19,7 @@ export default function App() {
           <Route path="/" element={<Navigate to="/login" />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          
+
           <Route
             path="/dashboard"
             element={
@@ -36,6 +36,10 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          {/* Puedes agregar más rutas protegidas aquí */}
+          
+          {/* Ruta para páginas no encontradas */}
+          <Route path="*" element={<h1 style={{ textAlign: 'center', marginTop: '50px' }}>Página no encontrada</h1>} />
         </Routes>
       </Router>
     </AuthProvider>
