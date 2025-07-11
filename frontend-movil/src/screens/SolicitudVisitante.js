@@ -23,7 +23,7 @@ export default function SolicitudVisitante({ navigation }) {
     }
 
     try {
-      const response = await fetch('http://localhost:3000/api/solicitudes', {
+      const response = await fetch('https://ezaccess-backend.onrender.com/api/solicitudes-visita', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
