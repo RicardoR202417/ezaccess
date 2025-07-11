@@ -19,6 +19,20 @@
   width: 100%;
   max-width: 400px;
 }
+/* Botón unificado estilo secundario */
+.btn-outline-custom {
+  border: 1px solid #1565C0;
+  color: #1565C0;
+  background-color: transparent;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.btn-outline-custom:hover {
+  background-color: #1565C0;
+  color: white;
+}
+
+/* Para navbar (ya aplicado) */
 .nav-link {
   transition: background-color 0.3s ease;
 }
@@ -27,4 +41,15 @@
   background-color: #007bff;
   color: white !important;
   border-radius: 5px;
+}
+
+.table th, .table td {
+  vertical-align: middle;
+}
+form label {
+  font-weight: 600;
+}
+
+form .form-control {
+  border-radius: 8px;
 }
