@@ -1,51 +1,48 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
-const SolicitudVisita = sequelize.define('SolicitudVisita', {
+const SolicitudVisita = sequelize.define('solicitudes_visita', {
   id_sol: {
     type: DataTypes.INTEGER,
     primaryKey: true,
-    autoIncrement: true,
+    autoIncrement: true
   },
   nombre_sol: {
     type: DataTypes.STRING(100),
-    allowNull: false,
-  },
-  apellido_pat_sol: {
-    type: DataTypes.STRING(100),
-    allowNull: true,
-  },
-  apellido_mat_sol: {
-    type: DataTypes.STRING(100),
-    allowNull: true,
-  },
-  tel_sol: {
-    type: DataTypes.STRING(20),
-    allowNull: true,
-  },
-  correo_sol: {
-    type: DataTypes.STRING(100),
-    allowNull: true,
-  },
-  fecha_visita_sol: {
-    type: DataTypes.DATEONLY,
-    allowNull: true,
+    allowNull: false
   },
   motivo_sol: {
     type: DataTypes.TEXT,
-    allowNull: true,
+    allowNull: true
   },
   estado_sol: {
-    type: DataTypes.ENUM('pendiente', 'aceptada', 'rechazada'),
+    type: DataTypes.STRING,
+    allowNull: true,
     defaultValue: 'pendiente',
+    validate: {
+      isIn: [['pendiente', 'aceptada', 'rechazada']]
+    }
   },
   fecha_reg_sol: {
     type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW,
+    allowNull: true,
+    defaultValue: DataTypes.NOW
   },
+  tipo_ingreso_sol: {
+    type: DataTypes.STRING(20),
+    allowNull: true
+  },
+  modelo_veh_sol: {
+    type: DataTypes.STRING(50),
+    allowNull: true
+  },
+  placas_veh_sol: {
+    type: DataTypes.STRING(20),
+    allowNull: true
+  }
 }, {
-  tableName: 'solicitudes_visita',
-  timestamps: false,
+  timestamps: false
 });
 
 module.exports = SolicitudVisita;
+    
