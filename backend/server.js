@@ -8,6 +8,9 @@ const sequelize = require('./config/db');
 // Importar rutas
 const authRoutes = require('./routes/authRoutes');
 const rutasProtegidas = require('./routes/protegidasRoutes'); // NUEVO
+const visitaRoutes = require('./routes/visitaRoutes');
+
+
 
 // Probar conexión a la BD
 sequelize.authenticate()
@@ -25,6 +28,7 @@ app.get('/', (req, res) => {
 
 // Rutas públicas
 app.use('/api', authRoutes);
+app.use('/api', visitaRoutes);
 
 // Rutas protegidas con JWT
 app.use('/api', rutasProtegidas); // NUEVO
