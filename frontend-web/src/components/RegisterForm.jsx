@@ -43,7 +43,7 @@ export default function RegisterForm({ onRegistroExitoso }) {
     };
 
     try {
-      const res = await fetch('https://ezaccess.onrender.com/api/usuarios', {
+      const res = await fetch('https://ezaccess-backend.onrender.com/api/usuarios', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
