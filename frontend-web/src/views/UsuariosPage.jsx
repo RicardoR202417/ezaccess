@@ -11,7 +11,7 @@ export default function UsuariosPage() {
 
   // Obtener usuarios
   const obtenerUsuarios = () => {
-    fetch('http://localhost:3000/api/usuarios', {
+    fetch('http://ezaccess-backend.onrender.com/api/usuarios', {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
@@ -23,7 +23,7 @@ export default function UsuariosPage() {
 
   // Obtener solicitudes
   const obtenerSolicitudes = () => {
-    fetch('http://localhost:3000/api/solicitudes', {
+    fetch('https://ezaccess-backend.onrender.com/api/solicitudes', {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
@@ -35,7 +35,7 @@ export default function UsuariosPage() {
 
   // Actualizar estado de solicitud
   const actualizarEstadoSolicitud = (id, nuevoEstado) => {
-    fetch(`http://localhost:3000/api/solicitudes/${id}/estado`, {
+    fetch(`http://ezaccess-backend.onrender.com/api/solicitudes/${id}/estado`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
