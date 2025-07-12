@@ -6,6 +6,8 @@ import LoginPage from './views/LoginPage';
 import RegisterPage from './views/RegisterPage';
 import DashboardPage from './views/DashboardPage';
 import UsuariosPage from './views/UsuariosPage';
+import CajonesPage from './views/CajonesPage';
+import ReportesPage from './views/ReportesPage';
 
 // Contexto de sesión
 import { AuthProvider } from './contexts/AuthContext';
@@ -36,9 +38,23 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-          {/* Puedes agregar más rutas protegidas aquí */}
-          
-          {/* Ruta para páginas no encontradas */}
+          <Route
+            path="/cajones"
+            element={
+              <ProtectedRoute>
+                <CajonesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reportes"
+            element={
+              <ProtectedRoute>
+                <ReportesPage />
+              </ProtectedRoute>
+            }
+          />
+
           <Route path="*" element={<h1 style={{ textAlign: 'center', marginTop: '50px' }}>Página no encontrada</h1>} />
         </Routes>
       </Router>
