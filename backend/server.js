@@ -14,39 +14,37 @@ const visitaRoutes = require('./routes/visitaRoutes');
 app.use(cors({
   origin: [
     'http://localhost:3000',     // frontend web en local
-    'http://localhost:8081',  
-    'http://localhost:5173',   // React Native web
-    'https://ezaccess.onrender.com', 
-    'https://ezaccess-backend.onrender.com' // frontend web en producción (si aplica)
+    'http://localhost:8081',     // otro posible frontend local
+    'http://localhost:8082',     // ⚠️ tu frontend que lanza el error
+    'http://localhost:5173',     // React Native web (opcional)
+    'https://ezaccess.onrender.com',          // producción frontend
+    'https://ezaccess-backend.onrender.com'   // producción backend (por si se conecta entre sí)
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true // 🔥 necesario si el frontend envía cookies o headers auth
 }));
 
 // Middleware para leer JSON
 app.use(express.json());
 
-// Probar conexión a la BD
+// ==================== CONEXIÓN A BASE DE DATOS ====================
 sequelize.authenticate()
   .then(() => console.log('✅ Conexión a PostgreSQL exitosa'))
   .catch(err => console.error('❌ Error al conectar a PostgreSQL:', err));
 
-// Ruta de prueba raíz
+// ==================== RUTAS ====================
 app.get('/', (req, res) => {
   res.send('API del sistema de acceso vehicular funcionando');
 });
 
-// Rutas públicas
-app.use('/api', authRoutes);
-app.use('/api', visitaRoutes);
+app.use('/api', authRoutes);         // Rutas públicas de autenticación
+app.use('/api', visitaRoutes);       // Rutas para visitas
+app.use('/api', rutasProtegidas);   // Rutas protegidas con JWT
 
-// Rutas protegidas con JWT
-app.use('/api', rutasProtegidas);
-
-// Puerto del servidor
+// ==================== PUERTO Y SERVIDOR ====================
 const PORT = process.env.PORT || 5000;
 
-// Escuchar en todas las interfaces para permitir acceso desde Expo
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Servidor corriendo en http://0.0.0.0:${PORT}`);
 });
