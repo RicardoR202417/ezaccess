@@ -9,13 +9,6 @@ const cajonesRoutes = require('./routes/cajonesRoutes'); // Agregar esta línea
 const actuadorRoutes = require('./routes/actuadorRoutes');
 
 
-
-// ...
-
-
-
-
-
 // Importar rutas
 const authRoutes = require('./routes/authRoutes');
 const rutasProtegidas = require('./routes/protegidasRoutes');
