@@ -6,8 +6,6 @@ import LoginPage from './views/LoginPage';
 import RegisterPage from './views/RegisterPage';
 import DashboardPage from './views/DashboardPage';
 import UsuariosPage from './views/UsuariosPage';
-import CajonesPage from './views/CajonesPage';
-import ReportesPage from './views/ReportesPage';
 
 // Contexto de sesión
 import { AuthProvider } from './contexts/AuthContext';
