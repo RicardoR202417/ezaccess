@@ -1,11 +1,11 @@
-/* Fondo general de la página */
+/* Fondo general */
 body {
   background-color: #f0f2f5;
   margin: 0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Contenedor del formulario */
+/* Contenedor del login centrado */
 .form-container {
   display: flex;
   flex-direction: column;
@@ -15,35 +15,33 @@ body {
   background-color: #f0f2f5;
 }
 
-/* Caja del login más grande */
+/* Caja del login con tamaño moderado */
 .form-box {
   width: 100%;
-  max-width: 520px;
-  padding: 3rem 2.5rem;
+  max-width: 480px;
+  padding: 2.5rem 2rem;
   background-color: white;
   border-radius: 12px;
-  box-shadow: 0 0 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 }
 
-/* Estilo del título */
-.form-title {
-  font-weight: 700;
-  color: #0d47a1;
-  font-size: 1.8rem;
-}
-
-/* Imagen del logo más grande */
+/* Logo centrado y de tamaño adecuado */
 .logo-login {
-  max-width: 150px;
-  max-height: 150px;
+  max-width: 120px;
   margin-bottom: 1.5rem;
 }
 
-/* Estilos para formularios */
+/* Título */
+.form-title {
+  font-weight: 700;
+  color: #0d47a1;
+  font-size: 1.6rem;
+}
+
+/* Formularios */
 form label {
   font-weight: 600;
 }
-
 form .form-control {
   border-radius: 8px;
 }
@@ -60,7 +58,7 @@ form .form-control {
   color: white;
 }
 
-/* Navbar y tablas (opcional, conservado) */
+/* Hover navbar */
 .nav-link:hover {
   background-color: #007bff;
   color: white !important;
