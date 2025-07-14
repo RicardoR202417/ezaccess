@@ -36,7 +36,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-          <Route
+          {/* <Route
             path="/cajones"
             element={
               <ProtectedRoute>
@@ -51,7 +51,7 @@ export default function App() {
                 <ReportesPage />
               </ProtectedRoute>
             }
-          />
+          /> */}
 
           <Route path="*" element={<h1 style={{ textAlign: 'center', marginTop: '50px' }}>Página no encontrada</h1>} />
         </Routes>
