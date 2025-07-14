@@ -7,11 +7,12 @@ export default function LoginPage() {
     <div className="form-container d-flex justify-content-center align-items-center vh-100">
       <div className="form-box p-4 shadow-lg rounded bg-white" style={{ maxWidth: '480px', width: '100%' }}>
         <div className="text-center mb-4">
-          <img 
-            src={logo} 
-            alt="Logo del sistema" 
-            style={{ maxWidth: '120px', maxHeight: '120px', width: 'auto', height: 'auto', display: 'block', margin: '0 auto' }}
-          />
+<img 
+  src={logo} 
+  alt="Logo del sistema" 
+  style={{ maxWidth: '120px', maxHeight: '120px', width: 'auto', height: 'auto', display: 'block', margin: '0 auto' }}
+/>
+
         </div>
         <h2 className="form-title text-center mb-3">Inicio de Sesión</h2>
         <LoginForm />
