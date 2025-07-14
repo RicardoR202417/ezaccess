@@ -58,16 +58,12 @@ form .form-control {
   color: #0d47a1;
 }
 
-/* LOGO LOGIN FIX */
 .logo-login {
-  display: block;
-  margin: 0 auto;
+  max-width: 120px;
+  max-height: 120px;
   width: auto;
   height: auto;
-  max-width: 160px;
-  max-height: 160px;
-  object-fit: contain;
-  background-color: transparent;
-  border-radius: 0;
+  display: block;
+  margin: 0 auto;
 }
 
