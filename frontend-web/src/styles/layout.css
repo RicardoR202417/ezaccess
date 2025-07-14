@@ -1,39 +1,45 @@
-/* Fondo general de la vista de login */
-.login-wrapper {
-  min-height: 100vh;
-  background-color: #f5f7fa;
+/* Fondo general de la página */
+body {
+  background-color: #f0f2f5;
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Contenedor del formulario */
+.form-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding-top: 2rem;
+  min-height: 100vh;
+  background-color: #f0f2f5;
 }
 
-/* Estilo del logo */
-.logo-login {
-  width: 140px;
-  height: auto;
-  margin-bottom: 1rem;
-}
-
-/* Caja del formulario de login */
+/* Caja del login más grande */
 .form-box {
-  background-color: #ffffff;
-  padding: 2.5rem;
-  border-radius: 12px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
   width: 100%;
-  max-width: 480px;
+  max-width: 520px;
+  padding: 3rem 2.5rem;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.1);
 }
 
-/* Título del formulario */
+/* Estilo del título */
 .form-title {
-  font-weight: 600;
+  font-weight: 700;
   color: #0d47a1;
-  text-align: center;
+  font-size: 1.8rem;
+}
+
+/* Imagen del logo más grande */
+.logo-login {
+  max-width: 150px;
+  max-height: 150px;
   margin-bottom: 1.5rem;
 }
 
+/* Estilos para formularios */
 form label {
   font-weight: 600;
 }
@@ -49,35 +55,17 @@ form .form-control {
   background-color: transparent;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
-
 .btn-outline-custom:hover {
   background-color: #1565C0;
   color: white;
 }
 
-/* Navbar */
-.nav-link {
-  transition: background-color 0.3s ease;
-}
-
+/* Navbar y tablas (opcional, conservado) */
 .nav-link:hover {
   background-color: #007bff;
   color: white !important;
   border-radius: 5px;
 }
-
 .table th, .table td {
   vertical-align: middle;
-}
-
-.text-center {
-  text-align: center;
-}
-
-.mt-4 {
-  margin-top: 1.5rem;
-}
-
-.mt-5 {
-  margin-top: 3rem;
 }
