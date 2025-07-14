@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import RegisterForm from '../components/RegisterForm';
-import { Button, Table } from 'react-bootstrap';
+import { Button, Table, Alert } from 'react-bootstrap';
 import NavBarMonitor from '../components/NavBarMonitor';
 
 export default function UsuariosPage() {
@@ -8,59 +8,61 @@ export default function UsuariosPage() {
   const [mostrarSolicitudes, setMostrarSolicitudes] = useState(false);
   const [usuarios, setUsuarios] = useState([]);
   const [solicitudes, setSolicitudes] = useState([]);
+  const [mensaje, setMensaje] = useState('');
 
-  // Obtener usuarios
-  const obtenerUsuarios = () => {
-    fetch('https://ezaccess-backend.onrender.com/api/usuarios', {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    })
-      .then(res => res.json())
-      .then(data => setUsuarios(data))
-      .catch(err => console.error('Error al obtener usuarios', err));
+  const token = localStorage.getItem('token');
+
+  const obtenerUsuarios = async () => {
+    try {
+      const res = await fetch('https://ezaccess-backend.onrender.com/api/usuarios', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      setUsuarios(data);
+    } catch (err) {
+      console.error('Error al obtener usuarios', err);
+    }
   };
 
-  // Obtener solicitudes
-  const obtenerSolicitudes = () => {
-    fetch('https://ezaccess-backend.onrender.com/api/solicitudes', {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    })
-      .then(res => res.json())
-      .then(data => setSolicitudes(data.solicitudes)) // asegúrate que en el backend esté como { solicitudes: [...] }
-      .catch(err => console.error('Error al obtener solicitudes', err));
+  const obtenerSolicitudes = async () => {
+    try {
+      const res = await fetch('https://ezaccess-backend.onrender.com/api/solicitudes', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      setSolicitudes(data.solicitudes);
+    } catch (err) {
+      console.error('Error al obtener solicitudes', err);
+    }
   };
 
-  // Actualizar estado de solicitud
-  const actualizarEstadoSolicitud = (id, nuevoEstado) => {
-    fetch(`https://ezaccess-backend.onrender.com/api/solicitudes/${id}/estado`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-      body: JSON.stringify({ nuevoEstado }),
-    })
-      .then(res => res.json())
-      .then(data => {
-        console.log(data.mensaje);
-        obtenerSolicitudes(); // Recargar tabla
-      })
-      .catch(err => console.error('Error al actualizar estado:', err));
+  const actualizarEstadoSolicitud = async (id, nuevoEstado) => {
+    try {
+      const res = await fetch(`https://ezaccess-backend.onrender.com/api/solicitudes/${id}/estado`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ nuevoEstado })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setMensaje(data.mensaje);
+        obtenerSolicitudes(); // ✅ Actualiza automáticamente después de cambiar estado
+      } else {
+        console.error('Error al actualizar estado:', data.mensaje);
+      }
+    } catch (error) {
+      console.error('Error en la petición:', error);
+    }
   };
 
   useEffect(() => {
     obtenerUsuarios();
-  }, []);
-
-  const toggleSolicitudes = () => {
-    if (!mostrarSolicitudes) {
-      obtenerSolicitudes();
-    }
-    setMostrarSolicitudes(!mostrarSolicitudes);
-  };
+    if (mostrarSolicitudes) obtenerSolicitudes();
+  }, [mostrarSolicitudes]);
 
   return (
     <div>
@@ -68,19 +70,77 @@ export default function UsuariosPage() {
       <div className="container mt-4">
         <h2 className="text-center mb-4">Gestión de Usuarios</h2>
 
-        <div className="d-flex justify-content-end mb-3 gap-2">
-          <Button className="btn-outline-custom" onClick={() => setMostrarFormulario(!mostrarFormulario)}>
+        <div className="d-flex justify-content-end mb-3">
+          <Button variant="primary" className="me-2" onClick={() => setMostrarFormulario(!mostrarFormulario)}>
             {mostrarFormulario ? 'Ocultar formulario' : 'Registrar nuevo'}
           </Button>
-
-          <Button className="btn-outline-custom" onClick={toggleSolicitudes}>
+          <Button variant="primary" onClick={() => setMostrarSolicitudes(!mostrarSolicitudes)}>
             {mostrarSolicitudes ? 'Ocultar solicitudes de visita' : 'Ver solicitudes de visita'}
           </Button>
         </div>
 
+        {mensaje && (
+          <Alert variant="info" onClose={() => setMensaje('')} dismissible>
+            {mensaje}
+          </Alert>
+        )}
+
         {mostrarFormulario && (
           <div className="card p-3 mb-4">
-            <RegisterForm actualizarLista={obtenerUsuarios} />
+            <RegisterForm onRegister={obtenerUsuarios} />
+          </div>
+        )}
+
+        {mostrarSolicitudes && (
+          <div className="card p-3 mb-4">
+            <h4>Solicitudes de Visita</h4>
+            <Table striped bordered hover responsive>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Teléfono</th>
+                  <th>Fecha Visita</th>
+                  <th>Motivo</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {solicitudes.map((sol) => (
+                  <tr key={sol.id_sol}>
+                    <td>{`${sol.nombre_sol} ${sol.apellido_pat_sol || ''} ${sol.apellido_mat_sol || ''}`}</td>
+                    <td>{sol.tel_sol || 'N/A'}</td>
+                    <td>{sol.fecha_visita_sol}</td>
+                    <td>{sol.motivo_sol}</td>
+                    <td>{sol.estado_sol}</td>
+                    <td>
+                      {sol.estado_sol === 'pendiente' && (
+                        <>
+                          <Button
+                            variant="success"
+                            size="sm"
+                            className="me-2"
+                            onClick={() => actualizarEstadoSolicitud(sol.id_sol, 'aceptada')}
+                          >
+                            Aceptar
+                          </Button>
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            onClick={() => actualizarEstadoSolicitud(sol.id_sol, 'rechazada')}
+                          >
+                            Rechazar
+                          </Button>
+                        </>
+                      )}
+                      {sol.estado_sol !== 'pendiente' && (
+                        <span className="text-muted">Sin acciones</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
           </div>
         )}
 
@@ -108,60 +168,6 @@ export default function UsuariosPage() {
             ))}
           </tbody>
         </Table>
-
-        {mostrarSolicitudes && (
-          <div className="mt-5">
-            <h4>Solicitudes de Visita</h4>
-            <Table striped bordered hover responsive>
-              <thead>
-                <tr>
-                  <th>Nombre</th>
-                  <th>Teléfono</th>
-                  <th>Fecha de Visita</th>
-                  <th>Motivo</th>
-                  <th>Estado</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {solicitudes.map((sol) => (
-                  <tr key={sol.id_sol}>
-                    <td>{sol.nombre_sol}</td>
-                    <td>{sol.tel_sol || 'Sin número'}</td>
-                    <td>{sol.fecha_visita_sol}</td>
-                    <td>{sol.motivo_sol}</td>
-                    <td>{sol.estado_sol}</td>
-                    <td>
-                      {sol.estado_sol === 'pendiente' ? (
-                        <>
-                          <Button
-                            size="sm"
-                            variant="success"
-                            className="me-1"
-                            onClick={() => actualizarEstadoSolicitud(sol.id_sol, 'aceptada')}
-                          >
-                            Aceptar
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="danger"
-                            onClick={() => actualizarEstadoSolicitud(sol.id_sol, 'rechazada')}
-                          >
-                            Rechazar
-                          </Button>
-                        </>
-                      ) : (
-                        <span className={`text-${sol.estado_sol === 'aceptada' ? 'success' : 'danger'}`}>
-                          {sol.estado_sol.charAt(0).toUpperCase() + sol.estado_sol.slice(1)}
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </div>
-        )}
       </div>
     </div>
   );

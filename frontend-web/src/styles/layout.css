@@ -1,25 +1,48 @@
-.admin-container {
-  max-width: 450px;
-  margin: 5rem auto;
-  padding: 2rem;
-  border-radius: 10px;
-  box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
-  background-color: #fff;
+/* Fondo general de la vista de login */
+.login-wrapper {
+  min-height: 100vh;
+  background-color: #f5f7fa;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 2rem;
 }
-.text-center {
-  text-align: center;
+
+/* Estilo del logo */
+.logo-login {
+  width: 140px;
+  height: auto;
+  margin-bottom: 1rem;
 }
-.mt-4 {
-  margin-top: 1.5rem;
-}
-.mt-5 {
-  margin-top: 3rem;
-}
-.login-box {
+
+/* Caja del formulario de login */
+.form-box {
+  background-color: #ffffff;
+  padding: 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
   width: 100%;
-  max-width: 400px;
+  max-width: 480px;
 }
-/* Botón unificado estilo secundario */
+
+/* Título del formulario */
+.form-title {
+  font-weight: 600;
+  color: #0d47a1;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+form label {
+  font-weight: 600;
+}
+
+form .form-control {
+  border-radius: 8px;
+}
+
+/* Botón personalizado */
 .btn-outline-custom {
   border: 1px solid #1565C0;
   color: #1565C0;
@@ -32,7 +55,7 @@
   color: white;
 }
 
-/* Para navbar (ya aplicado) */
+/* Navbar */
 .nav-link {
   transition: background-color 0.3s ease;
 }
@@ -46,10 +69,15 @@
 .table th, .table td {
   vertical-align: middle;
 }
-form label {
-  font-weight: 600;
+
+.text-center {
+  text-align: center;
 }
 
-form .form-control {
-  border-radius: 8px;
+.mt-4 {
+  margin-top: 1.5rem;
+}
+
+.mt-5 {
+  margin-top: 3rem;
 }
