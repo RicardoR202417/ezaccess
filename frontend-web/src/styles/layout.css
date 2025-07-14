@@ -5,7 +5,7 @@ body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Contenedor del login centrado */
+/* Contenedor general centrado */
 .form-container {
   display: flex;
   flex-direction: column;
@@ -15,20 +15,21 @@ body {
   background-color: #f0f2f5;
 }
 
-/* Caja del login con tamaño moderado */
-.form-box {
-  width: 100%;
-  max-width: 480px;
-  padding: 2.5rem 2rem;
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+/* Tamaño y estilo del logo */
+.logo-login {
+  max-width: 140px;
+  height: auto;
+  margin-bottom: 1rem;
 }
 
-/* Logo centrado y de tamaño adecuado */
-.logo-login {
-  max-width: 120px;
-  margin-bottom: 1.5rem;
+/* Caja del formulario */
+.form-box {
+  width: 100%;
+  max-width: 500px;
+  padding: 2rem 2.5rem;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 0 16px rgba(0, 0, 0, 0.1);
 }
 
 /* Título */
@@ -36,9 +37,11 @@ body {
   font-weight: 700;
   color: #0d47a1;
   font-size: 1.6rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
 }
 
-/* Formularios */
+/* Inputs */
 form label {
   font-weight: 600;
 }
@@ -64,6 +67,7 @@ form .form-control {
   color: white !important;
   border-radius: 5px;
 }
+
 .table th, .table td {
   vertical-align: middle;
 }
