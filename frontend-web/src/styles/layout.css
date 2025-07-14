@@ -26,7 +26,6 @@
   background-color: transparent;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
-
 .btn-outline-custom:hover {
   background-color: #1565C0;
   color: white;
@@ -36,7 +35,6 @@
 .nav-link {
   transition: background-color 0.3s ease;
 }
-
 .nav-link:hover {
   background-color: #007bff;
   color: white !important;
@@ -49,15 +47,21 @@
 form label {
   font-weight: 600;
 }
-
 form .form-control {
   border-radius: 8px;
 }
 .form-container {
   background-color: #f5f7fa;
 }
-
 .form-title {
   font-weight: 600;
   color: #0d47a1;
+}
+
+/* NUEVO: Estilo del logo */
+.logo-login {
+  display: block;
+  margin: 0 auto;
+  max-width: none;
+  height: auto;
 }
