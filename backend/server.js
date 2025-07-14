@@ -4,6 +4,17 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const sequelize = require('./config/db');
+const asignacionRoutes = require('./routes/asignacionRoutes');
+const cajonesRoutes = require('./routes/cajonesRoutes'); // Agregar esta línea
+const actuadorRoutes = require('./routes/actuadorRoutes');
+
+
+
+// ...
+
+
+
+
 
 // Importar rutas
 const authRoutes = require('./routes/authRoutes');
@@ -39,6 +50,9 @@ app.get('/', (req, res) => {
 // Rutas públicas
 app.use('/api', authRoutes);
 app.use('/api', visitaRoutes);
+app.use('/api', asignacionRoutes);
+app.use('/api', cajonesRoutes); // Agregar esta línea después de otras rutas
+app.use('/api', actuadorRoutes);
 
 // Rutas protegidas con JWT
 app.use('/api', rutasProtegidas);

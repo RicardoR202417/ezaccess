@@ -39,10 +39,17 @@ const SolicitudVisita = sequelize.define('solicitudes_visita', {
   placas_veh_sol: {
     type: DataTypes.STRING(20),
     allowNull: true
+  },
+  id_usu: { // 👈 NUEVO CAMPO
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'usuarios', // nombre de la tabla en la BD
+      key: 'id_usu'
+    }
   }
 }, {
   timestamps: false
 });
 
 module.exports = SolicitudVisita;
-    

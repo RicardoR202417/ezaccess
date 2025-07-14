@@ -10,6 +10,12 @@ exports.crearSolicitud = async (req, res) => {
     placas_veh_sol
   } = req.body;
 
+  const id_usu = req.usuario?.id; // Se obtiene del token JWT
+
+  if (!id_usu) {
+    return res.status(401).json({ mensaje: 'Usuario no autenticado' });
+  }
+
   try {
     const nuevaSolicitud = await SolicitudVisita.create({
       nombre_sol,
@@ -18,7 +24,8 @@ exports.crearSolicitud = async (req, res) => {
       modelo_veh_sol,
       placas_veh_sol,
       estado_sol: 'pendiente',
-      fecha_reg_sol: new Date()
+      fecha_reg_sol: new Date(),
+      id_usu
     });
 
     res.status(201).json({
@@ -31,13 +38,33 @@ exports.crearSolicitud = async (req, res) => {
   }
 };
 
-// Obtener todas las solicitudes
+// Obtener todas las solicitudes (admin/monitor)
 exports.obtenerSolicitudes = async (req, res) => {
   try {
     const solicitudes = await SolicitudVisita.findAll();
     res.json({ solicitudes });
   } catch (error) {
     console.error('Error al obtener solicitudes:', error);
+    res.status(500).json({ mensaje: 'Error del servidor' });
+  }
+};
+
+// Obtener solicitudes del usuario autenticado
+exports.obtenerSolicitudesPorUsuario = async (req, res) => {
+  const id_usu = req.usuario?.id;
+
+  if (!id_usu) {
+    return res.status(401).json({ mensaje: 'Usuario no autenticado' });
+  }
+
+  try {
+    const solicitudes = await SolicitudVisita.findAll({
+      where: { id_usu }
+    });
+
+    res.json({ solicitudes });
+  } catch (error) {
+    console.error('Error al obtener solicitudes del usuario:', error);
     res.status(500).json({ mensaje: 'Error del servidor' });
   }
 };
