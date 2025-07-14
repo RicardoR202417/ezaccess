@@ -4,17 +4,18 @@ import logo from '../assets/logo.png';
 
 export default function LoginPage() {
   return (
-    <div className="form-container d-flex justify-content-center align-items-center vh-100">
-      <div className="form-box p-4 shadow-lg rounded bg-white" style={{ maxWidth: '480px', width: '100%' }}>
-        <div className="text-center mb-4">
-<img 
-  src={logo} 
-  alt="Logo del sistema" 
-  style={{ maxWidth: '120px', maxHeight: '120px', width: 'auto', height: 'auto', display: 'block', margin: '0 auto' }}
-/>
+    <div className="login-wrapper d-flex flex-column align-items-center justify-content-center vh-100">
+      <img 
+        src={logo} 
+        alt="Logo del sistema" 
+        style={{ width: '140px', height: 'auto', marginBottom: '20px' }} 
+      />
 
-        </div>
-        <h2 className="form-title text-center mb-3">Inicio de Sesión</h2>
+      <div 
+        className="form-box p-5 shadow-lg rounded bg-white"
+        style={{ maxWidth: '500px', width: '100%' }}
+      >
+        <h2 className="form-title text-center mb-4">Inicio de Sesión</h2>
         <LoginForm />
       </div>
     </div>

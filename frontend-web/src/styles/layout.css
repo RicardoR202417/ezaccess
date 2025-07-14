@@ -6,19 +6,36 @@
   box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
   background-color: #fff;
 }
+
 .text-center {
   text-align: center;
 }
+
 .mt-4 {
   margin-top: 1.5rem;
 }
+
 .mt-5 {
   margin-top: 3rem;
 }
-.login-box {
-  width: 100%;
-  max-width: 400px;
+
+/* NUEVO: Contenedor general del login */
+.login-wrapper {
+  background-color: #f5f7fa;
+  padding-top: 40px;
+  padding-bottom: 40px;
 }
+
+/* MODIFICADO: Estilo del contenedor del formulario login */
+.form-box {
+  width: 100%;
+  max-width: 500px;
+  padding: 2.5rem;
+  border-radius: 12px;
+  background-color: white;
+  box-shadow: 0 5px 30px rgba(0, 0, 0, 0.1);
+}
+
 /* Botón unificado estilo secundario */
 .btn-outline-custom {
   border: 1px solid #1565C0;
@@ -26,15 +43,17 @@
   background-color: transparent;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
+
 .btn-outline-custom:hover {
   background-color: #1565C0;
   color: white;
 }
 
-/* Para navbar (ya aplicado) */
+/* Navbar */
 .nav-link {
   transition: background-color 0.3s ease;
 }
+
 .nav-link:hover {
   background-color: #007bff;
   color: white !important;
@@ -44,26 +63,30 @@
 .table th, .table td {
   vertical-align: middle;
 }
+
 form label {
   font-weight: 600;
 }
+
 form .form-control {
   border-radius: 8px;
 }
+
+/* Fondo de formulario */
 .form-container {
   background-color: #f5f7fa;
 }
+
+/* Título del formulario */
 .form-title {
   font-weight: 600;
   color: #0d47a1;
 }
 
+/* NUEVO: Tamaño y posicionamiento del logo */
 .logo-login {
-  max-width: 120px;
-  max-height: 120px;
-  width: auto;
+  width: 140px;
   height: auto;
   display: block;
-  margin: 0 auto;
+  margin: 0 auto 20px auto;
 }
-
