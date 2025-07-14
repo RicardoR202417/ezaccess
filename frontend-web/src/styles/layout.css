@@ -53,3 +53,11 @@ form label {
 form .form-control {
   border-radius: 8px;
 }
+.form-container {
+  background-color: #f5f7fa;
+}
+
+.form-title {
+  font-weight: 600;
+  color: #0d47a1;
+}
