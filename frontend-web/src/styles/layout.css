@@ -1,42 +1,48 @@
-.admin-container {
-  max-width: 450px;
-  margin: 5rem auto;
-  padding: 2rem;
-  border-radius: 10px;
-  box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
-  background-color: #fff;
-}
-
-.text-center {
-  text-align: center;
-}
-
-.mt-4 {
-  margin-top: 1.5rem;
-}
-
-.mt-5 {
-  margin-top: 3rem;
-}
-
-/* NUEVO: Contenedor general del login */
+/* Fondo general de la vista de login */
 .login-wrapper {
+  min-height: 100vh;
   background-color: #f5f7fa;
-  padding-top: 40px;
-  padding-bottom: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 2rem;
 }
 
-/* MODIFICADO: Estilo del contenedor del formulario login */
+/* Estilo del logo */
+.logo-login {
+  width: 140px;
+  height: auto;
+  margin-bottom: 1rem;
+}
+
+/* Caja del formulario de login */
 .form-box {
-  width: 100%;
-  max-width: 500px;
+  background-color: #ffffff;
   padding: 2.5rem;
   border-radius: 12px;
-  background-color: white;
-  box-shadow: 0 5px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  width: 100%;
+  max-width: 480px;
 }
 
-/* Botón unificado estilo secundario */
+/* Título del formulario */
+.form-title {
+  font-weight: 600;
+  color: #0d47a1;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+form label {
+  font-weight: 600;
+}
+
+form .form-control {
+  border-radius: 8px;
+}
+
+/* Botón personalizado */
 .btn-outline-custom {
   border: 1px solid #1565C0;
   color: #1565C0;
@@ -64,29 +70,14 @@
   vertical-align: middle;
 }
 
-form label {
-  font-weight: 600;
+.text-center {
+  text-align: center;
 }
 
-form .form-control {
-  border-radius: 8px;
+.mt-4 {
+  margin-top: 1.5rem;
 }
 
-/* Fondo de formulario */
-.form-container {
-  background-color: #f5f7fa;
-}
-
-/* Título del formulario */
-.form-title {
-  font-weight: 600;
-  color: #0d47a1;
-}
-
-/* NUEVO: Tamaño y posicionamiento del logo */
-.logo-login {
-  width: 140px;
-  height: auto;
-  display: block;
-  margin: 0 auto 20px auto;
+.mt-5 {
+  margin-top: 3rem;
 }
