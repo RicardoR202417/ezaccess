@@ -87,7 +87,7 @@ export default function RegisterForm({ onRegistroExitoso }) {
   };
 
   return (
-    <Form onSubmit={handleSubmit}>
+    <Form onSubmit={handleSubmit} className="p-3 rounded shadow-sm bg-light">
       {mensaje && <Alert variant="success">{mensaje}</Alert>}
       {error && <Alert variant="danger">{error}</Alert>}
 
@@ -101,6 +101,7 @@ export default function RegisterForm({ onRegistroExitoso }) {
               value={formData.nombre_usu}
               onChange={handleChange}
               required
+              placeholder="Ej. Juan"
             />
           </Form.Group>
         </Col>
@@ -113,13 +114,152 @@ export default function RegisterForm({ onRegistroExitoso }) {
               value={formData.apellido_pat_usu}
               onChange={handleChange}
               required
+              placeholder="Ej. Pérez"
             />
           </Form.Group>
         </Col>
       </Row>
 
-      {/* Resto del formulario igual... (puedo completarlo si lo deseas) */}
-      
+      <Row>
+        <Col md={6}>
+          <Form.Group className="mb-3">
+            <Form.Label>Apellido Materno</Form.Label>
+            <Form.Control
+              type="text"
+              name="apellido_mat_usu"
+              value={formData.apellido_mat_usu}
+              onChange={handleChange}
+              placeholder="Ej. López"
+            />
+          </Form.Group>
+        </Col>
+        <Col md={6}>
+          <Form.Group className="mb-3">
+            <Form.Label>Fecha de Nacimiento</Form.Label>
+            <Form.Control
+              type="date"
+              name="fecha_nac_usu"
+              value={formData.fecha_nac_usu}
+              onChange={handleChange}
+            />
+          </Form.Group>
+        </Col>
+      </Row>
+
+      <Row>
+        <Col md={6}>
+          <Form.Group className="mb-3">
+            <Form.Label>Tipo de Usuario</Form.Label>
+            <Form.Select
+              name="tipo_usu"
+              value={formData.tipo_usu}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Selecciona tipo</option>
+              <option value="monitor">Monitor</option>
+              <option value="residente">Residente</option>
+            </Form.Select>
+          </Form.Group>
+        </Col>
+        <Col md={6}>
+          <Form.Group className="mb-3">
+            <Form.Label>Teléfono</Form.Label>
+            <Form.Control
+              type="tel"
+              name="tel_usu"
+              value={formData.tel_usu}
+              onChange={handleChange}
+              placeholder="Ej. 4421234567"
+            />
+          </Form.Group>
+        </Col>
+      </Row>
+
+      <Row>
+        <Col md={6}>
+          <Form.Group className="mb-3">
+            <Form.Label>Correo electrónico</Form.Label>
+            <Form.Control
+              type="email"
+              name="correo_usu"
+              value={formData.correo_usu}
+              onChange={handleChange}
+              required
+              placeholder="Ej. usuario@email.com"
+            />
+          </Form.Group>
+        </Col>
+        <Col md={6}>
+          <Form.Group className="mb-3">
+            <Form.Label>Contraseña</Form.Label>
+            <Form.Control
+              type="password"
+              name="pass_usu"
+              value={formData.pass_usu}
+              onChange={handleChange}
+              required
+              placeholder="Mínimo 6 caracteres"
+              minLength={6}
+            />
+          </Form.Group>
+        </Col>
+      </Row>
+
+      <Row>
+        <Col md={4}>
+          <Form.Group className="mb-3">
+            <Form.Label>Ciudad</Form.Label>
+            <Form.Control
+              type="text"
+              name="ciudad_usu"
+              value={formData.ciudad_usu}
+              onChange={handleChange}
+              placeholder="Ej. Querétaro"
+            />
+          </Form.Group>
+        </Col>
+        <Col md={4}>
+          <Form.Group className="mb-3">
+            <Form.Label>Colonia</Form.Label>
+            <Form.Control
+              type="text"
+              name="colonia_usu"
+              value={formData.colonia_usu}
+              onChange={handleChange}
+              placeholder="Ej. Centro"
+            />
+          </Form.Group>
+        </Col>
+        <Col md={4}>
+          <Form.Group className="mb-3">
+            <Form.Label>Calle</Form.Label>
+            <Form.Control
+              type="text"
+              name="calle_usu"
+              value={formData.calle_usu}
+              onChange={handleChange}
+              placeholder="Ej. 5 de Febrero"
+            />
+          </Form.Group>
+        </Col>
+      </Row>
+
+      <Row>
+        <Col md={4}>
+          <Form.Group className="mb-3">
+            <Form.Label>Número Exterior</Form.Label>
+            <Form.Control
+              type="text"
+              name="num_ext_usu"
+              value={formData.num_ext_usu}
+              onChange={handleChange}
+              placeholder="Ej. 123"
+            />
+          </Form.Group>
+        </Col>
+      </Row>
+
       <div className="text-end">
         <Button type="submit" variant="primary">
           Registrar
