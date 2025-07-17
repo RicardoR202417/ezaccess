@@ -9,6 +9,8 @@ export default function UsuariosPage() {
   const [usuarios, setUsuarios] = useState([]);
   const [solicitudes, setSolicitudes] = useState([]);
   const [mensaje, setMensaje] = useState('');
+  const [modoEdicion, setModoEdicion] = useState(false);
+  const [usuarioEditar, setUsuarioEditar] = useState(null);
 
   const token = localStorage.getItem('token');
 
@@ -22,6 +24,33 @@ export default function UsuariosPage() {
     } catch (err) {
       console.error('Error al obtener usuarios', err);
     }
+  };
+
+  const eliminarUsuario = async (id) => {
+    if (!window.confirm('¿Estás seguro de eliminar este usuario?')) return;
+
+    try {
+      const res = await fetch(`https://ezaccess-backend.onrender.com/api/usuarios/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setMensaje(data.mensaje);
+        obtenerUsuarios();
+      } else {
+        console.error('Error al eliminar usuario:', data.mensaje);
+      }
+    } catch (error) {
+      console.error('Error en la petición:', error);
+    }
+  };
+
+  const editarUsuario = (usuario) => {
+    setModoEdicion(true);
+    setMostrarFormulario(true);
+    setUsuarioEditar(usuario);
   };
 
   const obtenerSolicitudes = async () => {
@@ -50,7 +79,7 @@ export default function UsuariosPage() {
       const data = await res.json();
       if (res.ok) {
         setMensaje(data.mensaje);
-        obtenerSolicitudes(); // ✅ Actualiza automáticamente después de cambiar estado
+        obtenerSolicitudes();
       } else {
         console.error('Error al actualizar estado:', data.mensaje);
       }
@@ -71,7 +100,11 @@ export default function UsuariosPage() {
         <h2 className="text-center mb-4">Gestión de Usuarios</h2>
 
         <div className="d-flex justify-content-end mb-3">
-          <Button variant="primary" className="me-2" onClick={() => setMostrarFormulario(!mostrarFormulario)}>
+          <Button variant="primary" className="me-2" onClick={() => {
+            setMostrarFormulario(!mostrarFormulario);
+            setModoEdicion(false);
+            setUsuarioEditar(null);
+          }}>
             {mostrarFormulario ? 'Ocultar formulario' : 'Registrar nuevo'}
           </Button>
           <Button variant="primary" onClick={() => setMostrarSolicitudes(!mostrarSolicitudes)}>
@@ -87,7 +120,16 @@ export default function UsuariosPage() {
 
         {mostrarFormulario && (
           <div className="card p-3 mb-4">
-            <RegisterForm onRegister={obtenerUsuarios} />
+            <RegisterForm
+              onRegister={obtenerUsuarios}
+              modoEdicion={modoEdicion}
+              usuarioEditar={usuarioEditar}
+              cancelarEdicion={() => {
+                setModoEdicion(false);
+                setUsuarioEditar(null);
+                setMostrarFormulario(false);
+              }}
+            />
           </div>
         )}
 
@@ -114,26 +156,14 @@ export default function UsuariosPage() {
                     <td>{sol.motivo_sol}</td>
                     <td>{sol.estado_sol}</td>
                     <td>
-                      {sol.estado_sol === 'pendiente' && (
+                      {sol.estado_sol === 'pendiente' ? (
                         <>
-                          <Button
-                            variant="success"
-                            size="sm"
-                            className="me-2"
-                            onClick={() => actualizarEstadoSolicitud(sol.id_sol, 'aceptada')}
-                          >
-                            Aceptar
-                          </Button>
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            onClick={() => actualizarEstadoSolicitud(sol.id_sol, 'rechazada')}
-                          >
-                            Rechazar
-                          </Button>
+                          <Button variant="success" size="sm" className="me-2"
+                            onClick={() => actualizarEstadoSolicitud(sol.id_sol, 'aceptada')}>Aceptar</Button>
+                          <Button variant="danger" size="sm"
+                            onClick={() => actualizarEstadoSolicitud(sol.id_sol, 'rechazada')}>Rechazar</Button>
                         </>
-                      )}
-                      {sol.estado_sol !== 'pendiente' && (
+                      ) : (
                         <span className="text-muted">Sin acciones</span>
                       )}
                     </td>
@@ -153,6 +183,7 @@ export default function UsuariosPage() {
               <th>Tipo</th>
               <th>Correo</th>
               <th>Teléfono</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -164,6 +195,10 @@ export default function UsuariosPage() {
                 <td>{user.tipo_usu}</td>
                 <td>{user.correo_usu}</td>
                 <td>{user.tel_usu}</td>
+                <td>
+                  <Button variant="warning" size="sm" className="me-2" onClick={() => editarUsuario(user)}>Editar</Button>
+                  <Button variant="danger" size="sm" onClick={() => eliminarUsuario(user.id_usu)}>Eliminar</Button>
+                </td>
               </tr>
             ))}
           </tbody>
