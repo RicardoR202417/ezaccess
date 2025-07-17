@@ -1,59 +1,50 @@
-/* Fondo y contenedor principal */
-.login-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
+/* Fondo gris claro */
+.form-container {
   background-color: #f5f7fa;
-  padding: 2rem;
 }
 
-/* Caja del login */
-.login-box {
-  background-color: white;
-  padding: 3rem 2rem;
+/* Caja de login */
+.form-box {
+  background-color: #fff;
   border-radius: 12px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-  text-align: center;
+  padding: 2rem;
+  box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
   width: 100%;
-  max-width: 400px;
+  max-width: 480px;
 }
 
-/* Logo del login */
-.login-logo {
-  width: 110px;
+/* Logo dentro de la caja */
+.logo-login {
+  max-width: 100px;
   height: auto;
-  margin-bottom: 1rem;
+  display: block;
+  margin: 0 auto;
 }
 
 /* Título */
-.login-title {
-  font-size: 1.8rem;
-  font-weight: bold;
+.form-title {
+  font-weight: 600;
   color: #0d47a1;
-  margin-bottom: 2rem;
+  font-size: 1.6rem;
 }
 
-/* Formularios */
-form {
-  width: 100%;
-}
-
+/* Estilo para etiquetas */
 form label {
   font-weight: 600;
 }
 
+/* Inputs */
 form .form-control {
   border-radius: 8px;
 }
 
-/* Botón login */
+/* Botón */
 .btn-primary {
   width: 100%;
   margin-top: 1rem;
 }
 
-/* Otros botones personalizados (navbar, etc.) */
+/* Estilo general para botones secundarios */
 .btn-outline-custom {
   border: 1px solid #1565C0;
   color: #1565C0;
