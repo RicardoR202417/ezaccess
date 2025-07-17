@@ -11,49 +11,58 @@ export default function SolicitudVisitante({ navigation }) {
   const [placas, setPlacas] = useState('');
   const [mensaje, setMensaje] = useState('');
 
-  const handleEnviar = async () => {
-    if (!nombre.trim() || !motivo.trim()) {
-      setMensaje('Por favor llena todos los campos obligatorios.');
+const handleEnviar = async () => {
+  if (!nombre.trim() || !motivo.trim()) {
+    setMensaje('Por favor llena todos los campos obligatorios.');
+    return;
+  }
+
+  if (modoEntrada === 'vehiculo' && (!tipoVehiculo.trim() || !placas.trim())) {
+    setMensaje('Completa los campos del vehículo.');
+    return;
+  }
+
+  try {
+    const token = await AsyncStorage.getItem('token'); // 👈 Recupera el token JWT
+
+    if (!token) {
+      setMensaje('Token no encontrado. Inicia sesión de nuevo.');
       return;
     }
 
-    if (modoEntrada === 'vehiculo' && (!tipoVehiculo.trim() || !placas.trim())) {
-      setMensaje('Completa los campos del vehículo.');
-      return;
+    const response = await fetch('https://ezaccess-backend.onrender.com/api/solicitudes-visita', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}` // ✅ Incluye el token aquí
+      },
+      body: JSON.stringify({
+        nombre_sol: nombre,
+        motivo_sol: motivo,
+        tipo_ingreso_sol: modoEntrada,
+        modelo_veh_sol: modoEntrada === 'vehiculo' ? tipoVehiculo : null,
+        placas_veh_sol: modoEntrada === 'vehiculo' ? placas : null
+      })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      setMensaje(`✅ ${data.mensaje}`);
+      setNombre('');
+      setMotivo('');
+      setModoEntrada('peaton');
+      setTipoVehiculo('');
+      setPlacas('');
+    } else {
+      setMensaje(`❌ Error: ${data.mensaje || 'No se pudo registrar la solicitud'}`);
     }
+  } catch (error) {
+    console.error('Error al enviar solicitud:', error);
+    setMensaje('❌ Error al conectar con el servidor');
+  }
+};
 
-    try {
-      const response = await fetch('https://ezaccess-backend.onrender.com/api/solicitudes-visita', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          nombre_sol: nombre,
-          motivo_sol: motivo,
-          tipo_ingreso_sol: modoEntrada,
-          modelo_veh_sol: modoEntrada === 'vehiculo' ? tipoVehiculo : null,
-          placas_veh_sol: modoEntrada === 'vehiculo' ? placas : null
-        })
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setMensaje(`✅ ${data.mensaje}`);
-        setNombre('');
-        setMotivo('');
-        setModoEntrada('peaton');
-        setTipoVehiculo('');
-        setPlacas('');
-      } else {
-        setMensaje(`❌ Error: ${data.mensaje || 'No se pudo registrar la solicitud'}`);
-      }
-    } catch (error) {
-      console.error('Error al enviar solicitud:', error);
-      setMensaje('❌ Error al conectar con el servidor');
-    }
-  };
 
   return (
     <KeyboardAvoidingView
