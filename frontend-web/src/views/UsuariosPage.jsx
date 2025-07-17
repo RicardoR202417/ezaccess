@@ -67,6 +67,31 @@ export default function UsuariosPage() {
     }
   };
 
+  const actualizarEstadoSolicitud = async (id, nuevoEstado) => {
+    try {
+      const res = await fetch(
+        `https://ezaccess-backend.onrender.com/api/solicitudes/${id}/estado`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ nuevoEstado }),
+        }
+      );
+      const data = await res.json();
+      if (res.ok) {
+        setMensaje(data.mensaje);
+        obtenerSolicitudes();
+      } else {
+        setMensaje(data.mensaje || "Error al actualizar estado");
+      }
+    } catch (error) {
+      setMensaje("Error al conectar con el servidor");
+    }
+  };
+
   useEffect(() => {
     obtenerUsuarios();
   }, []);
@@ -84,21 +109,22 @@ export default function UsuariosPage() {
         <h2 className="text-center mb-4">Gestión de Usuarios</h2>
 
         <div className="d-flex justify-content-end mb-3">
-          <Button
-            variant="primary"
-            className="me-2"
+          <button
+            className="btn-main"
             onClick={() => setMostrarFormulario(!mostrarFormulario)}
+            type="button"
           >
             {mostrarFormulario ? "Ocultar formulario" : "Registrar nuevo"}
-          </Button>
-          <Button
-            variant="info"
+          </button>
+          <button
+            className="btn-main"
             onClick={() => setMostrarSolicitudes(!mostrarSolicitudes)}
+            type="button"
           >
             {mostrarSolicitudes
               ? "Ocultar solicitudes visitas"
               : "Solicitudes visitas"}
-          </Button>
+          </button>
         </div>
 
         {mensaje && (
@@ -116,6 +142,14 @@ export default function UsuariosPage() {
         {mostrarSolicitudes && (
           <div className="card p-3 mb-4">
             <h4>Solicitudes de Visita</h4>
+            <div className="mb-2">
+              <span>
+                <strong>Estatus:</strong>{" "}
+                <span style={{ color: "#FFA000" }}>Pendiente</span> |{" "}
+                <span style={{ color: "#388E3C" }}>Aceptada</span> |{" "}
+                <span style={{ color: "#D32F2F" }}>Rechazada</span>
+              </span>
+            </div>
             <Table striped bordered hover responsive>
               <thead>
                 <tr>
@@ -128,12 +162,13 @@ export default function UsuariosPage() {
                   <th>Modelo Vehículo</th>
                   <th>Placas Vehículo</th>
                   <th>ID Usuario</th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {solicitudes.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="text-center">
+                    <td colSpan={10} className="text-center">
                       No hay solicitudes registradas.
                     </td>
                   </tr>
@@ -143,12 +178,51 @@ export default function UsuariosPage() {
                       <td>{sol.id_sol}</td>
                       <td>{sol.nombre_sol}</td>
                       <td>{sol.motivo_sol}</td>
-                      <td>{sol.estado_sol}</td>
+                      <td>
+                        <span
+                          style={{
+                            color:
+                              sol.estado_sol === "pendiente"
+                                ? "#FFA000"
+                                : sol.estado_sol === "aceptada"
+                                ? "#388E3C"
+                                : "#D32F2F",
+                            fontWeight: 600,
+                          }}
+                        >
+                          {sol.estado_sol.charAt(0).toUpperCase() +
+                            sol.estado_sol.slice(1)}
+                        </span>
+                      </td>
                       <td>{new Date(sol.fecha_reg_sol).toLocaleString()}</td>
                       <td>{sol.tipo_ingreso_sol}</td>
                       <td>{sol.modelo_veh_sol}</td>
                       <td>{sol.placas_veh_sol}</td>
                       <td>{sol.id_usu}</td>
+                      <td>
+                        {sol.estado_sol === "pendiente" ? (
+                          <>
+                            <button
+                              className="btn btn-success btn-sm me-2"
+                              onClick={() =>
+                                actualizarEstadoSolicitud(sol.id_sol, "aceptada")
+                              }
+                            >
+                              Aceptar
+                            </button>
+                            <button
+                              className="btn btn-danger btn-sm"
+                              onClick={() =>
+                                actualizarEstadoSolicitud(sol.id_sol, "rechazada")
+                              }
+                            >
+                              Rechazar
+                            </button>
+                          </>
+                        ) : (
+                          <span className="text-muted">Sin acciones</span>
+                        )}
+                      </td>
                     </tr>
                   ))
                 )}
