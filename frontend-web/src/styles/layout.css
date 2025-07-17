@@ -1,84 +1,67 @@
-/* Fondo completo para centrar el contenido de login */
-.login-wrapper {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: #f0f2f5;
+/* Fondo y contenedor principal */
+.login-container {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: #f5f7fa;
+  padding: 2rem;
 }
 
-/* Contenedor del login centrado */
-.login-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  max-width: 420px;
-  background-color: #fff;
+/* Caja del login */
+.login-box {
+  background-color: white;
   padding: 3rem 2rem;
   border-radius: 12px;
-  box-shadow: 0 0 18px rgba(0, 0, 0, 0.1);
-}
-
-/* Logo */
-.logo-fixed {
-  width: 130px;
-  height: auto;
-  margin-bottom: 1.5rem;
-}
-
-/* Título del formulario */
-.form-title {
-  font-size: 1.6rem;
-  font-weight: 600;
-  color: #0d47a1;
-  margin-bottom: 1.5rem;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
   text-align: center;
+  width: 100%;
+  max-width: 400px;
 }
 
-/* Formulario */
+/* Logo del login */
+.login-logo {
+  width: 110px;
+  height: auto;
+  margin-bottom: 1rem;
+}
+
+/* Título */
+.login-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #0d47a1;
+  margin-bottom: 2rem;
+}
+
+/* Formularios */
 form {
   width: 100%;
-  max-width: 360px;
 }
+
 form label {
   font-weight: 600;
 }
+
 form .form-control {
   border-radius: 8px;
 }
+
+/* Botón login */
 .btn-primary {
   width: 100%;
   margin-top: 1rem;
 }
 
-/* Botón secundario reutilizable */
+/* Otros botones personalizados (navbar, etc.) */
 .btn-outline-custom {
   border: 1px solid #1565C0;
   color: #1565C0;
   background-color: transparent;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
+
 .btn-outline-custom:hover {
   background-color: #1565C0;
   color: white;
-}
-
-/* Estilo para navbar */
-.nav-link {
-  transition: background-color 0.3s ease;
-}
-.nav-link:hover {
-  background-color: #007bff;
-  color: white !important;
-  border-radius: 5px;
-}
-
-/* Tablas */
-.table th, .table td {
-  vertical-align: middle;
 }
