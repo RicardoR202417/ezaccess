@@ -4,7 +4,7 @@ const visitaController = require('../controllers/visitaController');
 const verificarToken = require('../middlewares/verificarToken');
 
 
-router.post('/solicitudes-visita', visitaController.crearSolicitud);
+router.post('/solicitudes-visita', verificarToken, visitaController.crearSolicitud);
 router.get('/solicitudes', visitaController.obtenerSolicitudes); 
 router.put('/solicitudes/:id/estado', visitaController.actualizarEstado);
 router.get('/solicitudes/usuario', verificarToken, visitaController.obtenerSolicitudesPorUsuario);
