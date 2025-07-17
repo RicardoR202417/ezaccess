@@ -2,13 +2,13 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-// Importa todas las pantallas aquí arriba
 import LoginScreen from '../screens/LoginScreen';
 import Dashboard from '../screens/Dashboard';
 import EstadoAcceso from '../screens/EstadoAcceso';
 import AsignacionCajon from '../screens/AsignacionCajon';
 import SolicitudVisitante from '../screens/SolicitudVisitante';
 import EscaneoNFC from '../screens/EscaneoNFC';
+import HistorialVisitas from '../screens/HistorialVisitas';
 
 const Stack = createNativeStackNavigator();
 
@@ -22,6 +22,7 @@ export default function AppNavigator() {
         <Stack.Screen name="AsignacionCajon" component={AsignacionCajon} />
         <Stack.Screen name="SolicitudVisitante" component={SolicitudVisitante} />
         <Stack.Screen name="EscaneoNFC" component={EscaneoNFC} />
+        <Stack.Screen name="HistorialVisitas" component={HistorialVisitas} />
       </Stack.Navigator>
     </NavigationContainer>
   );

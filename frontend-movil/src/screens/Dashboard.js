@@ -12,7 +12,7 @@ export default function Dashboard({ navigation }) {
         <Text style={styles.subtitle}>Selecciona una opción:</Text>
 
         <View style={styles.buttons}>
-          {/* 🔹 Botón fusionado */}
+          {/* 🔹 Botón fusionado: Estado de acceso + cajón */}
           <Button
             mode="outlined"
             icon={() => <Icon name="garage" size={20} color="#1565C0" />}
@@ -34,7 +34,7 @@ export default function Dashboard({ navigation }) {
             Solicitar Visitante
           </Button>
 
-          {/* 🔹 Botón escaneo NFC (si deseas dejarlo disponible desde aquí también) */}
+          {/* 🔹 Botón escaneo NFC */}
           <Button
             mode="outlined"
             icon={() => <Icon name="nfc" size={20} color="#1565C0" />}
@@ -43,6 +43,17 @@ export default function Dashboard({ navigation }) {
             labelStyle={styles.buttonText}
           >
             Escanear NFC
+          </Button>
+
+          {/* 🔹 Nuevo botón: Historial de Visitas */}
+          <Button
+            mode="outlined"
+            icon={() => <Icon name="history" size={20} color="#1565C0" />}
+            onPress={() => navigation.navigate('HistorialVisitas')}
+            style={styles.button}
+            labelStyle={styles.buttonText}
+          >
+            Historial de Visitas
           </Button>
         </View>
 
