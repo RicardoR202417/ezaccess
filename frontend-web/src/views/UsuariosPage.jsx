@@ -3,13 +3,13 @@ import React, { useEffect, useState } from "react";
 import { Button, Table, Alert } from "react-bootstrap";
 import RegisterForm from "../components/RegisterForm";
 import NavBarMonitor from "../components/NavBarMonitor";
-import { useNavigate } from "react-router-dom";
 
 export default function UsuariosPage() {
   const [usuarios, setUsuarios] = useState([]);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [mensaje, setMensaje] = useState("");
-  const navigate = useNavigate();
+  const [mostrarSolicitudes, setMostrarSolicitudes] = useState(false);
+  const [solicitudes, setSolicitudes] = useState([]);
 
   const token = localStorage.getItem("token");
 
@@ -25,6 +25,21 @@ export default function UsuariosPage() {
       setUsuarios(data);
     } catch (err) {
       console.error("Error al obtener usuarios", err);
+    }
+  };
+
+  const obtenerSolicitudes = async () => {
+    try {
+      const res = await fetch(
+        "https://ezaccess-backend.onrender.com/api/solicitudes",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      const data = await res.json();
+      setSolicitudes(data.solicitudes || []);
+    } catch (err) {
+      console.error("Error al obtener solicitudes", err);
     }
   };
 
@@ -56,6 +71,12 @@ export default function UsuariosPage() {
     obtenerUsuarios();
   }, []);
 
+  useEffect(() => {
+    if (mostrarSolicitudes) {
+      obtenerSolicitudes();
+    }
+  }, [mostrarSolicitudes]);
+
   return (
     <div>
       <NavBarMonitor />
@@ -65,9 +86,18 @@ export default function UsuariosPage() {
         <div className="d-flex justify-content-end mb-3">
           <Button
             variant="primary"
+            className="me-2"
             onClick={() => setMostrarFormulario(!mostrarFormulario)}
           >
             {mostrarFormulario ? "Ocultar formulario" : "Registrar nuevo"}
+          </Button>
+          <Button
+            variant="info"
+            onClick={() => setMostrarSolicitudes(!mostrarSolicitudes)}
+          >
+            {mostrarSolicitudes
+              ? "Ocultar solicitudes visitas"
+              : "Solicitudes visitas"}
           </Button>
         </div>
 
@@ -80,6 +110,50 @@ export default function UsuariosPage() {
         {mostrarFormulario && (
           <div className="card p-3 mb-4">
             <RegisterForm onRegistroExitoso={obtenerUsuarios} />
+          </div>
+        )}
+
+        {mostrarSolicitudes && (
+          <div className="card p-3 mb-4">
+            <h4>Solicitudes de Visita</h4>
+            <Table striped bordered hover responsive>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nombre</th>
+                  <th>Motivo</th>
+                  <th>Estado</th>
+                  <th>Fecha Registro</th>
+                  <th>Tipo Ingreso</th>
+                  <th>Modelo Vehículo</th>
+                  <th>Placas Vehículo</th>
+                  <th>ID Usuario</th>
+                </tr>
+              </thead>
+              <tbody>
+                {solicitudes.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} className="text-center">
+                      No hay solicitudes registradas.
+                    </td>
+                  </tr>
+                ) : (
+                  solicitudes.map((sol) => (
+                    <tr key={sol.id_sol}>
+                      <td>{sol.id_sol}</td>
+                      <td>{sol.nombre_sol}</td>
+                      <td>{sol.motivo_sol}</td>
+                      <td>{sol.estado_sol}</td>
+                      <td>{new Date(sol.fecha_reg_sol).toLocaleString()}</td>
+                      <td>{sol.tipo_ingreso_sol}</td>
+                      <td>{sol.modelo_veh_sol}</td>
+                      <td>{sol.placas_veh_sol}</td>
+                      <td>{sol.id_usu}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </Table>
           </div>
         )}
 
@@ -115,7 +189,6 @@ export default function UsuariosPage() {
                   >
                     Editar
                   </Button>
-
                   <Button
                     variant="danger"
                     size="sm"
