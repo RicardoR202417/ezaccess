@@ -1,6 +1,7 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useState, useContext, useCallback } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
 import * as Animatable from 'react-native-animatable';
+import { useFocusEffect } from '@react-navigation/native';
 import { AuthContext } from '../context/AuthContext';
 import { API_URL } from '../config';
 
@@ -9,35 +10,49 @@ export default function HistorialVisitas() {
   const [visitas, setVisitas] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const obtenerVisitas = async () => {
-      try {
-        const res = await fetch(`${API_URL}solicitudes/usuario`, {
-          headers: {
-            Authorization: `Bearer ${usuario?.token}`,
-          },
-        });
+  useFocusEffect(
+    useCallback(() => {
+      const obtenerVisitas = async () => {
+        setLoading(true);
+        try {
+          console.log("🔑 Token usado:", usuario?.token);
 
-        const text = await res.text();
-        console.log("🔍 Respuesta del servidor:", text);
+          const res = await fetch(`${API_URL}solicitudes/usuario`, {
+            headers: {
+              Authorization: `Bearer ${usuario?.token}`,
+              'Content-Type': 'application/json',
+            },
+          });
 
-        const data = JSON.parse(text);
-        if (data?.solicitudes) {
-          setVisitas(data.solicitudes);
-        } else {
-          console.warn("⚠️ No llegaron solicitudes:", data);
+          const text = await res.text();
+          console.log("🔍 Respuesta del servidor (texto crudo):", text);
+
+          if (!res.ok) {
+            console.warn(`⚠️ Error HTTP ${res.status}`);
+            return;
+          }
+
+          const data = JSON.parse(text);
+
+          if (data?.solicitudes) {
+            setVisitas(data.solicitudes);
+          } else {
+            console.warn("⚠️ No llegaron solicitudes válidas:", data);
+          }
+
+        } catch (error) {
+          console.error("🚫 Error al obtener visitas:", error);
+        } finally {
+          setLoading(false);
         }
-      } catch (error) {
-        console.error("🚫 Error al obtener visitas:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+      };
 
-    if (usuario?.token) {
-      obtenerVisitas();
-    }
-  }, [usuario]);
+      if (usuario?.token) {
+        obtenerVisitas();
+      }
+
+    }, [usuario?.token])
+  );
 
   const renderItem = ({ item, index }) => (
     <Animatable.View
