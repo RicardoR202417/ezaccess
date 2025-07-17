@@ -26,33 +26,6 @@ export default function UsuariosPage() {
     }
   };
 
-  const eliminarUsuario = async (id) => {
-    if (!window.confirm('¿Estás seguro de eliminar este usuario?')) return;
-
-    try {
-      const res = await fetch(`https://ezaccess-backend.onrender.com/api/usuarios/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        setMensaje(data.mensaje);
-        obtenerUsuarios();
-      } else {
-        console.error('Error al eliminar usuario:', data.mensaje);
-      }
-    } catch (error) {
-      console.error('Error en la petición:', error);
-    }
-  };
-
-  const editarUsuario = (usuario) => {
-    setModoEdicion(true);
-    setMostrarFormulario(true);
-    setUsuarioEditar(usuario);
-  };
-
   const obtenerSolicitudes = async () => {
     try {
       const res = await fetch('https://ezaccess-backend.onrender.com/api/solicitudes', {
@@ -88,6 +61,39 @@ export default function UsuariosPage() {
     }
   };
 
+  const eliminarUsuario = async (id) => {
+    if (!window.confirm('¿Estás seguro de eliminar este usuario?')) return;
+
+    try {
+      const res = await fetch(`https://ezaccess-backend.onrender.com/api/usuarios/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setMensaje(data.mensaje);
+        obtenerUsuarios();
+      } else {
+        console.error('Error al eliminar usuario:', data.mensaje);
+      }
+    } catch (err) {
+      console.error('Error al eliminar usuario:', err);
+    }
+  };
+
+  const iniciarEdicion = (usuario) => {
+    setUsuarioEditar(usuario);
+    setModoEdicion(true);
+    setMostrarFormulario(true);
+  };
+
+  const cancelarEdicion = () => {
+    setModoEdicion(false);
+    setUsuarioEditar(null);
+    setMostrarFormulario(false);
+  };
+
   useEffect(() => {
     obtenerUsuarios();
     if (mostrarSolicitudes) obtenerSolicitudes();
@@ -96,16 +102,38 @@ export default function UsuariosPage() {
   return (
     <div>
       <NavBarMonitor />
+
+      {/* Formulario separado del contenedor principal para evitar duplicaciones */}
+      {mostrarFormulario && (
+        <div className="container mt-4">
+          <div className="card p-3 mb-4">
+            <RegisterForm
+              onRegistroExitoso={() => {
+                obtenerUsuarios();
+                cancelarEdicion();
+              }}
+              modoEdicion={modoEdicion}
+              usuarioEditar={usuarioEditar}
+              cancelarEdicion={cancelarEdicion}
+            />
+          </div>
+        </div>
+      )}
+
       <div className="container mt-4">
         <h2 className="text-center mb-4">Gestión de Usuarios</h2>
 
         <div className="d-flex justify-content-end mb-3">
-          <Button variant="primary" className="me-2" onClick={() => {
-            setMostrarFormulario(!mostrarFormulario);
-            setModoEdicion(false);
-            setUsuarioEditar(null);
-          }}>
-            {mostrarFormulario ? 'Ocultar formulario' : 'Registrar nuevo'}
+          <Button
+            variant="primary"
+            className="me-2"
+            onClick={() => {
+              setMostrarFormulario(!mostrarFormulario);
+              setModoEdicion(false);
+              setUsuarioEditar(null);
+            }}
+          >
+            {mostrarFormulario && !modoEdicion ? 'Ocultar formulario' : 'Registrar nuevo'}
           </Button>
           <Button variant="primary" onClick={() => setMostrarSolicitudes(!mostrarSolicitudes)}>
             {mostrarSolicitudes ? 'Ocultar solicitudes de visita' : 'Ver solicitudes de visita'}
@@ -116,21 +144,6 @@ export default function UsuariosPage() {
           <Alert variant="info" onClose={() => setMensaje('')} dismissible>
             {mensaje}
           </Alert>
-        )}
-
-        {mostrarFormulario && (
-          <div className="card p-3 mb-4">
-            <RegisterForm
-              onRegister={obtenerUsuarios}
-              modoEdicion={modoEdicion}
-              usuarioEditar={usuarioEditar}
-              cancelarEdicion={() => {
-                setModoEdicion(false);
-                setUsuarioEditar(null);
-                setMostrarFormulario(false);
-              }}
-            />
-          </div>
         )}
 
         {mostrarSolicitudes && (
@@ -158,10 +171,21 @@ export default function UsuariosPage() {
                     <td>
                       {sol.estado_sol === 'pendiente' ? (
                         <>
-                          <Button variant="success" size="sm" className="me-2"
-                            onClick={() => actualizarEstadoSolicitud(sol.id_sol, 'aceptada')}>Aceptar</Button>
-                          <Button variant="danger" size="sm"
-                            onClick={() => actualizarEstadoSolicitud(sol.id_sol, 'rechazada')}>Rechazar</Button>
+                          <Button
+                            variant="success"
+                            size="sm"
+                            className="me-2"
+                            onClick={() => actualizarEstadoSolicitud(sol.id_sol, 'aceptada')}
+                          >
+                            Aceptar
+                          </Button>
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            onClick={() => actualizarEstadoSolicitud(sol.id_sol, 'rechazada')}
+                          >
+                            Rechazar
+                          </Button>
                         </>
                       ) : (
                         <span className="text-muted">Sin acciones</span>
@@ -196,8 +220,12 @@ export default function UsuariosPage() {
                 <td>{user.correo_usu}</td>
                 <td>{user.tel_usu}</td>
                 <td>
-                  <Button variant="warning" size="sm" className="me-2" onClick={() => editarUsuario(user)}>Editar</Button>
-                  <Button variant="danger" size="sm" onClick={() => eliminarUsuario(user.id_usu)}>Eliminar</Button>
+                  <Button variant="warning" size="sm" className="me-2" onClick={() => iniciarEdicion(user)}>
+                    Editar
+                  </Button>
+                  <Button variant="danger" size="sm" onClick={() => eliminarUsuario(user.id_usu)}>
+                    Eliminar
+                  </Button>
                 </td>
               </tr>
             ))}
