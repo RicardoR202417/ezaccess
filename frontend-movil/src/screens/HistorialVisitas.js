@@ -12,7 +12,7 @@ export default function HistorialVisitas() {
   useEffect(() => {
     const obtenerVisitas = async () => {
       try {
-        const res = await fetch(`${API_URL}/solicitudes/usuario`, {
+        const res = await fetch(`${API_URL}solicitudes/usuario`, {
           headers: {
             Authorization: `Bearer ${usuario?.token}`,
           },
