@@ -15,11 +15,12 @@
 
 /* Logo dentro de la caja */
 .logo-login {
-  max-width: 100px;
+  max-width: 120px;
   height: auto;
   display: block;
-  margin: 0 auto;
+  margin: 0 auto 1rem auto;
 }
+
 
 /* Título */
 .form-title {
