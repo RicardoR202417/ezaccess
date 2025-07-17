@@ -17,7 +17,7 @@ export default function HistorialVisitas() {
         try {
           console.log("🔑 Token usado:", usuario?.token);
 
-          const res = await fetch(`${API_URL}solicitudes/usuario`, {
+          const res = await fetch(`${API_URL}/solicitudes/usuario`, {
             headers: {
               Authorization: `Bearer ${usuario?.token}`,
               'Content-Type': 'application/json',
