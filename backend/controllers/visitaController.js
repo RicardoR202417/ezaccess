@@ -10,7 +10,7 @@ exports.crearSolicitud = async (req, res) => {
     placas_veh_sol
   } = req.body;
 
-  const id_usu = req.usuario?.id; // Se obtiene del token JWT
+  const id_usu = req.usuario?.id; // ID del usuario autenticado (extraído del token)
 
   if (!id_usu) {
     return res.status(401).json({ mensaje: 'Usuario no autenticado' });
@@ -25,7 +25,7 @@ exports.crearSolicitud = async (req, res) => {
       placas_veh_sol,
       estado_sol: 'pendiente',
       fecha_reg_sol: new Date(),
-      id_usu
+      id_usu // ✅ se registra el ID del usuario
     });
 
     res.status(201).json({
@@ -38,7 +38,7 @@ exports.crearSolicitud = async (req, res) => {
   }
 };
 
-// Obtener todas las solicitudes (admin/monitor)
+// Obtener todas las solicitudes (uso administrativo/monitor)
 exports.obtenerSolicitudes = async (req, res) => {
   try {
     const solicitudes = await SolicitudVisita.findAll();
@@ -49,7 +49,7 @@ exports.obtenerSolicitudes = async (req, res) => {
   }
 };
 
-// Obtener solicitudes del usuario autenticado
+// Obtener solicitudes solo del usuario autenticado
 exports.obtenerSolicitudesPorUsuario = async (req, res) => {
   const id_usu = req.usuario?.id;
 
@@ -69,7 +69,7 @@ exports.obtenerSolicitudesPorUsuario = async (req, res) => {
   }
 };
 
-// Actualizar el estado de una solicitud
+// Actualizar el estado de una solicitud (aceptada o rechazada)
 exports.actualizarEstado = async (req, res) => {
   const { id } = req.params;
   const { nuevoEstado } = req.body;
