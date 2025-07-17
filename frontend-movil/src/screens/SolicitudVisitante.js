@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { TextInput, Button, Text, Title, RadioButton } from 'react-native-paper';
 import * as Animatable from 'react-native-animatable';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
 
 export default function SolicitudVisitante({ navigation }) {
   const [nombre, setNombre] = useState('');
