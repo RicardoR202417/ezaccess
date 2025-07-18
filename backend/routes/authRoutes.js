@@ -11,9 +11,8 @@ router.post('/login', authController.login);
 
 router.post('/logout', authController.logout);
 
-router.put('/usuarios/:id_usu', usuarioController.editarUsuario);
-
-router.delete('/usuarios/:id_usu', usuarioController.eliminarUsuario);
+router.put('/usuarios/:id_usu', authController.editarUsuario);
+router.delete('/usuarios/:id_usu', authController.eliminarUsuario);
 
 
 module.exports = router;
