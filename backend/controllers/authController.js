@@ -174,7 +174,7 @@ exports.editarUsuario = async (req, res) => {
   }
 };
 
-// ELIMINAR USUARIO
+// ELIMINAR USUARIO (ELIMINACIÓN FÍSICA)
 exports.eliminarUsuario = async (req, res) => {
   const { id_usu } = req.params;
 
@@ -185,12 +185,11 @@ exports.eliminarUsuario = async (req, res) => {
       return res.status(404).json({ mensaje: 'Usuario no encontrado' });
     }
 
-    // Baja lógica: cambiar el estado del usuario a 'inactivo'
-    usuario.estado_usu = 'inactivo';
-    await usuario.save();
+    // Eliminar usuario físicamente de la base de datos
+    await usuario.destroy();
 
     res.json({
-      mensaje: 'Usuario desactivado correctamente',
+      mensaje: 'Usuario eliminado correctamente',
       usuario
     });
   } catch (error) {
