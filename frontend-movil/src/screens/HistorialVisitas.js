@@ -4,12 +4,7 @@ import { AuthContext } from '../context/AuthContext';
 import { API_URL } from '../config';
 import { Button } from 'react-native-paper';
 
-<<<<<<< HEAD
 export default function HistorialVisitas({ navigation }) {
-=======
-
-export default function HistorialVisitas() {
->>>>>>> e33cf7afd1e990a887b60c0ed3e24cb815bd3a29
   const { usuario } = useContext(AuthContext);
   const [visitas, setVisitas] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,12 +50,16 @@ export default function HistorialVisitas() {
   }, [usuario?.token]);
 
   const renderItem = ({ item }) => (
-    <View style={styles.row}>
-      <Text style={[styles.cell, { flex: 2 }]}>{item.nombre_sol}</Text>
-      <Text style={[styles.cell, { flex: 2 }]}>{item.motivo_sol}</Text>
-      <Text style={[styles.cell, { flex: 1 }]}>{item.estado_sol?.toUpperCase()}</Text>
-      <Text style={[styles.cell, { flex: 2 }]}>{new Date(item.fecha_reg_sol).toLocaleString()}</Text>
-      <Text style={[styles.cell, { flex: 1 }]}>{item.tipo_ingreso_sol || 'N/A'}</Text>
+    <View
+      style={[
+        styles.card,
+        item.estado_sol === 'aceptada' ? styles.cardPermitido : styles.cardDenegado,
+      ]}
+    >
+      <Text style={styles.estado}>{item.estado_sol?.toUpperCase()}</Text>
+      <Text style={styles.fecha}>Fecha: {new Date(item.fecha_reg_sol).toLocaleString()}</Text>
+      <Text style={styles.detalle}>Motivo: {item.motivo_sol || 'No especificado'}</Text>
+      <Text style={styles.detalle}>Ingreso: {item.tipo_ingreso_sol || 'N/A'}</Text>
     </View>
   );
 
@@ -85,7 +84,6 @@ export default function HistorialVisitas() {
   return (
     <View style={styles.container}>
       <Text style={styles.titulo}>Historial de Visitas</Text>
-<<<<<<< HEAD
       <Button
         mode="contained"
         onPress={() => navigation.navigate('Dashboard')}
@@ -109,27 +107,6 @@ export default function HistorialVisitas() {
           contentContainerStyle={{ paddingBottom: 20 }}
         />
       )}
-=======
-      {/* Encabezados de la tabla */}
-      <View style={[styles.row, styles.headerRow]}>
-        <Text style={[styles.cell, styles.headerCell, { flex: 2 }]}>Nombre</Text>
-        <Text style={[styles.cell, styles.headerCell, { flex: 2 }]}>Motivo</Text>
-        <Text style={[styles.cell, styles.headerCell, { flex: 1 }]}>Estado</Text>
-        <Text style={[styles.cell, styles.headerCell, { flex: 2 }]}>Fecha</Text>
-        <Text style={[styles.cell, styles.headerCell, { flex: 1 }]}>Ingreso</Text>
-      </View>
-      <FlatList
-        data={visitas}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={renderItem}
-        ListEmptyComponent={
-          <Text style={{ textAlign: 'center', marginTop: 20 }}>
-            No hay visitas registradas.
-          </Text>
-        }
-        contentContainerStyle={{ paddingBottom: 20 }}
-      />
->>>>>>> e33cf7afd1e990a887b60c0ed3e24cb815bd3a29
     </View>
   );
 }
@@ -147,26 +124,37 @@ const styles = StyleSheet.create({
     color: '#0D47A1',
     textAlign: 'center',
   },
-  row: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-    paddingVertical: 8,
-    alignItems: 'center',
+  card: {
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
   },
-  headerRow: {
-    backgroundColor: '#e3e3e3',
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
+  cardPermitido: {
+    backgroundColor: '#E8F5E9',
+    borderLeftColor: '#388E3C',
+    borderLeftWidth: 5,
   },
-  cell: {
-    fontSize: 13,
-    paddingHorizontal: 4,
-    textAlign: 'center',
+  cardDenegado: {
+    backgroundColor: '#FFEBEE',
+    borderLeftColor: '#D32F2F',
+    borderLeftWidth: 5,
   },
-  headerCell: {
+  estado: {
+    fontSize: 18,
     fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  fecha: {
     fontSize: 14,
+    color: '#555',
+  },
+  detalle: {
+    fontSize: 14,
+    color: '#777',
   },
   volverButton: {
     backgroundColor: '#1565C0',
