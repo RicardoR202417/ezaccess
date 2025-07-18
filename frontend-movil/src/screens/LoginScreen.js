@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
   View,
   StyleSheet,
@@ -9,12 +9,13 @@ import {
 } from 'react-native';
 import { TextInput, Button, Text, Title } from 'react-native-paper';
 import * as Animatable from 'react-native-animatable';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../config';
+import { AuthContext } from '../context/AuthContext';
 
 export default function LoginScreen({ navigation }) {
   const [correo, setCorreo] = useState('');
   const [password, setPassword] = useState('');
+  const { login } = useContext(AuthContext);
 
   const handleLogin = async () => {
     if (!correo || !password) {
@@ -32,9 +33,12 @@ export default function LoginScreen({ navigation }) {
       const data = await response.json();
       console.log('Respuesta del servidor:', data);
 
-      if (response.ok) {
-        await AsyncStorage.setItem('token', data.token);
-        await AsyncStorage.setItem('usuario', JSON.stringify(data.usuario));
+      if (response.ok && data.token && data.usuario) {
+        // Guarda usuario y token juntos en el contexto
+        login({
+          ...data.usuario,
+          token: data.token
+        });
 
         navigation.replace('Dashboard');
       } else {

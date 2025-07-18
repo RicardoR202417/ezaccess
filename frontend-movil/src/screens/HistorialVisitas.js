@@ -1,40 +1,53 @@
-import React, { useState, useContext, useCallback } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
 import { AuthContext } from '../context/AuthContext';
 import { API_URL } from '../config';
+import { Button } from 'react-native-paper';
 
-export default function HistorialVisitas() {
+export default function HistorialVisitas({ navigation }) {
   const { usuario } = useContext(AuthContext);
   const [visitas, setVisitas] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  useFocusEffect(
-    useCallback(() => {
-      const obtenerVisitas = async () => {
-        try {
-          const res = await fetch(`${API_URL}/solicitudes/usuario`, {
-            headers: {
-              Authorization: `Bearer ${usuario?.token}`,
-              'Content-Type': 'application/json',
-            },
-          });
+  useEffect(() => {
+    console.log('👤 Usuario en contexto:', usuario);
 
-          const text = await res.text();
-          const data = JSON.parse(text);
+    if (!usuario?.token) {
+      setLoading(false);
+      return;
+    }
 
-          if (res.ok && data?.solicitudes) {
-            setVisitas(data.solicitudes);
-          }
-        } catch (error) {
-          console.error("Error al obtener visitas:", error);
+    const obtenerVisitas = async () => {
+      try {
+        const res = await fetch(`${API_URL}/solicitudes/usuario`, {
+          headers: {
+            Authorization: `Bearer ${usuario.token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!res.ok) {
+          throw new Error(`HTTP error! Status: ${res.status}`);
         }
-      };
 
-      if (usuario?.token) {
-        obtenerVisitas();
+        const data = await res.json();
+        console.log('🔎 Respuesta del backend:', data);
+
+        if (data?.solicitudes && Array.isArray(data.solicitudes)) {
+          setVisitas(data.solicitudes);
+        } else {
+          setVisitas([]);
+        }
+      } catch (error) {
+        console.error("🚫 Error al obtener visitas:", error);
+        setVisitas([]);
+      } finally {
+        setLoading(false);
       }
-    }, [usuario?.token])
-  );
+    };
+
+    obtenerVisitas();
+  }, [usuario?.token]);
 
   const renderItem = ({ item }) => (
     <View
@@ -50,20 +63,50 @@ export default function HistorialVisitas() {
     </View>
   );
 
+  if (!usuario?.token) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.titulo}>Historial de Visitas</Text>
+        <Text style={{ textAlign: 'center', marginTop: 20, color: 'red' }}>
+          Usuario no autenticado. Inicia sesión para ver tu historial.
+        </Text>
+        <Button
+          mode="contained"
+          onPress={() => navigation.navigate('Login')}
+          style={styles.volverButton}
+        >
+          Ir al Login
+        </Button>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.titulo}>Historial de Visitas</Text>
-      <FlatList
-        data={visitas}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={renderItem}
-        ListEmptyComponent={
-          <Text style={{ textAlign: 'center', marginTop: 20 }}>
-            No hay visitas registradas.
-          </Text>
-        }
-        contentContainerStyle={{ paddingBottom: 20 }}
-      />
+      <Button
+        mode="contained"
+        onPress={() => navigation.navigate('Dashboard')}
+        style={styles.volverButton}
+      >
+        Volver al Dashboard
+      </Button>
+
+      {loading ? (
+        <Text style={{ textAlign: 'center', marginTop: 20 }}>Cargando visitas...</Text>
+      ) : (
+        <FlatList
+          data={visitas}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={renderItem}
+          ListEmptyComponent={
+            <Text style={{ textAlign: 'center', marginTop: 20 }}>
+              No hay visitas registradas.
+            </Text>
+          }
+          contentContainerStyle={{ paddingBottom: 20 }}
+        />
+      )}
     </View>
   );
 }
@@ -112,5 +155,9 @@ const styles = StyleSheet.create({
   detalle: {
     fontSize: 14,
     color: '#777',
+  },
+  volverButton: {
+    backgroundColor: '#1565C0',
+    marginBottom: 20,
   },
 });
