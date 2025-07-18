@@ -1,198 +1,231 @@
-import React, { useEffect, useState } from 'react';
-import RegisterForm from '../components/RegisterForm';
-import { Button, Table, Alert } from 'react-bootstrap';
-import NavBarMonitor from '../components/NavBarMonitor';
+// views/UsuariosPage.jsx
+import React, { useEffect, useState } from "react";
+import { Button, Table, Alert } from "react-bootstrap";
+import RegisterForm from "../components/RegisterForm";
+import NavBarMonitor from "../components/NavBarMonitor";
 
 export default function UsuariosPage() {
-  const [mostrarFormulario, setMostrarFormulario] = useState(false);
-  const [mostrarSolicitudes, setMostrarSolicitudes] = useState(false);
   const [usuarios, setUsuarios] = useState([]);
+  const [mostrarFormulario, setMostrarFormulario] = useState(false);
+  const [mensaje, setMensaje] = useState("");
+  const [mostrarSolicitudes, setMostrarSolicitudes] = useState(false);
   const [solicitudes, setSolicitudes] = useState([]);
-  const [mensaje, setMensaje] = useState('');
-  const [modoEdicion, setModoEdicion] = useState(false);
-  const [usuarioEditar, setUsuarioEditar] = useState(null);
 
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
 
   const obtenerUsuarios = async () => {
     try {
-      const res = await fetch('https://ezaccess-backend.onrender.com/api/usuarios', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await fetch(
+        "https://ezaccess-backend.onrender.com/api/usuarios",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       const data = await res.json();
       setUsuarios(data);
     } catch (err) {
-      console.error('Error al obtener usuarios', err);
+      console.error("Error al obtener usuarios", err);
     }
   };
 
   const obtenerSolicitudes = async () => {
     try {
-      const res = await fetch('https://ezaccess-backend.onrender.com/api/solicitudes', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await fetch(
+        "https://ezaccess-backend.onrender.com/api/solicitudes",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       const data = await res.json();
-      setSolicitudes(data.solicitudes);
+      setSolicitudes(data.solicitudes || []);
     } catch (err) {
-      console.error('Error al obtener solicitudes', err);
-    }
-  };
-
-  const actualizarEstadoSolicitud = async (id, nuevoEstado) => {
-    try {
-      const res = await fetch(`https://ezaccess-backend.onrender.com/api/solicitudes/${id}/estado`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ nuevoEstado })
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        setMensaje(data.mensaje);
-        obtenerSolicitudes();
-      } else {
-        console.error('Error al actualizar estado:', data.mensaje);
-      }
-    } catch (error) {
-      console.error('Error en la petición:', error);
+      console.error("Error al obtener solicitudes", err);
     }
   };
 
   const eliminarUsuario = async (id) => {
-    if (!window.confirm('¿Estás seguro de eliminar este usuario?')) return;
+    if (!window.confirm("¿Estás seguro de eliminar este usuario?")) return;
 
     try {
-      const res = await fetch(`https://ezaccess-backend.onrender.com/api/usuarios/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await fetch(
+        `https://ezaccess-backend.onrender.com/api/usuarios/${id}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       const data = await res.json();
       if (res.ok) {
         setMensaje(data.mensaje);
         obtenerUsuarios();
       } else {
-        console.error('Error al eliminar usuario:', data.mensaje);
+        console.error("Error al eliminar usuario:", data.mensaje);
       }
     } catch (err) {
-      console.error('Error al eliminar usuario:', err);
+      console.error("Error al eliminar usuario:", err);
     }
   };
 
-  const iniciarEdicion = (usuario) => {
-    setUsuarioEditar(usuario);
-    setModoEdicion(true);
-    setMostrarFormulario(true);
-  };
-
-  const cancelarEdicion = () => {
-    setModoEdicion(false);
-    setUsuarioEditar(null);
-    setMostrarFormulario(false);
+  const actualizarEstadoSolicitud = async (id, nuevoEstado) => {
+    try {
+      const res = await fetch(
+        `https://ezaccess-backend.onrender.com/api/solicitudes/${id}/estado`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ nuevoEstado }),
+        }
+      );
+      const data = await res.json();
+      if (res.ok) {
+        setMensaje(data.mensaje);
+        obtenerSolicitudes();
+      } else {
+        setMensaje(data.mensaje || "Error al actualizar estado");
+      }
+    } catch (error) {
+      setMensaje("Error al conectar con el servidor");
+    }
   };
 
   useEffect(() => {
     obtenerUsuarios();
-    if (mostrarSolicitudes) obtenerSolicitudes();
+  }, []);
+
+  useEffect(() => {
+    if (mostrarSolicitudes) {
+      obtenerSolicitudes();
+    }
   }, [mostrarSolicitudes]);
 
   return (
     <div>
       <NavBarMonitor />
-
-      {/* Formulario separado del contenedor principal para evitar duplicaciones */}
-      {mostrarFormulario && (
-        <div className="container mt-4">
-          <div className="card p-3 mb-4">
-            <RegisterForm
-              onRegistroExitoso={() => {
-                obtenerUsuarios();
-                cancelarEdicion();
-              }}
-              modoEdicion={modoEdicion}
-              usuarioEditar={usuarioEditar}
-              cancelarEdicion={cancelarEdicion}
-            />
-          </div>
-        </div>
-      )}
-
       <div className="container mt-4">
         <h2 className="text-center mb-4">Gestión de Usuarios</h2>
 
         <div className="d-flex justify-content-end mb-3">
-          <Button
-            variant="primary"
-            className="me-2"
-            onClick={() => {
-              setMostrarFormulario(!mostrarFormulario);
-              setModoEdicion(false);
-              setUsuarioEditar(null);
-            }}
+          <button
+            className="btn-main"
+            onClick={() => setMostrarFormulario(!mostrarFormulario)}
+            type="button"
           >
-            {mostrarFormulario && !modoEdicion ? 'Ocultar formulario' : 'Registrar nuevo'}
-          </Button>
-          <Button variant="primary" onClick={() => setMostrarSolicitudes(!mostrarSolicitudes)}>
-            {mostrarSolicitudes ? 'Ocultar solicitudes de visita' : 'Ver solicitudes de visita'}
-          </Button>
+            {mostrarFormulario ? "Ocultar formulario" : "Registrar nuevo"}
+          </button>
+          <button
+            className="btn-main"
+            onClick={() => setMostrarSolicitudes(!mostrarSolicitudes)}
+            type="button"
+          >
+            {mostrarSolicitudes
+              ? "Ocultar solicitudes visitas"
+              : "Solicitudes visitas"}
+          </button>
         </div>
 
         {mensaje && (
-          <Alert variant="info" onClose={() => setMensaje('')} dismissible>
+          <Alert variant="info" onClose={() => setMensaje("")} dismissible>
             {mensaje}
           </Alert>
+        )}
+
+        {mostrarFormulario && (
+          <div className="card p-3 mb-4">
+            <RegisterForm onRegistroExitoso={obtenerUsuarios} />
+          </div>
         )}
 
         {mostrarSolicitudes && (
           <div className="card p-3 mb-4">
             <h4>Solicitudes de Visita</h4>
+            <div className="mb-2">
+              <span>
+                <strong>Estatus:</strong>{" "}
+                <span style={{ color: "#FFA000" }}>Pendiente</span> |{" "}
+                <span style={{ color: "#388E3C" }}>Aceptada</span> |{" "}
+                <span style={{ color: "#D32F2F" }}>Rechazada</span>
+              </span>
+            </div>
             <Table striped bordered hover responsive>
               <thead>
                 <tr>
+                  <th>ID</th>
                   <th>Nombre</th>
-                  <th>Teléfono</th>
-                  <th>Fecha Visita</th>
                   <th>Motivo</th>
                   <th>Estado</th>
+                  <th>Fecha Registro</th>
+                  <th>Tipo Ingreso</th>
+                  <th>Modelo Vehículo</th>
+                  <th>Placas Vehículo</th>
+                  <th>ID Usuario</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                {solicitudes.map((sol) => (
-                  <tr key={sol.id_sol}>
-                    <td>{`${sol.nombre_sol} ${sol.apellido_pat_sol || ''} ${sol.apellido_mat_sol || ''}`}</td>
-                    <td>{sol.tel_sol || 'N/A'}</td>
-                    <td>{sol.fecha_visita_sol}</td>
-                    <td>{sol.motivo_sol}</td>
-                    <td>{sol.estado_sol}</td>
-                    <td>
-                      {sol.estado_sol === 'pendiente' ? (
-                        <>
-                          <Button
-                            variant="success"
-                            size="sm"
-                            className="me-2"
-                            onClick={() => actualizarEstadoSolicitud(sol.id_sol, 'aceptada')}
-                          >
-                            Aceptar
-                          </Button>
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            onClick={() => actualizarEstadoSolicitud(sol.id_sol, 'rechazada')}
-                          >
-                            Rechazar
-                          </Button>
-                        </>
-                      ) : (
-                        <span className="text-muted">Sin acciones</span>
-                      )}
+                {solicitudes.length === 0 ? (
+                  <tr>
+                    <td colSpan={10} className="text-center">
+                      No hay solicitudes registradas.
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  solicitudes.map((sol) => (
+                    <tr key={sol.id_sol}>
+                      <td>{sol.id_sol}</td>
+                      <td>{sol.nombre_sol}</td>
+                      <td>{sol.motivo_sol}</td>
+                      <td>
+                        <span
+                          style={{
+                            color:
+                              sol.estado_sol === "pendiente"
+                                ? "#FFA000"
+                                : sol.estado_sol === "aceptada"
+                                ? "#388E3C"
+                                : "#D32F2F",
+                            fontWeight: 600,
+                          }}
+                        >
+                          {sol.estado_sol.charAt(0).toUpperCase() +
+                            sol.estado_sol.slice(1)}
+                        </span>
+                      </td>
+                      <td>{new Date(sol.fecha_reg_sol).toLocaleString()}</td>
+                      <td>{sol.tipo_ingreso_sol}</td>
+                      <td>{sol.modelo_veh_sol}</td>
+                      <td>{sol.placas_veh_sol}</td>
+                      <td>{sol.id_usu}</td>
+                      <td>
+                        {sol.estado_sol === "pendiente" ? (
+                          <>
+                            <button
+                              className="btn btn-success btn-sm me-2"
+                              onClick={() =>
+                                actualizarEstadoSolicitud(sol.id_sol, "aceptada")
+                              }
+                            >
+                              Aceptar
+                            </button>
+                            <button
+                              className="btn btn-danger btn-sm"
+                              onClick={() =>
+                                actualizarEstadoSolicitud(sol.id_sol, "rechazada")
+                              }
+                            >
+                              Rechazar
+                            </button>
+                          </>
+                        ) : (
+                          <span className="text-muted">Sin acciones</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </Table>
           </div>
@@ -220,10 +253,21 @@ export default function UsuariosPage() {
                 <td>{user.correo_usu}</td>
                 <td>{user.tel_usu}</td>
                 <td>
-                  <Button variant="warning" size="sm" className="me-2" onClick={() => iniciarEdicion(user)}>
+                  <Button
+                    variant="warning"
+                    size="sm"
+                    className="me-2"
+                    onClick={() =>
+                      (window.location.href = `/usuarios/editar/${user.id_usu}`)
+                    }
+                  >
                     Editar
                   </Button>
-                  <Button variant="danger" size="sm" onClick={() => eliminarUsuario(user.id_usu)}>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => eliminarUsuario(user.id_usu)}
+                  >
                     Eliminar
                   </Button>
                 </td>
