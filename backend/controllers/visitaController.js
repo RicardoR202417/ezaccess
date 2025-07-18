@@ -56,6 +56,7 @@ exports.obtenerSolicitudes = async (req, res) => {
 exports.obtenerSolicitudesPorUsuario = async (req, res) => {
   try {
     const id_usu = req.usuario?.id;
+    console.log('ID usuario recibido:', id_usu); // <-- AQUÍ
 
     if (!id_usu) {
       return res.status(401).json({ mensaje: 'Usuario no autenticado (sin ID)' });
@@ -65,6 +66,8 @@ exports.obtenerSolicitudesPorUsuario = async (req, res) => {
       where: { id_usu },
       order: [['fecha_reg_sol', 'DESC']]
     });
+
+    console.log('Solicitudes encontradas:', solicitudes); // <-- Opcional, para ver qué trae la consulta
 
     return res.json({ solicitudes });
 
