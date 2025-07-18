@@ -4,6 +4,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { AuthContext } from '../context/AuthContext';
 import { API_URL } from '../config';
 
+
 export default function HistorialVisitas() {
   const { usuario } = useContext(AuthContext);
   const [visitas, setVisitas] = useState([]);
@@ -37,22 +38,26 @@ export default function HistorialVisitas() {
   );
 
   const renderItem = ({ item }) => (
-    <View
-      style={[
-        styles.card,
-        item.estado_sol === 'aceptada' ? styles.cardPermitido : styles.cardDenegado,
-      ]}
-    >
-      <Text style={styles.estado}>{item.estado_sol?.toUpperCase()}</Text>
-      <Text style={styles.fecha}>Fecha: {new Date(item.fecha_reg_sol).toLocaleString()}</Text>
-      <Text style={styles.detalle}>Motivo: {item.motivo_sol || 'No especificado'}</Text>
-      <Text style={styles.detalle}>Ingreso: {item.tipo_ingreso_sol || 'N/A'}</Text>
+    <View style={styles.row}>
+      <Text style={[styles.cell, { flex: 2 }]}>{item.nombre_sol}</Text>
+      <Text style={[styles.cell, { flex: 2 }]}>{item.motivo_sol}</Text>
+      <Text style={[styles.cell, { flex: 1 }]}>{item.estado_sol?.toUpperCase()}</Text>
+      <Text style={[styles.cell, { flex: 2 }]}>{new Date(item.fecha_reg_sol).toLocaleString()}</Text>
+      <Text style={[styles.cell, { flex: 1 }]}>{item.tipo_ingreso_sol || 'N/A'}</Text>
     </View>
   );
 
   return (
     <View style={styles.container}>
       <Text style={styles.titulo}>Historial de Visitas</Text>
+      {/* Encabezados de la tabla */}
+      <View style={[styles.row, styles.headerRow]}>
+        <Text style={[styles.cell, styles.headerCell, { flex: 2 }]}>Nombre</Text>
+        <Text style={[styles.cell, styles.headerCell, { flex: 2 }]}>Motivo</Text>
+        <Text style={[styles.cell, styles.headerCell, { flex: 1 }]}>Estado</Text>
+        <Text style={[styles.cell, styles.headerCell, { flex: 2 }]}>Fecha</Text>
+        <Text style={[styles.cell, styles.headerCell, { flex: 1 }]}>Ingreso</Text>
+      </View>
       <FlatList
         data={visitas}
         keyExtractor={(item, index) => index.toString()}
@@ -81,36 +86,25 @@ const styles = StyleSheet.create({
     color: '#0D47A1',
     textAlign: 'center',
   },
-  card: {
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
+  row: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    paddingVertical: 8,
+    alignItems: 'center',
   },
-  cardPermitido: {
-    backgroundColor: '#E8F5E9',
-    borderLeftColor: '#388E3C',
-    borderLeftWidth: 5,
+  headerRow: {
+    backgroundColor: '#e3e3e3',
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
   },
-  cardDenegado: {
-    backgroundColor: '#FFEBEE',
-    borderLeftColor: '#D32F2F',
-    borderLeftWidth: 5,
+  cell: {
+    fontSize: 13,
+    paddingHorizontal: 4,
+    textAlign: 'center',
   },
-  estado: {
-    fontSize: 18,
+  headerCell: {
     fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  fecha: {
     fontSize: 14,
-    color: '#555',
-  },
-  detalle: {
-    fontSize: 14,
-    color: '#777',
   },
 });
