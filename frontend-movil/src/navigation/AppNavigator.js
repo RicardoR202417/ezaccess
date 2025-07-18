@@ -2,7 +2,8 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import LoginScreen from '../screens/LoginScreen';
+// Importa todas las pantallas aquí
+import LoginScreen from '../screens/LoginScreen'; 
 import Dashboard from '../screens/Dashboard';
 import EstadoAcceso from '../screens/EstadoAcceso';
 import AsignacionCajon from '../screens/AsignacionCajon';

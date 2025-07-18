@@ -11,6 +11,7 @@ import { TextInput, Button, Text, Title } from 'react-native-paper';
 import * as Animatable from 'react-native-animatable';
 import { API_URL } from '../config';
 import { AuthContext } from '../context/AuthContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen({ navigation }) {
   const [correo, setCorreo] = useState('');
@@ -34,6 +35,9 @@ export default function LoginScreen({ navigation }) {
       console.log('Respuesta del servidor:', data);
 
       if (response.ok && data.token && data.usuario) {
+        // Guarda el token en AsyncStorage para que esté disponible en toda la app
+        await AsyncStorage.setItem('token', data.token);
+
         // Guarda usuario y token juntos en el contexto
         login({
           ...data.usuario,
@@ -94,7 +98,7 @@ export default function LoginScreen({ navigation }) {
             style={styles.button}
             contentStyle={{ paddingVertical: 6 }}
           >
-            Iniciar Sesión
+            <Text>Iniciar Sesión</Text>
           </Button>
         </Animatable.View>
       </View>

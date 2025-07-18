@@ -91,7 +91,14 @@ export default function HistorialVisitas({ navigation }) {
       >
         Volver al Dashboard
       </Button>
-
+      {/* Encabezados de la tabla */}
+      <View style={[styles.row, styles.headerRow]}>
+        <Text style={[styles.cell, styles.headerCell, { flex: 2 }]}>Nombre</Text>
+        <Text style={[styles.cell, styles.headerCell, { flex: 2 }]}>Motivo</Text>
+        <Text style={[styles.cell, styles.headerCell, { flex: 1 }]}>Estado</Text>
+        <Text style={[styles.cell, styles.headerCell, { flex: 2 }]}>Fecha</Text>
+        <Text style={[styles.cell, styles.headerCell, { flex: 1 }]}>Ingreso</Text>
+      </View>
       {loading ? (
         <Text style={{ textAlign: 'center', marginTop: 20 }}>Cargando visitas...</Text>
       ) : (
