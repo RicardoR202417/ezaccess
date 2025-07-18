@@ -118,6 +118,87 @@ exports.registrar = async (req, res) => {
   }
 };
 
+// EDITAR USUARIO
+exports.editarUsuario = async (req, res) => {
+  const { id_usu } = req.params;
+  const {
+    nombre,
+    apellido_paterno,
+    apellido_materno,
+    fecha_nac,
+    tipo,
+    telefono,
+    correo,
+    contrasena,
+    ciudad,
+    colonia,
+    calle,
+    num_ext
+  } = req.body;
+
+  try {
+    const usuario = await Usuario.findByPk(id_usu);
+
+    if (!usuario) {
+      return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+    }
+
+    // Si se recibe una nueva contraseña, la hasheamos
+    if (contrasena) {
+      const hash = await bcrypt.hash(contrasena, 10);
+      usuario.pass_usu = hash;
+    }
+
+    // Actualizar los demás campos
+    usuario.nombre_usu = nombre || usuario.nombre_usu;
+    usuario.apellido_pat_usu = apellido_paterno || usuario.apellido_pat_usu;
+    usuario.apellido_mat_usu = apellido_materno || usuario.apellido_mat_usu;
+    usuario.fecha_nac_usu = fecha_nac || usuario.fecha_nac_usu;
+    usuario.tipo_usu = tipo || usuario.tipo_usu;
+    usuario.tel_usu = telefono || usuario.tel_usu;
+    usuario.correo_usu = correo || usuario.correo_usu;
+    usuario.ciudad_usu = ciudad || usuario.ciudad_usu;
+    usuario.colonia_usu = colonia || usuario.colonia_usu;
+    usuario.calle_usu = calle || usuario.calle_usu;
+    usuario.num_ext_usu = num_ext || usuario.num_ext_usu;
+
+    await usuario.save();
+
+    res.json({
+      mensaje: 'Usuario actualizado correctamente',
+      usuario
+    });
+  } catch (error) {
+    console.error('Error al editar usuario:', error);
+    res.status(500).json({ mensaje: 'Error del servidor' });
+  }
+};
+
+// ELIMINAR USUARIO
+exports.eliminarUsuario = async (req, res) => {
+  const { id_usu } = req.params;
+
+  try {
+    const usuario = await Usuario.findByPk(id_usu);
+
+    if (!usuario) {
+      return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+    }
+
+    // Baja lógica: cambiar el estado del usuario a 'inactivo'
+    usuario.estado_usu = 'inactivo';
+    await usuario.save();
+
+    res.json({
+      mensaje: 'Usuario desactivado correctamente',
+      usuario
+    });
+  } catch (error) {
+    console.error('Error al eliminar usuario:', error);
+    res.status(500).json({ mensaje: 'Error del servidor' });
+  }
+};
+
 // LOGOUT
 exports.logout = (req, res) => {
   res.json({ mensaje: 'Sesión cerrada correctamente' });
