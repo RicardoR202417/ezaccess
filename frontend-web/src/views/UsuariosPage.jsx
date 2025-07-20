@@ -4,7 +4,7 @@ import { Table, Alert } from "react-bootstrap";
 import RegisterForm from "../components/RegisterForm";
 import NavBarMonitor from "../components/NavBarMonitor";
 // Importa los iconos de react-icons
-import { FaTrash, FaEdit } from "react-icons/fa";
+import { FaTrash, FaEdit, FaCheck, FaTimes } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 export default function UsuariosPage() {
@@ -209,19 +209,21 @@ export default function UsuariosPage() {
                           <>
                             <button
                               className="btn btn-success btn-sm me-2"
+                              title="Aceptar"
                               onClick={() =>
                                 actualizarEstadoSolicitud(sol.id_sol, "aceptada")
                               }
                             >
-                              Aceptar
+                              <FaCheck />
                             </button>
                             <button
                               className="btn btn-danger btn-sm"
+                              title="Rechazar"
                               onClick={() =>
                                 actualizarEstadoSolicitud(sol.id_sol, "rechazada")
                               }
                             >
-                              Rechazar
+                              <FaTimes />
                             </button>
                           </>
                         ) : (

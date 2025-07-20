@@ -81,3 +81,27 @@ form .form-control {
   color: #fff !important;
   box-shadow: 0 4px 16px rgba(21, 101, 192, 0.25) !important;
 }
+
+/* Botones del NavBar personalizados */
+.nav-btn-custom {
+  background: transparent;
+  color: #1565C0 !important;
+  border: none;
+  border-radius: 20px;
+  padding: 0.4rem 1.2rem;
+  margin-right: 0.5rem;
+  font-weight: 500;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  box-shadow: none;
+  outline: none;
+  display: inline-block;
+}
+
+.nav-btn-custom.active,
+.nav-btn-custom:focus,
+.nav-btn-custom:hover {
+  background: #e3f0fc;
+  color: #0d47a1 !important;
+  box-shadow: 0 2px 8px rgba(21, 101, 192, 0.10);
+  text-decoration: none;
+}
