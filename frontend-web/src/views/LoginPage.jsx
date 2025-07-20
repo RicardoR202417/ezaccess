@@ -10,7 +10,7 @@ export default function LoginPage() {
           src={logo}
           alt="Logo del sistema"
           className="logo-login"
-          style={{ width: '140px', height: '140px', objectFit: 'contain' }} // Tamaño ligeramente mayor
+          style={{ width: '200px', height: '200px', objectFit: 'contain' }} // Tamaño ligeramente mayor
         />
       </div>
       <div className="form-box p-4 shadow-lg rounded bg-white" style={{ maxWidth: '480px', width: '100%' }}>
