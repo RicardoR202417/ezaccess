@@ -202,3 +202,18 @@ exports.eliminarUsuario = async (req, res) => {
 exports.logout = (req, res) => {
   res.json({ mensaje: 'Sesión cerrada correctamente' });
 };
+
+// Obtener usuario por ID
+exports.obtenerUsuarioPorId = async (req, res) => {
+  const { id_usu } = req.params;
+  try {
+    const usuario = await Usuario.findByPk(id_usu);
+    if (!usuario) {
+      return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+    }
+    res.json(usuario);
+  } catch (error) {
+    console.error('Error al obtener usuario:', error);
+    res.status(500).json({ mensaje: 'Error del servidor' });
+  }
+};

@@ -14,5 +14,7 @@ router.post('/logout', authController.logout);
 router.put('/usuarios/:id_usu', authController.editarUsuario);
 router.delete('/usuarios/:id_usu', authController.eliminarUsuario);
 
+router.get('/usuarios/:id_usu', authController.obtenerUsuarioPorId);
+
 
 module.exports = router;

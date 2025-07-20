@@ -1,8 +1,11 @@
 // views/UsuariosPage.jsx
 import React, { useEffect, useState } from "react";
-import { Button, Table, Alert } from "react-bootstrap";
+import { Table, Alert } from "react-bootstrap";
 import RegisterForm from "../components/RegisterForm";
 import NavBarMonitor from "../components/NavBarMonitor";
+// Importa los iconos de react-icons
+import { FaTrash, FaEdit } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 export default function UsuariosPage() {
   const [usuarios, setUsuarios] = useState([]);
@@ -10,6 +13,7 @@ export default function UsuariosPage() {
   const [mensaje, setMensaje] = useState("");
   const [mostrarSolicitudes, setMostrarSolicitudes] = useState(false);
   const [solicitudes, setSolicitudes] = useState([]);
+  const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
 
@@ -43,8 +47,9 @@ export default function UsuariosPage() {
     }
   };
 
+  // Eliminar usuario definitivamente
   const eliminarUsuario = async (id) => {
-    if (!window.confirm("¿Estás seguro de eliminar este usuario?")) return;
+    if (!window.confirm("¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer.")) return;
 
     try {
       const res = await fetch(
@@ -60,10 +65,10 @@ export default function UsuariosPage() {
         setMensaje(data.mensaje);
         obtenerUsuarios();
       } else {
-        console.error("Error al eliminar usuario:", data.mensaje);
+        setMensaje(data.mensaje || "Error al eliminar usuario");
       }
     } catch (err) {
-      console.error("Error al eliminar usuario:", err);
+      setMensaje("Error al eliminar usuario");
     }
   };
 
@@ -253,23 +258,20 @@ export default function UsuariosPage() {
                 <td>{user.correo_usu}</td>
                 <td>{user.tel_usu}</td>
                 <td>
-                  <Button
-                    variant="warning"
-                    size="sm"
-                    className="me-2"
-                    onClick={() =>
-                      (window.location.href = `/usuarios/editar/${user.id_usu}`)
-                    }
+                  <button
+                    className="btn btn-warning btn-sm me-2"
+                    title="Editar"
+                    onClick={() => navigate(`/usuarios/editar/${user.id_usu}`)}
                   >
-                    Editar
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
+                    <FaEdit />
+                  </button>
+                  <button
+                    className="btn btn-danger btn-sm"
+                    title="Eliminar"
                     onClick={() => eliminarUsuario(user.id_usu)}
                   >
-                    Eliminar
-                  </Button>
+                    <FaTrash />
+                  </button>
                 </td>
               </tr>
             ))}
