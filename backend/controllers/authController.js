@@ -122,52 +122,41 @@ exports.registrar = async (req, res) => {
 exports.editarUsuario = async (req, res) => {
   const { id_usu } = req.params;
   const {
-    nombre,
-    apellido_paterno,
-    apellido_materno,
-    fecha_nac,
-    tipo,
-    telefono,
-    correo,
-    contrasena,
-    ciudad,
-    colonia,
-    calle,
-    num_ext
+    nombre_usu,
+    apellido_pat_usu,
+    apellido_mat_usu,
+    fecha_nac_usu,
+    tipo_usu,
+    tel_usu,
+    correo_usu,
+    ciudad_usu,
+    colonia_usu,
+    calle_usu,
+    num_ext_usu
   } = req.body;
 
   try {
     const usuario = await Usuario.findByPk(id_usu);
-
     if (!usuario) {
       return res.status(404).json({ mensaje: 'Usuario no encontrado' });
     }
 
-    // Si se recibe una nueva contraseña, la hasheamos
-    if (contrasena) {
-      const hash = await bcrypt.hash(contrasena, 10);
-      usuario.pass_usu = hash;
-    }
-
-    // Actualizar los demás campos
-    usuario.nombre_usu = nombre || usuario.nombre_usu;
-    usuario.apellido_pat_usu = apellido_paterno || usuario.apellido_pat_usu;
-    usuario.apellido_mat_usu = apellido_materno || usuario.apellido_mat_usu;
-    usuario.fecha_nac_usu = fecha_nac || usuario.fecha_nac_usu;
-    usuario.tipo_usu = tipo || usuario.tipo_usu;
-    usuario.tel_usu = telefono || usuario.tel_usu;
-    usuario.correo_usu = correo || usuario.correo_usu;
-    usuario.ciudad_usu = ciudad || usuario.ciudad_usu;
-    usuario.colonia_usu = colonia || usuario.colonia_usu;
-    usuario.calle_usu = calle || usuario.calle_usu;
-    usuario.num_ext_usu = num_ext || usuario.num_ext_usu;
+    // Actualiza solo los campos recibidos
+    if (nombre_usu !== undefined) usuario.nombre_usu = nombre_usu;
+    if (apellido_pat_usu !== undefined) usuario.apellido_pat_usu = apellido_pat_usu;
+    if (apellido_mat_usu !== undefined) usuario.apellido_mat_usu = apellido_mat_usu;
+    if (fecha_nac_usu !== undefined) usuario.fecha_nac_usu = fecha_nac_usu;
+    if (tipo_usu !== undefined) usuario.tipo_usu = tipo_usu;
+    if (tel_usu !== undefined) usuario.tel_usu = tel_usu;
+    if (correo_usu !== undefined) usuario.correo_usu = correo_usu;
+    if (ciudad_usu !== undefined) usuario.ciudad_usu = ciudad_usu;
+    if (colonia_usu !== undefined) usuario.colonia_usu = colonia_usu;
+    if (calle_usu !== undefined) usuario.calle_usu = calle_usu;
+    if (num_ext_usu !== undefined) usuario.num_ext_usu = num_ext_usu;
 
     await usuario.save();
 
-    res.json({
-      mensaje: 'Usuario actualizado correctamente',
-      usuario
-    });
+    res.json({ mensaje: 'Usuario actualizado correctamente', usuario });
   } catch (error) {
     console.error('Error al editar usuario:', error);
     res.status(500).json({ mensaje: 'Error del servidor' });
