@@ -1,9 +1,8 @@
 // views/UsuariosPage.jsx
 import React, { useEffect, useState } from "react";
-import { Table, Alert } from "react-bootstrap";
+import { Table, Alert, Form, Row, Col } from "react-bootstrap";
 import RegisterForm from "../components/RegisterForm";
 import NavBarMonitor from "../components/NavBarMonitor";
-// Importa los iconos de react-icons
 import { FaTrash, FaEdit, FaCheck, FaTimes } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
@@ -13,8 +12,14 @@ export default function UsuariosPage() {
   const [mensaje, setMensaje] = useState("");
   const [mostrarSolicitudes, setMostrarSolicitudes] = useState(false);
   const [solicitudes, setSolicitudes] = useState([]);
-  const navigate = useNavigate();
 
+  // Filtros y buscadores
+  const [filtroTipo, setFiltroTipo] = useState("todos");
+  const [busquedaUsuario, setBusquedaUsuario] = useState("");
+  const [filtroFecha, setFiltroFecha] = useState("");
+  const [busquedaSolicitud, setBusquedaSolicitud] = useState("");
+
+  const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
   const obtenerUsuarios = async () => {
@@ -107,6 +112,30 @@ export default function UsuariosPage() {
     }
   }, [mostrarSolicitudes]);
 
+  // --- FILTROS Y BUSCADORES ---
+
+  // Usuarios filtrados por tipo y búsqueda
+  const usuariosFiltrados = usuarios.filter((user) => {
+    const coincideTipo =
+      filtroTipo === "todos" ? true : user.tipo_usu === filtroTipo;
+    const coincideBusqueda =
+      user.nombre_usu.toLowerCase().includes(busquedaUsuario.toLowerCase()) ||
+      user.apellido_pat_usu.toLowerCase().includes(busquedaUsuario.toLowerCase()) ||
+      user.correo_usu.toLowerCase().includes(busquedaUsuario.toLowerCase());
+    return coincideTipo && coincideBusqueda;
+  });
+
+  // Solicitudes filtradas por fecha y búsqueda
+  const solicitudesFiltradas = solicitudes.filter((sol) => {
+    const coincideFecha = filtroFecha
+      ? new Date(sol.fecha_reg_sol).toISOString().slice(0, 10) === filtroFecha
+      : true;
+    const coincideBusqueda =
+      sol.nombre_sol.toLowerCase().includes(busquedaSolicitud.toLowerCase()) ||
+      sol.motivo_sol.toLowerCase().includes(busquedaSolicitud.toLowerCase());
+    return coincideFecha && coincideBusqueda;
+  });
+
   return (
     <div>
       <NavBarMonitor />
@@ -155,6 +184,25 @@ export default function UsuariosPage() {
                 <span style={{ color: "#D32F2F" }}>Rechazada</span>
               </span>
             </div>
+            {/* Filtros de solicitudes */}
+            <Row className="mb-3">
+              <Col md={4}>
+                <Form.Control
+                  type="date"
+                  value={filtroFecha}
+                  onChange={(e) => setFiltroFecha(e.target.value)}
+                  placeholder="Filtrar por fecha"
+                />
+              </Col>
+              <Col md={8}>
+                <Form.Control
+                  type="text"
+                  placeholder="Buscar por nombre o motivo"
+                  value={busquedaSolicitud}
+                  onChange={(e) => setBusquedaSolicitud(e.target.value)}
+                />
+              </Col>
+            </Row>
             <Table striped bordered hover responsive>
               <thead>
                 <tr>
@@ -171,14 +219,14 @@ export default function UsuariosPage() {
                 </tr>
               </thead>
               <tbody>
-                {solicitudes.length === 0 ? (
+                {solicitudesFiltradas.length === 0 ? (
                   <tr>
                     <td colSpan={10} className="text-center">
                       No hay solicitudes registradas.
                     </td>
                   </tr>
                 ) : (
-                  solicitudes.map((sol) => (
+                  solicitudesFiltradas.map((sol) => (
                     <tr key={sol.id_sol}>
                       <td>{sol.id_sol}</td>
                       <td>{sol.nombre_sol}</td>
@@ -238,6 +286,28 @@ export default function UsuariosPage() {
           </div>
         )}
 
+        {/* Filtros de usuarios */}
+        <Row className="mb-3">
+          <Col md={3}>
+            <Form.Select
+              value={filtroTipo}
+              onChange={(e) => setFiltroTipo(e.target.value)}
+            >
+              <option value="todos">Todos los tipos</option>
+              <option value="monitor">Monitor</option>
+              <option value="residente">Residente</option>
+            </Form.Select>
+          </Col>
+          <Col md={9}>
+            <Form.Control
+              type="text"
+              placeholder="Buscar por nombre, apellido o correo"
+              value={busquedaUsuario}
+              onChange={(e) => setBusquedaUsuario(e.target.value)}
+            />
+          </Col>
+        </Row>
+
         <Table striped bordered hover responsive>
           <thead>
             <tr>
@@ -251,32 +321,40 @@ export default function UsuariosPage() {
             </tr>
           </thead>
           <tbody>
-            {usuarios.map((user) => (
-              <tr key={user.id_usu}>
-                <td>{user.id_usu}</td>
-                <td>{user.nombre_usu}</td>
-                <td>{user.apellido_pat_usu}</td>
-                <td>{user.tipo_usu}</td>
-                <td>{user.correo_usu}</td>
-                <td>{user.tel_usu}</td>
-                <td>
-                  <button
-                    className="btn btn-warning btn-sm me-2"
-                    title="Editar"
-                    onClick={() => navigate(`/usuarios/editar/${user.id_usu}`)}
-                  >
-                    <FaEdit />
-                  </button>
-                  <button
-                    className="btn btn-danger btn-sm"
-                    title="Eliminar"
-                    onClick={() => eliminarUsuario(user.id_usu)}
-                  >
-                    <FaTrash />
-                  </button>
+            {usuariosFiltrados.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="text-center">
+                  No hay usuarios registrados.
                 </td>
               </tr>
-            ))}
+            ) : (
+              usuariosFiltrados.map((user) => (
+                <tr key={user.id_usu}>
+                  <td>{user.id_usu}</td>
+                  <td>{user.nombre_usu}</td>
+                  <td>{user.apellido_pat_usu}</td>
+                  <td>{user.tipo_usu}</td>
+                  <td>{user.correo_usu}</td>
+                  <td>{user.tel_usu}</td>
+                  <td>
+                    <button
+                      className="btn btn-warning btn-sm me-2"
+                      title="Editar"
+                      onClick={() => navigate(`/usuarios/editar/${user.id_usu}`)}
+                    >
+                      <FaEdit />
+                    </button>
+                    <button
+                      className="btn btn-danger btn-sm"
+                      title="Eliminar"
+                      onClick={() => eliminarUsuario(user.id_usu)}
+                    >
+                      <FaTrash />
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </Table>
       </div>
