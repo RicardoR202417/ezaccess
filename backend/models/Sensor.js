@@ -2,24 +2,24 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const Cajon = require('./Cajon');
 
-const Actuador = sequelize.define('actuadores', {
-  id_act: {
+const Sensor = sequelize.define('sensores', {
+  id_sen: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
   },
-  tipo_act: {
+  tipo_sen: {
     type: DataTypes.STRING(50),
     allowNull: false,
   },
-  estado_act: {
+  estado_sen: {
     type: DataTypes.TEXT,
-    defaultValue: 'bloqueado',
+    defaultValue: 'activo',
     validate: {
-      isIn: [['liberado', 'bloqueado']],
+      isIn: [['activo', 'inactivo']],
     },
   },
-  fecha_actualizacion_act: {
+  fecha_lectura_sen: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,
   },
@@ -36,6 +36,6 @@ const Actuador = sequelize.define('actuadores', {
 });
 
 // Relación (uno a uno)
-Actuador.belongsTo(Cajon, { foreignKey: 'id_caj' });
+Sensor.belongsTo(Cajon, { foreignKey: 'id_caj' });
 
-module.exports = Actuador;
+module.exports = Sensor;
