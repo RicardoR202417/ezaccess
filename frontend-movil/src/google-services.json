@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "269042249238",
+    "project_id": "ezaccess-98540",
+    "storage_bucket": "ezaccess-98540.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:269042249238:android:3136c9d889cf4e7e62cf37",
+        "android_client_info": {
+          "package_name": "com.ezaccess.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "269042249238-u7aa5175c6vc3dg641rtnjopccrdu8t2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCrh8bi6f1WtOM1rP6mBXLlErijWI7nWnw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "269042249238-u7aa5175c6vc3dg641rtnjopccrdu8t2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
