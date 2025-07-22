@@ -2,15 +2,15 @@ const Sequelize = require('sequelize');
 const sequelize = require('../config/db');
 
 // Modelos
-const Acceso = require('./Acceso');
-const SolicitudVisita = require('./SolicitudVisita');
+const Usuario = require('./Usuario');
 const Cajon = require('./Cajon');
 const Actuador = require('./Actuador');
 const Sensor = require('./Sensor');
+const SolicitudVisita = require('./SolicitudVisita');
 const Asignacion = require('./Asignacion');
-const Usuario = require('./Usuario');
+const Acceso = require('./Acceso');
 
-// Relaciones
+// Relaciones entre modelos
 Usuario.hasMany(SolicitudVisita, { foreignKey: 'id_usu' });
 SolicitudVisita.belongsTo(Usuario, { foreignKey: 'id_usu' });
 
@@ -25,10 +25,10 @@ Asignacion.belongsTo(Cajon, { foreignKey: 'id_caj' });
 module.exports = {
   sequelize,
   Usuario,
-  Acceso,
-  SolicitudVisita,
   Cajon,
   Actuador,
   Sensor,
+  SolicitudVisita,
   Asignacion,
+  Acceso,
 };
