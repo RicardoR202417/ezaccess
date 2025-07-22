@@ -1,38 +1,36 @@
-import React, { useEffect, useState } from 'react';
-import { Table, Button, Spinner, Alert } from 'react-bootstrap';
-import NavBarMonitor from '../components/NavBarMonitor';
-import '../styles/layout.css';
+import React, { useEffect, useState } from "react";
+import { Button, Spinner, Alert, Form, ButtonGroup } from "react-bootstrap";
+import NavBarMonitor from "../components/NavBarMonitor";
+import "../styles/layout.css";
 
 export default function CajonesPage() {
   const [cajones, setCajones] = useState([]);
-  const [mensaje, setMensaje] = useState('');
+  const [mensaje, setMensaje] = useState("");
   const [cargando, setCargando] = useState(false);
-
-  const token = localStorage.getItem('token');
-  console.log('🧪 Token cargado desde localStorage:', token);
+  const [zonaActiva, setZonaActiva] = useState("Zona A");
+  const [filtroNumero, setFiltroNumero] = useState("");
+  const [filtroEstado, setFiltroEstado] = useState("todos");
+  const token = localStorage.getItem("token");
 
   const obtenerCajones = async () => {
     setCargando(true);
     try {
-      console.log('📡 Realizando solicitud GET a /api/cajones...');
-      const res = await fetch('https://ezaccess-backend.onrender.com/api/cajones', {
-        headers: {
-          Authorization: `Bearer ${token}`
+      const res = await fetch(
+        "https://ezaccess-backend.onrender.com/api/cajones",
+        {
+          headers: { Authorization: `Bearer ${token}` },
         }
-      });
-
-      console.log('📥 Respuesta recibida:', res);
+      );
 
       if (!res.ok) {
         throw new Error(`Error HTTP: ${res.status}`);
       }
 
       const data = await res.json();
-      console.log('✅ Datos obtenidos:', data);
       setCajones(data);
     } catch (error) {
-      console.error('❌ Error al obtener cajones:', error);
-      setMensaje('No se pudo obtener el listado de cajones.');
+      console.error("Error al obtener cajones:", error);
+      setMensaje("No se pudo obtener el listado de cajones.");
     } finally {
       setCargando(false);
     }
@@ -40,32 +38,47 @@ export default function CajonesPage() {
 
   const cambiarAsignacion = async (id_caj, accion) => {
     try {
-      console.log(`⚙️ Cambiando estado del cajón ${id_caj} → acción: ${accion}`);
-      const res = await fetch(`https://ezaccess-backend.onrender.com/api/cajones/${id_caj}/estado`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ accion })
-      });
+      const res = await fetch(
+        `https://ezaccess-backend.onrender.com/api/cajones/${id_caj}/estado`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ accion }),
+        }
+      );
 
       const data = await res.json();
       if (res.ok) {
         setMensaje(data.mensaje);
         obtenerCajones();
       } else {
-        setMensaje(data.mensaje || 'Error al cambiar estado');
+        setMensaje(data.mensaje || "Error al cambiar estado");
       }
     } catch (err) {
-      console.error('❌ Error al cambiar estado:', err);
-      setMensaje('Error en la conexión con el servidor.');
+      console.error("Error al cambiar estado:", err);
+      setMensaje("Error en la conexión con el servidor.");
     }
   };
 
   useEffect(() => {
     obtenerCajones();
   }, []);
+
+  const zonas = ["Zona A", "Zona C", "Zona D", "Zona E"];
+
+  const cajonesFiltrados = cajones.filter((cajon) => {
+    const coincideZona =
+      cajon.ubicacion_caj && cajon.ubicacion_caj.includes(zonaActiva);
+    const coincideNumero = cajon.numero_caj
+      .toLowerCase()
+      .includes(filtroNumero.toLowerCase());
+    const coincideEstado =
+      filtroEstado === "todos" || cajon.estado === filtroEstado;
+    return coincideZona && coincideNumero && coincideEstado;
+  });
 
   return (
     <div>
@@ -74,10 +87,47 @@ export default function CajonesPage() {
         <h2 className="text-center mb-4">Mapa de Cajones</h2>
 
         {mensaje && (
-          <Alert variant="info" onClose={() => setMensaje('')} dismissible>
+          <Alert variant="info" onClose={() => setMensaje("")} dismissible>
             {mensaje}
           </Alert>
         )}
+
+        {/* Filtros */}
+        <div className="d-flex flex-wrap justify-content-between align-items-center mb-3">
+          <div className="zona-buttons">
+            {zonas.map((zona) => (
+              <Button
+                key={zona}
+                variant={zona === zonaActiva ? "primary" : "outline-primary"}
+                className={`zona-btn ${
+                  zona === zonaActiva ? "zona-activa" : ""
+                }`}
+                onClick={() => setZonaActiva(zona)}
+              >
+                {zona}
+              </Button>
+            ))}
+          </div>
+
+          <div className="d-flex flex-wrap align-items-center">
+            <Form.Control
+              type="text"
+              placeholder="Buscar por número"
+              value={filtroNumero}
+              onChange={(e) => setFiltroNumero(e.target.value)}
+              className="me-2 mb-2"
+            />
+            <Form.Select
+              value={filtroEstado}
+              onChange={(e) => setFiltroEstado(e.target.value)}
+              className="mb-2"
+            >
+              <option value="todos">Todos</option>
+              <option value="libre">Libres</option>
+              <option value="ocupado">Ocupados</option>
+            </Form.Select>
+          </div>
+        </div>
 
         {cargando ? (
           <div className="text-center">
@@ -85,27 +135,38 @@ export default function CajonesPage() {
           </div>
         ) : (
           <div className="grid-cajones">
-            {cajones.map((cajon) => (
-              <div
-                key={cajon.id_caj}
-                className={`card-cajon ${cajon.estado === 'ocupado' ? 'ocupado' : 'libre'}`}
-              >
-                <h5>{cajon.numero_caj}</h5>
-                <p className="ubicacion">{cajon.ubicacion_caj}</p>
-                <p className="estado">
-                  Estado: <strong>{cajon.estado}</strong>
-                </p>
-                <Button
-                  variant={cajon.estado === 'ocupado' ? 'danger' : 'success'}
-                  size="sm"
-                  onClick={() =>
-                    cambiarAsignacion(cajon.id_caj, cajon.estado === 'ocupado' ? 'finalizar' : 'activar')
-                  }
+            {cajonesFiltrados.length > 0 ? (
+              cajonesFiltrados.map((cajon) => (
+                <div
+                  key={cajon.id_caj}
+                  className={`card-cajon ${
+                    cajon.estado === "ocupado" ? "ocupado" : "libre"
+                  }`}
                 >
-                  {cajon.estado === 'ocupado' ? 'Finalizar' : 'Activar'}
-                </Button>
-              </div>
-            ))}
+                  <h5>{cajon.numero_caj}</h5>
+                  <p className="ubicacion">{cajon.ubicacion_caj}</p>
+                  <p className="estado">
+                    Estado: <strong>{cajon.estado}</strong>
+                  </p>
+                  <Button
+                    variant={cajon.estado === "ocupado" ? "danger" : "success"}
+                    size="sm"
+                    onClick={() =>
+                      cambiarAsignacion(
+                        cajon.id_caj,
+                        cajon.estado === "ocupado" ? "finalizar" : "activar"
+                      )
+                    }
+                  >
+                    {cajon.estado === "ocupado" ? "Finalizar" : "Activar"}
+                  </Button>
+                </div>
+              ))
+            ) : (
+              <p className="text-center">
+                No hay cajones que coincidan con los filtros.
+              </p>
+            )}
           </div>
         )}
       </div>
