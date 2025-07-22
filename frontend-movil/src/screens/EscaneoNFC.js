@@ -1,3 +1,5 @@
+// src/screens/EscaneoNFC.js
+
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, Platform, ToastAndroid } from 'react-native';
 import { Text, Title } from 'react-native-paper';
@@ -9,7 +11,7 @@ import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import { db } from '../firebase/firebaseConfig';
 
 const API_BASE = 'https://ezaccess-backend.onrender.com/api';
-const UID = 'NFC-MONITOR-003'; // UID fijo para simulación
+const UID = 'NFC-MONITOR-003'; // Simulación
 
 export default function EscaneoNFC() {
   const [modo, setModo] = useState(null);
@@ -39,10 +41,11 @@ export default function EscaneoNFC() {
     try {
       await addDoc(collection(db, coleccion), {
         fecha_hora: Timestamp.now(),
-        id_usuario: userData.id,
-        tipo_usuario: userData.tipo,
-        evento: tipo,
-        uid: UID
+        id_usuario: userData.id || null,
+        tipo_usuario: userData.tipo || null,
+        nombre: userData.nombre || '',
+        uid: UID,
+        evento: tipo
       });
       console.log(`✅ Registro guardado en colección: ${coleccion}`);
       mostrarMensaje(`Registro de ${tipo} exitoso`);
@@ -63,36 +66,33 @@ export default function EscaneoNFC() {
         body: JSON.stringify({ uid: UID })
       });
 
-      if (!res.ok) {
-        throw new Error(`Error HTTP ${res.status}`);
-      }
+      if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
 
       const data = await res.json();
       setCargando(false);
 
-      if (!data.usuario || !data.tipo) {
-        throw new Error('Respuesta incompleta del servidor');
+      if (!data.permitido || !data.tipo) {
+        throw new Error('Respuesta incompleta o no permitida');
       }
 
-      if (data.permitido) {
-        setModo(data.tipo);
-        await registrarEnFirebase(data.tipo, data.usuario);
-        await AsyncStorage.setItem('usuario', JSON.stringify(data.usuario));
+      const userData = {
+        id: data.id_usu || null,       // Por si backend lo incluye
+        tipo: data.tipo || 'desconocido',
+        nombre: data.nombre || 'Anónimo'
+      };
 
-        setTimeout(() => {
-          navigation.replace('EstadoAcceso', {
-            estado: 'permitido',
-            mensaje: `Acceso ${data.tipo}`,
-            tipo: data.tipo
-          });
-        }, 2000);
-      } else {
+      setModo(data.tipo);
+
+      await registrarEnFirebase(data.tipo, userData);
+      await AsyncStorage.setItem('usuario', JSON.stringify(userData));
+
+      setTimeout(() => {
         navigation.replace('EstadoAcceso', {
-          estado: 'denegado',
-          mensaje: 'UID no válido',
-          tipo: 'error'
+          estado: 'permitido',
+          mensaje: `Acceso ${data.tipo}`,
+          tipo: data.tipo
         });
-      }
+      }, 2000);
     } catch (error) {
       console.error('❌ Error al enviar UID (detalle):', error);
       setCargando(false);
