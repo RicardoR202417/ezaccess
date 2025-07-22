@@ -1,17 +1,41 @@
 // src/screens/EstadoAcceso.js
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 import * as Animatable from 'react-native-animatable';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function EstadoAcceso({ navigation, route }) {
-  const { estado, mensaje, tipo, cajon } = route.params;
+  const [cajonAsignado, setCajonAsignado] = useState(null);
+
+  // Validación por si no se mandan parámetros
+  const estado = route?.params?.estado || 'denegado';
+  const mensaje = route?.params?.mensaje || 'Sin parámetros';
+  const tipo = route?.params?.tipo || 'error';
 
   const accesoPermitido = estado === 'permitido';
   const icono = accesoPermitido ? (tipo === 'entrada' ? 'login' : 'logout') : 'close-circle';
   const color = accesoPermitido ? (tipo === 'entrada' ? '#64B5F6' : '#4CAF50') : '#F44336';
+
+  useEffect(() => {
+    const obtenerCajon = async () => {
+      try {
+        const cajonJSON = await AsyncStorage.getItem('cajon_asignado');
+        if (cajonJSON) {
+          const cajon = JSON.parse(cajonJSON);
+          setCajonAsignado(cajon);
+        }
+      } catch (error) {
+        console.error('Error al leer cajón desde AsyncStorage:', error);
+      }
+    };
+
+    if (accesoPermitido && tipo === 'entrada') {
+      obtenerCajon();
+    }
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -21,14 +45,13 @@ export default function EstadoAcceso({ navigation, route }) {
         style={styles.card}
       >
         <Icon name={icono} size={100} color={color} />
-
         <Text style={[styles.texto, { color }]}>{mensaje}</Text>
 
-        {accesoPermitido && tipo === 'entrada' && cajon && (
+        {accesoPermitido && tipo === 'entrada' && cajonAsignado && (
           <View style={styles.cajonInfo}>
             <Text style={styles.label}>Cajón asignado:</Text>
-            <Text style={styles.valor}>Número: {cajon.numero}</Text>
-            <Text style={styles.valor}>Ubicación: {cajon.ubicacion}</Text>
+            <Text style={styles.valor}>Número: {cajonAsignado.numero}</Text>
+            <Text style={styles.valor}>Ubicación: {cajonAsignado.ubicacion}</Text>
           </View>
         )}
 
