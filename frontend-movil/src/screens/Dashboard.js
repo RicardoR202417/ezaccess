@@ -12,7 +12,7 @@ export default function Dashboard({ navigation }) {
         <Text style={styles.subtitle}>Selecciona una opción:</Text>
 
         <View style={styles.buttons}>
-          {/* 🔹 Botón fusionado: Estado de acceso + cajón */}
+          {/* 🔹 Estado + Cajón */}
           <Button
             mode="outlined"
             icon={() => <Icon name="garage" size={20} color="#1565C0" />}
@@ -23,7 +23,7 @@ export default function Dashboard({ navigation }) {
             Revisar Estado y Cajón
           </Button>
 
-          {/* 🔹 Botón solicitud visitante */}
+          {/* 🔹 Solicitar Visitante */}
           <Button
             mode="outlined"
             icon={() => <Icon name="account-plus" size={20} color="#1565C0" />}
@@ -34,7 +34,7 @@ export default function Dashboard({ navigation }) {
             Solicitar Visitante
           </Button>
 
-          {/* 🔹 Botón escaneo NFC */}
+          {/* 🔹 Escanear NFC */}
           <Button
             mode="outlined"
             icon={() => <Icon name="nfc" size={20} color="#1565C0" />}
@@ -45,7 +45,7 @@ export default function Dashboard({ navigation }) {
             Escanear NFC
           </Button>
 
-          {/* 🔹 Nuevo botón: Historial de Visitas */}
+          {/* 🔹 Historial de Visitas */}
           <Button
             mode="outlined"
             icon={() => <Icon name="history" size={20} color="#1565C0" />}
@@ -54,6 +54,17 @@ export default function Dashboard({ navigation }) {
             labelStyle={styles.buttonText}
           >
             Historial de Visitas
+          </Button>
+
+          {/* 🔹 Nuevo botón: Seleccionar Cajón */}
+          <Button
+            mode="outlined"
+            icon={() => <Icon name="car-arrow-right" size={20} color="#1565C0" />}
+            onPress={() => navigation.navigate('SeleccionCajon')}
+            style={styles.button}
+            labelStyle={styles.buttonText}
+          >
+            Seleccionar Cajón
           </Button>
         </View>
 
