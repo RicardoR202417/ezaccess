@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, Platform, ToastAndroid } from 'react-native';
 import { Text, Title } from 'react-native-paper';
 import * as Animatable from 'react-native-animatable';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -8,7 +8,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import { db } from '../firebase/firebaseConfig';
 
-const API_BASE = 'http://192.168.100.35:3000/api';
+const API_BASE = 'https://ezaccess-backend.onrender.com/api';
+const UID = 'NFC-MONITOR-003'; // UID fijo para simulación
 
 export default function EscaneoNFC() {
   const [modo, setModo] = useState(null);
@@ -24,27 +25,36 @@ export default function EscaneoNFC() {
     cargarUsuario();
   }, []);
 
+  const mostrarMensaje = (msg) => {
+    if (Platform.OS === 'android') {
+      ToastAndroid.show(msg, ToastAndroid.SHORT);
+    } else {
+      Alert.alert('Información', msg);
+    }
+  };
+
   const registrarEnFirebase = async (tipo, userData) => {
-    const coleccion = tipo === 'entrada' ? 'Entrada' : 'Salida';
+    const coleccion = tipo === 'entrada' ? 'entradas' : 'salidas';
 
     try {
       await addDoc(collection(db, coleccion), {
         fecha_hora: Timestamp.now(),
         id_usuario: userData.id,
-        tipo_usuario: userData.tipo
+        tipo_usuario: userData.tipo,
+        evento: tipo,
+        uid: UID
       });
-      console.log(`✅ Registro guardado en ${coleccion}`);
+      console.log(`✅ Registro guardado en colección: ${coleccion}`);
+      mostrarMensaje(`Registro de ${tipo} exitoso`);
     } catch (error) {
       console.error('❌ Error guardando en Firebase:', error);
-      Alert.alert('Error', 'No se pudo registrar en Firebase');
+      Alert.alert('Error', 'No se pudo registrar el acceso en Firebase');
     }
   };
 
   const simularEscaneoNFC = async () => {
     setCargando(true);
     setModo(null);
-
-    const UID = 'NFC-MONITOR-003';
 
     try {
       const res = await fetch(`${API_BASE}/validar-uid`, {
@@ -53,17 +63,20 @@ export default function EscaneoNFC() {
         body: JSON.stringify({ uid: UID })
       });
 
-      const raw = await res.text();
-      console.log('📦 Respuesta cruda:', raw);
+      if (!res.ok) {
+        throw new Error(`Error HTTP ${res.status}`);
+      }
 
-      const data = JSON.parse(raw);
+      const data = await res.json();
       setCargando(false);
+
+      if (!data.usuario || !data.tipo) {
+        throw new Error('Respuesta incompleta del servidor');
+      }
 
       if (data.permitido) {
         setModo(data.tipo);
         await registrarEnFirebase(data.tipo, data.usuario);
-
-        // También guardar en sesión si quieres usarlo globalmente
         await AsyncStorage.setItem('usuario', JSON.stringify(data.usuario));
 
         setTimeout(() => {
