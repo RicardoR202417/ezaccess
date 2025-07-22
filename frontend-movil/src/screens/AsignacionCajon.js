@@ -1,11 +1,33 @@
 import React, { useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Alert } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 import * as Animatable from 'react-native-animatable';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { getFirestore, collection, addDoc, Timestamp } from 'firebase/firestore';
+import { app } from '../firebaseConfig'; // Asegúrate de tener este archivo exportando tu instancia
 
 export default function AsignacionCajon({ navigation }) {
   const [estado, setEstado] = useState(null); // 'conformado' | 'denegado' | 'error'
+  const db = getFirestore(app);
+
+  const registrarEntrada = async () => {
+    try {
+      await addDoc(collection(db, 'Entrada'), {
+        fecha_hora: Timestamp.now()
+      });
+      console.log('Entrada registrada con éxito');
+    } catch (error) {
+      console.error('Error al registrar entrada:', error);
+      Alert.alert('Error', 'No se pudo registrar la entrada en Firebase.');
+    }
+  };
+
+  const manejarEstado = (nuevoEstado) => {
+    setEstado(nuevoEstado);
+    if (nuevoEstado === 'conformado') {
+      registrarEntrada(); // Solo registra si fue exitoso
+    }
+  };
 
   const obtenerContenido = () => {
     switch (estado) {
@@ -42,19 +64,19 @@ export default function AsignacionCajon({ navigation }) {
       <Text style={styles.title}>Resultado de Asignación</Text>
 
       <View style={styles.botones}>
-        <Button mode="outlined" onPress={() => setEstado('conformado')} textColor="#1565C0">
+        <Button mode="outlined" onPress={() => manejarEstado('conformado')} textColor="#1565C0">
           Simular Conformado
         </Button>
-        <Button mode="outlined" onPress={() => setEstado('denegado')} textColor="#1565C0">
+        <Button mode="outlined" onPress={() => manejarEstado('denegado')} textColor="#1565C0">
           Simular Denegado
         </Button>
-        <Button mode="outlined" onPress={() => setEstado('error')} textColor="#1565C0">
+        <Button mode="outlined" onPress={() => manejarEstado('error')} textColor="#1565C0">
           Simular Error
         </Button>
       </View>
 
       {contenido && (
-        <Animatable.View animation={contenido.animacion} duration={1000} style={[styles.card]}>
+        <Animatable.View animation={contenido.animacion} duration={1000} style={styles.card}>
           <Icon name={contenido.icono} size={80} color={contenido.color} />
           <Text style={[styles.mensaje, { color: contenido.color }]}>{contenido.mensaje}</Text>
         </Animatable.View>
