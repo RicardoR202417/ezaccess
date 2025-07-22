@@ -7,23 +7,31 @@ export default function CajonesPage() {
   const [cajones, setCajones] = useState([]);
   const [mensaje, setMensaje] = useState('');
   const [cargando, setCargando] = useState(false);
+
   const token = localStorage.getItem('token');
+  console.log('🧪 Token cargado desde localStorage:', token);
 
   const obtenerCajones = async () => {
     setCargando(true);
     try {
+      console.log('📡 Realizando solicitud GET a /api/cajones...');
       const res = await fetch('https://ezaccess-backend.onrender.com/api/cajones', {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       });
+
+      console.log('📥 Respuesta recibida:', res);
 
       if (!res.ok) {
         throw new Error(`Error HTTP: ${res.status}`);
       }
 
       const data = await res.json();
+      console.log('✅ Datos obtenidos:', data);
       setCajones(data);
     } catch (error) {
-      console.error('Error al obtener cajones:', error);
+      console.error('❌ Error al obtener cajones:', error);
       setMensaje('No se pudo obtener el listado de cajones.');
     } finally {
       setCargando(false);
@@ -32,6 +40,7 @@ export default function CajonesPage() {
 
   const cambiarAsignacion = async (id_caj, accion) => {
     try {
+      console.log(`⚙️ Cambiando estado del cajón ${id_caj} → acción: ${accion}`);
       const res = await fetch(`https://ezaccess-backend.onrender.com/api/cajones/${id_caj}/estado`, {
         method: 'PUT',
         headers: {
@@ -49,7 +58,7 @@ export default function CajonesPage() {
         setMensaje(data.mensaje || 'Error al cambiar estado');
       }
     } catch (err) {
-      console.error('Error al cambiar estado:', err);
+      console.error('❌ Error al cambiar estado:', err);
       setMensaje('Error en la conexión con el servidor.');
     }
   };
