@@ -1,8 +1,20 @@
-const Asignacion = require('../models/Asignacion');
+const { Asignacion, Usuario, Cajon, Actuador, Sensor } = require('../models');
 
 exports.obtenerAsignaciones = async (req, res) => {
   try {
-    const asignaciones = await Asignacion.findAll();
+    const asignaciones = await Asignacion.findAll({
+      include: [
+        { model: Usuario, attributes: ['id_usu', 'nombre_usu'] },
+        { 
+          model: Cajon, 
+          attributes: ['id_caj', 'numero_caj', 'ubicacion_caj'],
+          include: [
+            { model: Actuador, attributes: ['id_act', 'estado_act'] },
+            { model: Sensor, attributes: ['id_sen', 'estado_sen', 'fecha_lectura_sen'] }
+          ]
+        }
+      ]
+    });
     res.json(asignaciones);
   } catch (error) {
     console.error('Error al obtener asignaciones:', error);
@@ -27,9 +39,22 @@ exports.actualizarEstadoAsignacion = async (req, res) => {
     asignacion.estado_asig = estado_asig;
     await asignacion.save();
 
-    // Aquí puedes agregar lógica para comunicar al IoT, si es necesario.
+    // Consulta relacional para devolver la asignación completa
+    const asignacionCompleta = await Asignacion.findByPk(id, {
+      include: [
+        { model: Usuario, attributes: ['id_usu', 'nombre_usu'] },
+        { 
+          model: Cajon, 
+          attributes: ['id_caj', 'numero_caj', 'ubicacion_caj'],
+          include: [
+            { model: Actuador, attributes: ['id_act', 'estado_act'] },
+            { model: Sensor, attributes: ['id_sen', 'estado_sen', 'fecha_lectura_sen'] }
+          ]
+        }
+      ]
+    });
 
-    res.json({ mensaje: 'Estado actualizado', asignacion });
+    res.json({ mensaje: 'Estado actualizado', asignacion: asignacionCompleta });
   } catch (error) {
     console.error('Error al actualizar asignación:', error);
     res.status(500).json({ mensaje: 'Error del servidor' });
