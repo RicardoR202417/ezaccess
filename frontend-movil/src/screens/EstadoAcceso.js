@@ -1,16 +1,17 @@
-import React, { useState } from 'react';
+// src/screens/EstadoAcceso.js
+
+import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 import * as Animatable from 'react-native-animatable';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-export default function EstadoAcceso({ navigation }) {
-  const [accesoPermitido, setAccesoPermitido] = useState(true); // simulado
+export default function EstadoAcceso({ navigation, route }) {
+  const { estado, mensaje, tipo, cajon } = route.params;
 
-  const icono = accesoPermitido ? 'check-circle' : 'close-circle';
-  const color = accesoPermitido ? '#4CAF50' : '#F44336';
-  const mensaje = accesoPermitido ? '¡Acceso Permitido!' : 'Acceso Denegado';
-  const cajonAsignado = accesoPermitido ? 'Cajón asignado: #3' : null;
+  const accesoPermitido = estado === 'permitido';
+  const icono = accesoPermitido ? (tipo === 'entrada' ? 'login' : 'logout') : 'close-circle';
+  const color = accesoPermitido ? (tipo === 'entrada' ? '#64B5F6' : '#4CAF50') : '#F44336';
 
   return (
     <View style={styles.container}>
@@ -20,22 +21,16 @@ export default function EstadoAcceso({ navigation }) {
         style={styles.card}
       >
         <Icon name={icono} size={100} color={color} />
-        
+
         <Text style={[styles.texto, { color }]}>{mensaje}</Text>
 
-        {cajonAsignado && (
-          <Text style={styles.cajon}>{cajonAsignado}</Text>
+        {accesoPermitido && tipo === 'entrada' && cajon && (
+          <View style={styles.cajonInfo}>
+            <Text style={styles.label}>Cajón asignado:</Text>
+            <Text style={styles.valor}>Número: {cajon.numero}</Text>
+            <Text style={styles.valor}>Ubicación: {cajon.ubicacion}</Text>
+          </View>
         )}
-
-        <Button
-          mode="contained-tonal"
-          onPress={() => setAccesoPermitido(!accesoPermitido)}
-          style={styles.toggleButton}
-          buttonColor="#E3F2FD"
-          textColor="#0D47A1"
-        >
-          Cambiar Estado (Prueba)
-        </Button>
 
         <Button
           mode="outlined"
@@ -68,19 +63,26 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     textAlign: 'center'
   },
-  cajon: {
-    fontSize: 18,
-    color: '#1565C0',
-    fontWeight: '600',
-    marginBottom: 20
+  cajonInfo: {
+    marginTop: 20,
+    alignItems: 'center',
+    backgroundColor: '#E3F2FD',
+    borderRadius: 10,
+    padding: 10
   },
-  toggleButton: {
-    marginBottom: 15,
-    width: '100%'
+  label: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#0D47A1',
+    marginBottom: 4
+  },
+  valor: {
+    fontSize: 16,
+    color: '#333'
   },
   volverBtn: {
     width: '100%',
-    borderRadius: 10,
+    marginTop: 25,
     borderColor: '#1565C0',
     borderWidth: 1
   }
