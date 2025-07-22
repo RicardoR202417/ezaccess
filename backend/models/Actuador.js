@@ -1,6 +1,5 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
-const Cajon = require('./Cajon');
 
 const Actuador = sequelize.define('actuadores', {
   id_act: {
@@ -26,16 +25,9 @@ const Actuador = sequelize.define('actuadores', {
   id_caj: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    references: {
-      model: Cajon,
-      key: 'id_caj',
-    },
   },
 }, {
   timestamps: false,
 });
-
-// Relación (uno a uno)
-Actuador.belongsTo(Cajon, { foreignKey: 'id_caj' });
 
 module.exports = Actuador;

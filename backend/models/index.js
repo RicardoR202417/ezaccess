@@ -16,11 +16,9 @@ SolicitudVisita.belongsTo(Usuario, { foreignKey: 'id_usu' });
 
 Cajon.hasOne(Actuador, { foreignKey: 'id_caj' });
 Cajon.hasOne(Sensor, { foreignKey: 'id_caj' });
-
 Actuador.belongsTo(Cajon, { foreignKey: 'id_caj' });
 Sensor.belongsTo(Cajon, { foreignKey: 'id_caj' });
 
-// Relación: Una asignación pertenece a un usuario y a un cajón
 Asignacion.belongsTo(Usuario, { foreignKey: 'id_usu' });
 Asignacion.belongsTo(Cajon, { foreignKey: 'id_caj' });
 
@@ -32,4 +30,5 @@ module.exports = {
   Cajon,
   Actuador,
   Sensor,
+  Asignacion,
 };

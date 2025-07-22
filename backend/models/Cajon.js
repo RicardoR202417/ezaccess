@@ -19,11 +19,4 @@ const Cajon = sequelize.define('cajones', {
   timestamps: false,
 });
 
-// Relaciona este modelo con los demás (uno a uno)
-const Actuador = require('./Actuador');
-const Sensor = require('./Sensor');
-
-Cajon.hasOne(Actuador, { foreignKey: 'id_caj' });
-Cajon.hasOne(Sensor, { foreignKey: 'id_caj' });
-
 module.exports = Cajon;
