@@ -105,3 +105,50 @@ form .form-control {
   box-shadow: 0 2px 8px rgba(21, 101, 192, 0.10);
   text-decoration: none;
 }
+
+/* Mapa de cajones en forma de cuadrícula */
+.grid-cajones {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 20px;
+  padding: 10px;
+}
+
+.card-cajon {
+  background-color: #f5f5f5;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.card-cajon:hover {
+  transform: scale(1.03);
+}
+
+.card-cajon h5 {
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.card-cajon .ubicacion {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+.card-cajon .estado {
+  margin-bottom: 10px;
+}
+
+/* Estados visuales */
+.card-cajon.libre {
+  border-color: #28a745;
+}
+
+.card-cajon.ocupado {
+  border-color: #dc3545;
+  background-color: #ffeaea;
+}
