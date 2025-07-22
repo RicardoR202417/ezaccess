@@ -12,6 +12,7 @@ import RegisterPage from "./views/RegisterPage";
 import DashboardPage from "./views/DashboardPage";
 import UsuariosPage from "./views/UsuariosPage";
 import EditarUsuarioPage from "./views/EditarUsuarioPage";
+import CajonesPage from "./views/CajonesPage";
 
 // Contexto de sesión
 import { AuthProvider } from "./contexts/AuthContext";
@@ -51,8 +52,6 @@ export default function App() {
             }
           />
 
-          {/* Las siguientes rutas están comentadas porque los componentes no están importados aún */}
-          {/*
           <Route
             path="/cajones"
             element={
@@ -61,15 +60,6 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/reportes"
-            element={
-              <ProtectedRoute>
-                <ReportesPage />
-              </ProtectedRoute>
-            }
-          />
-          */}
 
           <Route
             path="*"
