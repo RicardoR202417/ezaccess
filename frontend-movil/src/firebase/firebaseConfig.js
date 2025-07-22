@@ -3,6 +3,7 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 
+
 // Configuración de Firebase para EZACCESS
 const firebaseConfig = {
   apiKey: "AIzaSyDMcFtt1sT9a4IGlCMzk-zDalByH41Wj24",

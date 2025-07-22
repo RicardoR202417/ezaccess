@@ -1,23 +1,50 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { Text, Title } from 'react-native-paper';
 import * as Animatable from 'react-native-animatable';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { collection, addDoc, Timestamp } from 'firebase/firestore';
+import { db } from '../firebase/firebaseConfig';
 
-// IP LOCAL de tu backend
 const API_BASE = 'http://192.168.100.35:3000/api';
 
 export default function EscaneoNFC() {
   const [modo, setModo] = useState(null);
   const [cargando, setCargando] = useState(false);
   const navigation = useNavigation();
+  const [usuario, setUsuario] = useState(null);
+
+  useEffect(() => {
+    const cargarUsuario = async () => {
+      const json = await AsyncStorage.getItem('usuario');
+      if (json) setUsuario(JSON.parse(json));
+    };
+    cargarUsuario();
+  }, []);
+
+  const registrarEnFirebase = async (tipo, userData) => {
+    const coleccion = tipo === 'entrada' ? 'Entrada' : 'Salida';
+
+    try {
+      await addDoc(collection(db, coleccion), {
+        fecha_hora: Timestamp.now(),
+        id_usuario: userData.id,
+        tipo_usuario: userData.tipo
+      });
+      console.log(`✅ Registro guardado en ${coleccion}`);
+    } catch (error) {
+      console.error('❌ Error guardando en Firebase:', error);
+      Alert.alert('Error', 'No se pudo registrar en Firebase');
+    }
+  };
 
   const simularEscaneoNFC = async () => {
     setCargando(true);
     setModo(null);
 
-    const UID = 'NFC-MONITOR-003'; // ✅ UID válido de Diego
+    const UID = 'NFC-MONITOR-003';
 
     try {
       const res = await fetch(`${API_BASE}/validar-uid`, {
@@ -26,12 +53,18 @@ export default function EscaneoNFC() {
         body: JSON.stringify({ uid: UID })
       });
 
-      const data = await res.json();
-      console.log('✅ Respuesta del backend:', data); // 👈 Agregado para debug
+      const raw = await res.text();
+      console.log('📦 Respuesta cruda:', raw);
+
+      const data = JSON.parse(raw);
       setCargando(false);
 
       if (data.permitido) {
-        setModo(data.tipo); // 'entrada' o 'salida'
+        setModo(data.tipo);
+        await registrarEnFirebase(data.tipo, data.usuario);
+
+        // También guardar en sesión si quieres usarlo globalmente
+        await AsyncStorage.setItem('usuario', JSON.stringify(data.usuario));
 
         setTimeout(() => {
           navigation.replace('EstadoAcceso', {
@@ -48,7 +81,7 @@ export default function EscaneoNFC() {
         });
       }
     } catch (error) {
-      console.error('❌ Error al enviar UID:', error);
+      console.error('❌ Error al enviar UID (detalle):', error);
       setCargando(false);
       navigation.replace('EstadoAcceso', {
         estado: 'denegado',

@@ -1,42 +1,65 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 import * as Animatable from 'react-native-animatable';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { getFirestore, collection, addDoc, Timestamp } from 'firebase/firestore';
-import { app } from '../firebaseConfig'; // Asegúrate de tener este archivo exportando tu instancia
+import { collection, addDoc, Timestamp } from 'firebase/firestore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { db } from '../firebase/firebaseConfig';
 
 export default function AsignacionCajon({ navigation }) {
-  const [estado, setEstado] = useState(null); // 'conformado' | 'denegado' | 'error'
-  const db = getFirestore(app);
+  const [estado, setEstado] = useState(null);
+  const [usuario, setUsuario] = useState(null); // ← info del usuario logueado
 
-  const registrarEntrada = async () => {
+  useEffect(() => {
+    const obtenerUsuario = async () => {
+      const json = await AsyncStorage.getItem('usuario');
+      if (json) setUsuario(JSON.parse(json));
+    };
+    obtenerUsuario();
+  }, []);
+
+  const registrarEvento = async (tipo) => {
+    if (!usuario) {
+      Alert.alert('Error', 'Usuario no identificado');
+      return;
+    }
+
+    const coleccion = tipo === 'entrada' ? 'Entrada' : 'Salida';
     try {
-      await addDoc(collection(db, 'Entrada'), {
-        fecha_hora: Timestamp.now()
+      await addDoc(collection(db, coleccion), {
+        fecha_hora: Timestamp.now(),
+        id_usuario: usuario.id,
+        tipo_usuario: usuario.tipo
       });
-      console.log('Entrada registrada con éxito');
+      console.log(`✅ ${coleccion} registrada`);
     } catch (error) {
-      console.error('Error al registrar entrada:', error);
-      Alert.alert('Error', 'No se pudo registrar la entrada en Firebase.');
+      console.error(`❌ Error al registrar ${coleccion}:`, error);
+      Alert.alert('Error', `No se pudo registrar la ${coleccion}`);
     }
   };
 
   const manejarEstado = (nuevoEstado) => {
     setEstado(nuevoEstado);
-    if (nuevoEstado === 'conformado') {
-      registrarEntrada(); // Solo registra si fue exitoso
-    }
+    if (nuevoEstado === 'entrada') registrarEvento('entrada');
+    if (nuevoEstado === 'salida') registrarEvento('salida');
   };
 
   const obtenerContenido = () => {
     switch (estado) {
-      case 'conformado':
+      case 'entrada':
         return {
           icono: 'car-parking-lights',
           color: '#4CAF50',
-          mensaje: '¡Cajón asignado correctamente!',
+          mensaje: '¡Entrada registrada!',
           animacion: 'bounceIn'
+        };
+      case 'salida':
+        return {
+          icono: 'exit-run',
+          color: '#2196F3',
+          mensaje: '¡Salida registrada!',
+          animacion: 'fadeInUp'
         };
       case 'denegado':
         return {
@@ -49,7 +72,7 @@ export default function AsignacionCajon({ navigation }) {
         return {
           icono: 'alert-octagon',
           color: '#F44336',
-          mensaje: 'Ocurrió un error al asignar el cajón.',
+          mensaje: 'Ocurrió un error.',
           animacion: 'shake'
         };
       default:
@@ -61,11 +84,14 @@ export default function AsignacionCajon({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Resultado de Asignación</Text>
+      <Text style={styles.title}>Registro de Acceso</Text>
 
       <View style={styles.botones}>
-        <Button mode="outlined" onPress={() => manejarEstado('conformado')} textColor="#1565C0">
-          Simular Conformado
+        <Button mode="outlined" onPress={() => manejarEstado('entrada')} textColor="#1565C0">
+          Simular Entrada
+        </Button>
+        <Button mode="outlined" onPress={() => manejarEstado('salida')} textColor="#1565C0">
+          Simular Salida
         </Button>
         <Button mode="outlined" onPress={() => manejarEstado('denegado')} textColor="#1565C0">
           Simular Denegado
