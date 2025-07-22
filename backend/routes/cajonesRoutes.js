@@ -6,5 +6,6 @@ const cajonesController = require('../controllers/cajonesController');
 // ✅ USAMOS LA FUNCIÓN QUE SÍ EXISTE EN TU CONTROLADOR
 router.put('/cajones/:id_caj/estado', cajonesController.cambiarEstadoCajon);
 
+router.get('/estado-completo', cajonesController.obtenerEstadoCompleto);
 
 module.exports = router;
