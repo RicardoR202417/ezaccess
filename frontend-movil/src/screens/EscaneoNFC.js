@@ -1,5 +1,3 @@
-// src/screens/EscaneoNFC.js
-
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, Platform, ToastAndroid } from 'react-native';
 import { Text, Title } from 'react-native-paper';
@@ -11,7 +9,7 @@ import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import { db } from '../firebase/firebaseConfig';
 
 const API_BASE = 'https://ezaccess-backend.onrender.com/api';
-const UID = 'NFC-MONITOR-003'; // Simulación
+const UID = 'NFC-MONITOR-003';
 
 export default function EscaneoNFC() {
   const [modo, setModo] = useState(null);
@@ -45,7 +43,8 @@ export default function EscaneoNFC() {
         tipo_usuario: userData.tipo || null,
         nombre: userData.nombre || '',
         uid: UID,
-        evento: tipo
+        evento: tipo,
+        cajon: userData.cajon || null
       });
       console.log(`✅ Registro guardado en colección: ${coleccion}`);
       mostrarMensaje(`Registro de ${tipo} exitoso`);
@@ -76,13 +75,13 @@ export default function EscaneoNFC() {
       }
 
       const userData = {
-        id: data.id_usu || null,       // Por si backend lo incluye
+        id: data.id_usu || null,
         tipo: data.tipo || 'desconocido',
-        nombre: data.nombre || 'Anónimo'
+        nombre: data.nombre || 'Anónimo',
+        cajon: data.cajon || null
       };
 
       setModo(data.tipo);
-
       await registrarEnFirebase(data.tipo, userData);
       await AsyncStorage.setItem('usuario', JSON.stringify(userData));
 
@@ -90,7 +89,8 @@ export default function EscaneoNFC() {
         navigation.replace('EstadoAcceso', {
           estado: 'permitido',
           mensaje: `Acceso ${data.tipo}`,
-          tipo: data.tipo
+          tipo: data.tipo,
+          cajon: data.cajon || null
         });
       }, 2000);
     } catch (error) {
