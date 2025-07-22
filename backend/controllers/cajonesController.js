@@ -1,5 +1,4 @@
-const Cajon = require('../models/Cajon');
-const Asignacion = require('../models/Asignacion');
+const { Cajon, Asignacion, Actuador, Sensor } = require('../models');
 
 // Obtener todos los cajones con su estado (ocupado o libre)
 exports.obtenerCajonesConEstado = async (req, res) => {
@@ -85,6 +84,45 @@ exports.cambiarEstadoCajon = async (req, res) => {
 
   } catch (error) {
     console.error('Error al cambiar el estado del cajón:', error);
+    res.status(500).json({ mensaje: 'Error del servidor' });
+  }
+};
+
+// Obtener el estado completo de los cajones con asignaciones, actuadores y sensores
+exports.obtenerEstadoCompleto = async (req, res) => {
+  try {
+    const cajones = await Cajon.findAll({
+      include: [
+        {
+          model: Asignacion,
+          where: { estado_asig: 'activa' },
+          required: false
+        },
+        {
+          model: Actuador,
+          attributes: ['id_act', 'estado_act'],
+          required: false
+        },
+        {
+          model: Sensor,
+          attributes: ['id_sen', 'estado_sen', 'fecha_lectura_sen'],
+          required: false
+        }
+      ]
+    });
+
+    const resultado = cajones.map(cajon => ({
+      id_caj: cajon.id_caj,
+      numero_caj: cajon.numero_caj,
+      ubicacion_caj: cajon.ubicacion_caj,
+      estado: cajon.asignacions?.length > 0 ? 'ocupado' : 'libre',
+      actuador: cajon.actuadore || null,
+      sensor: cajon.sensore || null
+    }));
+
+    res.json(resultado);
+  } catch (error) {
+    console.error('Error al obtener el estado completo de los cajones:', error);
     res.status(500).json({ mensaje: 'Error del servidor' });
   }
 };
