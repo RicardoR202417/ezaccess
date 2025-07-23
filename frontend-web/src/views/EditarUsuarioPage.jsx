@@ -26,7 +26,7 @@ export default function EditarUsuarioPage() {
     const obtenerUsuario = async () => {
       try {
         const res = await fetch(
-          `http://localhost:3000/api/usuarios/${id}`,
+          `https://ezaccess-backend.onrender.com/api/usuarios/${id}`,
           {
             headers: { Authorization: `Bearer ${token}` }
           }
@@ -63,7 +63,7 @@ export default function EditarUsuarioPage() {
     setMensaje("");
     try {
       const res = await fetch(
-        `http://localhost:3000/api/usuarios/${id}`,
+        `https://ezaccess-backend.onrender.com/api/usuarios/${id}`,
         {
           method: "PUT",
           headers: {
