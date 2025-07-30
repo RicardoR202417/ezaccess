@@ -16,7 +16,7 @@ export default function CajonesPage() {
     setCargando(true);
     try {
       const res = await fetch(
-        "https://ezaccess-backend.onrender.com/api/cajones",
+        "https://ezaccess-backend.onrender.com/api/cajones/estado",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -153,7 +153,10 @@ export default function CajonesPage() {
           </div>
         </div>
 
-        <div className="d-flex justify-content-center mb-3" style={{ gap: "0.5rem" }}>
+        <div
+          className="d-flex justify-content-center mb-3"
+          style={{ gap: "0.5rem" }}
+        >
           <Button
             variant="success"
             size="sm"
