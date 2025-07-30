@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Spinner, Alert, Form, ButtonGroup } from "react-bootstrap";
+import { Button, Spinner, Alert, Form } from "react-bootstrap";
 import NavBarMonitor from "../components/NavBarMonitor";
 import "../styles/layout.css";
 
@@ -108,7 +108,27 @@ export default function CajonesPage() {
     <div>
       <NavBarMonitor />
       <div className="container mt-4">
-        <h2 className="text-center mb-4">Mapa de Cajones</h2>
+        <h2 className="text-center mb-3">Mapa de Cajones</h2>
+
+        {/* Botones compactos alineados a la derecha arriba de los filtros */}
+        <div className="text-end mb-2">
+          <div className="btn-group" role="group">
+            <Button
+              className="btn-control-cajon activar btn-sm"
+              onClick={() => cambiarEstadoTodos("activar")}
+              disabled={cargando}
+            >
+              Activar todos
+            </Button>
+            <Button
+              className="btn-control-cajon finalizar btn-sm"
+              onClick={() => cambiarEstadoTodos("finalizar")}
+              disabled={cargando}
+            >
+              Finalizar todos
+            </Button>
+          </div>
+        </div>
 
         {mensaje && (
           <Alert variant="info" onClose={() => setMensaje("")} dismissible>
@@ -116,7 +136,7 @@ export default function CajonesPage() {
           </Alert>
         )}
 
-        {/* Filtros */}
+        {/* Filtros debajo */}
         <div className="d-flex flex-wrap justify-content-between align-items-center mb-3">
           <div className="zona-buttons">
             {zonas.map((zona) => (
@@ -151,28 +171,6 @@ export default function CajonesPage() {
               <option value="ocupado">Ocupados</option>
             </Form.Select>
           </div>
-        </div>
-
-        <div
-          className="d-flex justify-content-center mb-3"
-          style={{ gap: "0.5rem" }}
-        >
-          <Button
-            variant="success"
-            size="sm"
-            onClick={() => cambiarEstadoTodos("activar")}
-            disabled={cargando}
-          >
-            Activar todos
-          </Button>
-          <Button
-            variant="danger"
-            size="sm"
-            onClick={() => cambiarEstadoTodos("finalizar")}
-            disabled={cargando}
-          >
-            Finalizar todos
-          </Button>
         </div>
 
         {cargando ? (

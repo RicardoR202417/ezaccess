@@ -269,3 +269,75 @@ form .form-control {
   background: #2563fa;
   color: #fff;
 }
+/* Botones de control general: Activar todos / Finalizar todos */
+.btn-control-cajon {
+  background-color: #1565C0;
+  color: white;
+  font-weight: 500;
+  padding: 0.45rem 1.3rem;
+  border-radius: 8px;
+  margin-left: 0.6rem;
+  box-shadow: 0 2px 8px rgba(21, 101, 192, 0.25);
+  border: none;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-control-cajon:hover {
+  background-color: #0d47a1;
+  box-shadow: 0 4px 12px rgba(21, 101, 192, 0.35);
+}
+
+.btn-control-cajon:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.btn-control-cajon.danger {
+  background-color: #c62828;
+  box-shadow: 0 2px 8px rgba(198, 40, 40, 0.25);
+}
+
+.btn-control-cajon.danger:hover {
+  background-color: #b71c1c;
+}
+.btn-control-cajon.btn-sm {
+  padding: 0.35rem 0.9rem;
+  font-size: 0.875rem;
+}
+/* Estilos exclusivos para botones globales Activar / Finalizar */
+.btn-control-cajon {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.4rem 1.2rem;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  min-width: 120px;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  margin-right: 0.5rem;
+}
+
+/* Estilo para el botón azul (activar) */
+.btn-control-cajon.activar {
+  background-color: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+
+.btn-control-cajon.activar:hover {
+  background-color: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
+/* Estilo para el botón rojo (finalizar) */
+.btn-control-cajon.finalizar {
+  background-color: #e53935;
+  color: #fff;
+  border-color: #e53935;
+}
+
+.btn-control-cajon.finalizar:hover {
+  background-color: #c62828;
+  border-color: #c62828;
+}
