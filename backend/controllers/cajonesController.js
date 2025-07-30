@@ -88,6 +88,47 @@ exports.cambiarEstadoCajon = async (req, res) => {
   }
 };
 
+// Cambiar el estado de todos los cajones a la vez
+exports.cambiarEstadoTodos = async (req, res) => {
+  const { accion } = req.body; // 'activar' o 'finalizar'
+  try {
+    const cajones = await Cajon.findAll();
+
+    if (accion === 'activar') {
+      let count = 0;
+      for (const cajon of cajones) {
+        const asignacionExistente = await Asignacion.findOne({
+          where: { id_caj: cajon.id_caj, estado_asig: 'activa' }
+        });
+        if (!asignacionExistente) {
+          await Asignacion.create({
+            id_caj: cajon.id_caj,
+            id_usu: 1, // Ajusta según tu lógica de usuario
+            tipo_asig: 'manual',
+            estado_asig: 'activa'
+          });
+          count++;
+        }
+      }
+      return res.json({ mensaje: `Se activaron ${count} cajones.` });
+    } else if (accion === 'finalizar') {
+      const asignaciones = await Asignacion.findAll({
+        where: { estado_asig: 'activa' }
+      });
+      for (const asig of asignaciones) {
+        asig.estado_asig = 'finalizada';
+        await asig.save();
+      }
+      return res.json({ mensaje: `Se finalizaron ${asignaciones.length} cajones.` });
+    } else {
+      return res.status(400).json({ mensaje: 'Acción no válida. Usa "activar" o "finalizar".' });
+    }
+  } catch (error) {
+    console.error('Error al cambiar el estado de todos los cajones:', error);
+    res.status(500).json({ mensaje: 'Error del servidor' });
+  }
+};
+
 // Obtener el estado completo de los cajones con asignaciones, actuadores y sensores
 exports.obtenerEstadoCompleto = async (req, res) => {
   try {

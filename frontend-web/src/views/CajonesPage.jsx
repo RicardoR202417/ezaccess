@@ -63,6 +63,30 @@ export default function CajonesPage() {
     }
   };
 
+  const cambiarEstadoTodos = async (accion) => {
+    setCargando(true);
+    try {
+      const res = await fetch(
+        "https://ezaccess-backend.onrender.com/api/cajones/estado/todos",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ accion }),
+        }
+      );
+      const data = await res.json();
+      setMensaje(data.mensaje);
+      obtenerCajones();
+    } catch (err) {
+      setMensaje("Error al cambiar el estado de todos los cajones.");
+    } finally {
+      setCargando(false);
+    }
+  };
+
   useEffect(() => {
     obtenerCajones();
   }, []);
@@ -127,6 +151,25 @@ export default function CajonesPage() {
               <option value="ocupado">Ocupados</option>
             </Form.Select>
           </div>
+        </div>
+
+        <div className="d-flex justify-content-center mb-3" style={{ gap: "0.5rem" }}>
+          <Button
+            variant="success"
+            size="sm"
+            onClick={() => cambiarEstadoTodos("activar")}
+            disabled={cargando}
+          >
+            Activar todos
+          </Button>
+          <Button
+            variant="danger"
+            size="sm"
+            onClick={() => cambiarEstadoTodos("finalizar")}
+            disabled={cargando}
+          >
+            Finalizar todos
+          </Button>
         </div>
 
         {cargando ? (
