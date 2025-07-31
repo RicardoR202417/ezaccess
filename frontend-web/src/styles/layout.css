@@ -341,3 +341,11 @@ form .form-control {
   background-color: #c62828;
   border-color: #c62828;
 }
+.resumen-cajones {
+  display: flex;
+  justify-content: space-around;
+  padding-top: 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #333;
+}
