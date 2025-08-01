@@ -2,7 +2,10 @@ const express = require('express');
 const router = express.Router();
 const cajonesController = require('../controllers/cajonesController');
 
-// ✅ Ruta para obtener todos los cajones con su estado (necesaria para la vista)
+// ✅ Ruta alternativa para obtener el estado de los cajones (usada en el Dashboard)
+router.get('/estado', cajonesController.obtenerCajonesConEstado);
+
+// ✅ Ruta para obtener todos los cajones con su estado (necesaria para la vista de mapa de cajones)
 router.get('/cajones', cajonesController.obtenerCajonesConEstado);
 
 // ✅ Ruta para cambiar el estado de un cajón (activar/finalizar asignación manual)
