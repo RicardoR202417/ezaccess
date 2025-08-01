@@ -1,5 +1,8 @@
-// Crear nueva solicitud
-exports.crearSolicitud = async (req, res) => {
+// controllers/visitaController.js
+const SolicitudVisita = require('../models/SolicitudVisita');
+
+// ✅ Crear nueva solicitud
+const crearSolicitud = async (req, res) => {
   try {
     const {
       nombre_sol,
@@ -7,7 +10,7 @@ exports.crearSolicitud = async (req, res) => {
       tipo_ingreso_sol,
       modelo_veh_sol,
       placas_veh_sol,
-      fecha_visita_sol // 👈 nuevo campo capturado desde req.body
+      fecha_visita_sol // <- nuevo campo
     } = req.body;
 
     const id_usu = req.usuario?.id;
@@ -22,7 +25,7 @@ exports.crearSolicitud = async (req, res) => {
       tipo_ingreso_sol,
       modelo_veh_sol,
       placas_veh_sol,
-      fecha_visita_sol, // 👈 se guarda en BD
+      fecha_visita_sol,
       estado_sol: 'pendiente',
       fecha_reg_sol: new Date(),
       id_usu
@@ -39,9 +42,79 @@ exports.crearSolicitud = async (req, res) => {
   }
 };
 
+// ✅ Obtener TODAS las solicitudes (para monitores)
+const obtenerSolicitudes = async (req, res) => {
+  try {
+    const solicitudes = await SolicitudVisita.findAll({
+      order: [['fecha_reg_sol', 'DESC']]
+    });
+    return res.json({ solicitudes });
+  } catch (error) {
+    console.error('❌ Error al obtener solicitudes:', error);
+    return res.status(500).json({ mensaje: 'Error del servidor' });
+  }
+};
+
+// ✅ Obtener solicitudes del usuario autenticado
+const obtenerSolicitudesPorUsuario = async (req, res) => {
+  try {
+    const id_usu = req.usuario?.id;
+
+    if (!id_usu) {
+      return res.status(401).json({ mensaje: 'Usuario no autenticado (sin ID)' });
+    }
+
+    const solicitudes = await SolicitudVisita.findAll({
+      where: { id_usu },
+      order: [['fecha_reg_sol', 'DESC']]
+    });
+
+    return res.json({ solicitudes });
+
+  } catch (error) {
+    console.error('❌ Error al obtener solicitudes del usuario:', error);
+    return res.status(500).json({ mensaje: 'Error del servidor' });
+  }
+};
+
+// ✅ Actualizar estado de una solicitud
+const actualizarEstado = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nuevoEstado } = req.body;
+
+    const estadosPermitidos = ['aceptada', 'rechazada'];
+
+    if (!estadosPermitidos.includes(nuevoEstado)) {
+      return res.status(400).json({
+        mensaje: 'Estado no válido. Usa "aceptada" o "rechazada".'
+      });
+    }
+
+    const solicitud = await SolicitudVisita.findByPk(id);
+
+    if (!solicitud) {
+      return res.status(404).json({ mensaje: 'Solicitud no encontrada' });
+    }
+
+    solicitud.estado_sol = nuevoEstado;
+    await solicitud.save();
+
+    return res.json({
+      mensaje: `Estado actualizado a ${nuevoEstado}`,
+      solicitud
+    });
+
+  } catch (error) {
+    console.error('❌ Error al actualizar estado:', error);
+    return res.status(500).json({ mensaje: 'Error del servidor' });
+  }
+};
+
+// ✅ Exportar controladores
 module.exports = {
   crearSolicitud,
   obtenerSolicitudes,
-  actualizarEstado,
-  obtenerSolicitudesPorUsuario
+  obtenerSolicitudesPorUsuario,
+  actualizarEstado
 };
