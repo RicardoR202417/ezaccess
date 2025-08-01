@@ -26,7 +26,7 @@ export default function EditarUsuarioPage() {
     const obtenerUsuario = async () => {
       try {
         const res = await fetch(
-          `http://localhost:3000/api/usuarios/${id}`,
+          `https://ezaccess-backend.onrender.com/${id}`,
           {
             headers: { Authorization: `Bearer ${token}` }
           }
