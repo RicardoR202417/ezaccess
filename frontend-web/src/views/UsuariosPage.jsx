@@ -1,10 +1,13 @@
-// views/UsuariosPage.jsx
 import React, { useEffect, useState } from "react";
 import { Table, Alert, Form, Row, Col } from "react-bootstrap";
 import RegisterForm from "../components/RegisterForm";
 import NavBarMonitor from "../components/NavBarMonitor";
 import { FaTrash, FaEdit, FaCheck, FaTimes } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+
+// Firebase
+import { getFirestore, collection, addDoc } from "firebase/firestore";
+import { app } from "../firebaseConfig"; // Asegúrate que este archivo existe y exporta tu app
 
 export default function UsuariosPage() {
   const [usuarios, setUsuarios] = useState([]);
@@ -13,7 +16,6 @@ export default function UsuariosPage() {
   const [mostrarSolicitudes, setMostrarSolicitudes] = useState(false);
   const [solicitudes, setSolicitudes] = useState([]);
 
-  // Filtros y buscadores
   const [filtroTipo, setFiltroTipo] = useState("todos");
   const [busquedaUsuario, setBusquedaUsuario] = useState("");
   const [filtroFecha, setFiltroFecha] = useState("");
@@ -52,7 +54,6 @@ export default function UsuariosPage() {
     }
   };
 
-  // Eliminar usuario definitivamente
   const eliminarUsuario = async (id) => {
     if (!window.confirm("¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer.")) return;
 
@@ -102,6 +103,20 @@ export default function UsuariosPage() {
     }
   };
 
+  const guardarComentarioEnFirebase = async (idSol, comentario) => {
+    try {
+      const db = getFirestore(app);
+      await addDoc(collection(db, "rechazos_visitas"), {
+        id_sol: idSol,
+        comentario,
+        fecha_registro: new Date().toISOString(),
+      });
+      console.log("Comentario registrado correctamente en Firebase");
+    } catch (error) {
+      console.error("Error al registrar comentario en Firebase:", error);
+    }
+  };
+
   useEffect(() => {
     obtenerUsuarios();
   }, []);
@@ -112,9 +127,6 @@ export default function UsuariosPage() {
     }
   }, [mostrarSolicitudes]);
 
-  // --- FILTROS Y BUSCADORES ---
-
-  // Usuarios filtrados por tipo y búsqueda
   const usuariosFiltrados = usuarios.filter((user) => {
     const coincideTipo =
       filtroTipo === "todos" ? true : user.tipo_usu === filtroTipo;
@@ -125,7 +137,6 @@ export default function UsuariosPage() {
     return coincideTipo && coincideBusqueda;
   });
 
-  // Solicitudes filtradas por fecha y búsqueda
   const solicitudesFiltradas = solicitudes.filter((sol) => {
     const coincideFecha = filtroFecha
       ? new Date(sol.fecha_reg_sol).toISOString().slice(0, 10) === filtroFecha
@@ -184,7 +195,6 @@ export default function UsuariosPage() {
                 <span style={{ color: "#D32F2F" }}>Rechazada</span>
               </span>
             </div>
-            {/* Filtros de solicitudes */}
             <Row className="mb-3">
               <Col md={4}>
                 <Form.Control
@@ -267,9 +277,12 @@ export default function UsuariosPage() {
                             <button
                               className="btn btn-danger btn-sm"
                               title="Rechazar"
-                              onClick={() =>
-                                actualizarEstadoSolicitud(sol.id_sol, "rechazada")
-                              }
+                              onClick={async () => {
+                                const comentario = prompt("Ingresa el motivo del rechazo:");
+                                if (!comentario) return;
+                                await actualizarEstadoSolicitud(sol.id_sol, "rechazada");
+                                await guardarComentarioEnFirebase(sol.id_sol, comentario);
+                              }}
                             >
                               <FaTimes />
                             </button>
@@ -286,7 +299,6 @@ export default function UsuariosPage() {
           </div>
         )}
 
-        {/* Filtros de usuarios */}
         <Row className="mb-3">
           <Col md={3}>
             <Form.Select

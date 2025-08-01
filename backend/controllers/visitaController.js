@@ -38,3 +38,10 @@ exports.crearSolicitud = async (req, res) => {
     return res.status(500).json({ mensaje: 'Error del servidor' });
   }
 };
+
+module.exports = {
+  crearSolicitud,
+  obtenerSolicitudes,
+  actualizarEstado,
+  obtenerSolicitudesPorUsuario
+};
