@@ -6,6 +6,8 @@ import {
   Navigate,
 } from "react-router-dom";
 
+import 'bootstrap-icons/font/bootstrap-icons.css';
+
 // Vistas
 import LoginPage from "./views/LoginPage";
 import RegisterPage from "./views/RegisterPage";

@@ -14,4 +14,7 @@ router.put('/cajones/:id_caj/estado', cajonesController.cambiarEstadoCajon);
 // (Opcional) Ruta para obtener estado completo, si la necesitas en otra vista
 router.get('/estado-completo', cajonesController.obtenerEstadoCompleto);
 
+router.put('/cajones/estado/todos', cajonesController.cambiarEstadoTodos); // ✅ NUEVA RUTA
+
+
 module.exports = router;

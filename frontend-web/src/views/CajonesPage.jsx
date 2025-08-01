@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Spinner, Alert, Form, ButtonGroup } from "react-bootstrap";
+import { Button, Spinner, Alert, Form } from "react-bootstrap";
 import NavBarMonitor from "../components/NavBarMonitor";
 import "../styles/layout.css";
 
@@ -16,7 +16,7 @@ export default function CajonesPage() {
     setCargando(true);
     try {
       const res = await fetch(
-        "https://ezaccess-backend.onrender.com/api/cajones",
+        "https://ezaccess-backend.onrender.com/api/cajones", // ← ruta corregida
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -63,6 +63,30 @@ export default function CajonesPage() {
     }
   };
 
+  const cambiarEstadoTodos = async (accion) => {
+    setCargando(true);
+    try {
+      const res = await fetch(
+        "https://ezaccess-backend.onrender.com/api/cajones/estado/todos",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ accion }),
+        }
+      );
+      const data = await res.json();
+      setMensaje(data.mensaje);
+      obtenerCajones();
+    } catch (err) {
+      setMensaje("Error al cambiar el estado de todos los cajones.");
+    } finally {
+      setCargando(false);
+    }
+  };
+
   useEffect(() => {
     obtenerCajones();
   }, []);
@@ -84,7 +108,26 @@ export default function CajonesPage() {
     <div>
       <NavBarMonitor />
       <div className="container mt-4">
-        <h2 className="text-center mb-4">Mapa de Cajones</h2>
+        <h2 className="text-center mb-3">Mapa de Cajones</h2>
+
+        <div className="text-end mb-2">
+          <div className="btn-group" role="group">
+            <Button
+              className="btn-control-cajon activar btn-sm"
+              onClick={() => cambiarEstadoTodos("activar")}
+              disabled={cargando}
+            >
+              Activar todos
+            </Button>
+            <Button
+              className="btn-control-cajon finalizar btn-sm"
+              onClick={() => cambiarEstadoTodos("finalizar")}
+              disabled={cargando}
+            >
+              Finalizar todos
+            </Button>
+          </div>
+        </div>
 
         {mensaje && (
           <Alert variant="info" onClose={() => setMensaje("")} dismissible>
@@ -92,7 +135,6 @@ export default function CajonesPage() {
           </Alert>
         )}
 
-        {/* Filtros */}
         <div className="d-flex flex-wrap justify-content-between align-items-center mb-3">
           <div className="zona-buttons">
             {zonas.map((zona) => (

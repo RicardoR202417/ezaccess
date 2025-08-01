@@ -126,3 +126,47 @@ exports.obtenerEstadoCompleto = async (req, res) => {
     res.status(500).json({ mensaje: 'Error del servidor' });
   }
 };
+exports.cambiarEstadoTodos = async (req, res) => {
+  const { accion } = req.body;
+
+  try {
+    const cajones = await Cajon.findAll();
+
+    for (const cajon of cajones) {
+      if (accion === 'activar') {
+        const existeAsignacion = await Asignacion.findOne({
+          where: {
+            id_caj: cajon.id_caj,
+            estado_asig: 'activa',
+          },
+        });
+
+        if (!existeAsignacion) {
+          await Asignacion.create({
+            id_caj: cajon.id_caj,
+            id_usu: 1, // Este ID se puede reemplazar luego por el de sesión
+            tipo_asig: 'manual',
+            estado_asig: 'activa',
+          });
+        }
+      } else if (accion === 'finalizar') {
+        const asignacion = await Asignacion.findOne({
+          where: {
+            id_caj: cajon.id_caj,
+            estado_asig: 'activa',
+          },
+        });
+
+        if (asignacion) {
+          asignacion.estado_asig = 'finalizada';
+          await asignacion.save();
+        }
+      }
+    }
+
+    res.json({ mensaje: `Asignaciones ${accion === 'activar' ? 'activadas' : 'finalizadas'} correctamente.` });
+  } catch (error) {
+    console.error("Error al cambiar el estado de todos los cajones:", error);
+    res.status(500).json({ mensaje: "Error al procesar los cajones." });
+  }
+};
