@@ -28,6 +28,13 @@ const SolicitudVisita = sequelize.define('solicitudes_visita', {
     allowNull: true,
     defaultValue: DataTypes.NOW
   },
+
+  // ✅ NUEVO CAMPO
+  fecha_visita_sol: {
+    type: DataTypes.DATEONLY, // o DATE si usarás también hora
+    allowNull: true
+  },
+
   tipo_ingreso_sol: {
     type: DataTypes.STRING(20),
     allowNull: true
@@ -40,11 +47,11 @@ const SolicitudVisita = sequelize.define('solicitudes_visita', {
     type: DataTypes.STRING(20),
     allowNull: true
   },
-  id_usu: { // 👈 NUEVO CAMPO
+  id_usu: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'usuarios', // nombre de la tabla en la BD
+      model: 'usuarios',
       key: 'id_usu'
     }
   }

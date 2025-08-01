@@ -7,13 +7,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function SolicitudVisitante({ navigation }) {
   const [nombre, setNombre] = useState('');
   const [motivo, setMotivo] = useState('');
-  const [modoEntrada, setModoEntrada] = useState('peaton'); // peaton | vehiculo
+  const [modoEntrada, setModoEntrada] = useState('peaton');
   const [tipoVehiculo, setTipoVehiculo] = useState('');
   const [placas, setPlacas] = useState('');
+  const [fechaVisita, setFechaVisita] = useState('');
   const [mensaje, setMensaje] = useState('');
 
   const handleEnviar = async () => {
-    if (!nombre.trim() || !motivo.trim()) {
+    if (!nombre.trim() || !motivo.trim() || !fechaVisita.trim()) {
       setMensaje('Por favor llena todos los campos obligatorios.');
       return;
     }
@@ -24,7 +25,7 @@ export default function SolicitudVisitante({ navigation }) {
     }
 
     try {
-      const token = await AsyncStorage.getItem('token'); // Recupera el token JWT
+      const token = await AsyncStorage.getItem('token');
 
       if (!token) {
         setMensaje('Token no encontrado. Inicia sesión de nuevo.');
@@ -42,7 +43,8 @@ export default function SolicitudVisitante({ navigation }) {
           motivo_sol: motivo,
           tipo_ingreso_sol: modoEntrada,
           modelo_veh_sol: modoEntrada === 'vehiculo' ? tipoVehiculo : null,
-          placas_veh_sol: modoEntrada === 'vehiculo' ? placas : null
+          placas_veh_sol: modoEntrada === 'vehiculo' ? placas : null,
+          fecha_visita_sol: fechaVisita
         })
       });
 
@@ -55,6 +57,7 @@ export default function SolicitudVisitante({ navigation }) {
         setModoEntrada('peaton');
         setTipoVehiculo('');
         setPlacas('');
+        setFechaVisita('');
       } else {
         setMensaje(`❌ Error: ${data.mensaje || 'No se pudo registrar la solicitud'}`);
       }
@@ -91,6 +94,17 @@ export default function SolicitudVisitante({ navigation }) {
             style={styles.input}
             outlineColor="#1565C0"
             activeOutlineColor="#0D47A1"
+          />
+
+          <TextInput
+            label="Fecha de visita (YYYY-MM-DD)"
+            mode="outlined"
+            value={fechaVisita}
+            onChangeText={setFechaVisita}
+            style={styles.input}
+            outlineColor="#1565C0"
+            activeOutlineColor="#0D47A1"
+            placeholder="Ej. 2025-08-04"
           />
 
           <Text style={styles.label}>¿Cómo ingresa el visitante?</Text>
