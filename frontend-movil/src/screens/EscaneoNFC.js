@@ -19,22 +19,24 @@ export default function EscaneoNFC() {
 
   useEffect(() => {
     const cargarUsuario = async () => {
-      const json = await AsyncStorage.getItem('usuario');
-      if (json) setUsuario(JSON.parse(json));
+      try {
+        const json = await AsyncStorage.getItem('usuario');
+        if (json) setUsuario(JSON.parse(json));
+      } catch (error) {
+        console.error('Error cargando usuario de AsyncStorage:', error);
+      }
     };
     cargarUsuario();
   }, []);
 
   const mostrarMensaje = (msg) => {
-    if (Platform.OS === 'android') {
-      ToastAndroid.show(msg, ToastAndroid.SHORT);
-    } else {
-      Alert.alert('Información', msg);
-    }
+    Platform.OS === 'android'
+      ? ToastAndroid.show(msg, ToastAndroid.SHORT)
+      : Alert.alert('Información', msg);
   };
 
   const registrarEnFirebase = async (tipo, userData) => {
-    const coleccion = tipo === 'entrada' ? 'entradas' : 'salidas';
+    const coleccion = tipo === 'entrada' ? 'Entrada' : 'Salida'; // Corregí mayúsculas para consistencia
 
     try {
       await addDoc(collection(db, coleccion), {
@@ -68,7 +70,6 @@ export default function EscaneoNFC() {
       if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
 
       const data = await res.json();
-      setCargando(false);
 
       if (!data.permitido || !data.tipo) {
         throw new Error('Respuesta incompleta o no permitida');
@@ -93,22 +94,25 @@ export default function EscaneoNFC() {
           cajon: data.cajon || null
         });
       }, 2000);
+
     } catch (error) {
       console.error('❌ Error al enviar UID (detalle):', error);
-      setCargando(false);
+      Alert.alert('Error', error.message || 'Error de red o servidor');
       navigation.replace('EstadoAcceso', {
         estado: 'denegado',
         mensaje: 'Error de red o servidor',
         tipo: 'error'
       });
+    } finally {
+      setCargando(false);
     }
   };
 
   const datos = modo === 'entrada'
     ? { icono: 'login', mensaje: 'Entrada registrada', color: '#64B5F6' }
     : modo === 'salida'
-    ? { icono: 'logout', mensaje: 'Salida registrada', color: '#4CAF50' }
-    : null;
+      ? { icono: 'logout', mensaje: 'Salida registrada', color: '#4CAF50' }
+      : null;
 
   return (
     <View style={styles.container}>
@@ -178,4 +182,3 @@ const styles = StyleSheet.create({
     textAlign: 'center'
   }
 });
-

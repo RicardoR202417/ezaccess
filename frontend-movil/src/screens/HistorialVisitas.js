@@ -10,8 +10,6 @@ export default function HistorialVisitas({ navigation }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log('👤 Usuario en contexto:', usuario);
-
     if (!usuario?.token) {
       setLoading(false);
       return;
@@ -31,8 +29,6 @@ export default function HistorialVisitas({ navigation }) {
         }
 
         const data = await res.json();
-        console.log('🔎 Respuesta del backend:', data);
-
         if (data?.solicitudes && Array.isArray(data.solicitudes)) {
           setVisitas(data.solicitudes);
         } else {
@@ -56,10 +52,11 @@ export default function HistorialVisitas({ navigation }) {
         item.estado_sol === 'aceptada' ? styles.cardPermitido : styles.cardDenegado,
       ]}
     >
-      <Text style={styles.estado}>{item.estado_sol?.toUpperCase()}</Text>
-      <Text style={styles.fecha}>Fecha: {new Date(item.fecha_reg_sol).toLocaleString()}</Text>
-      <Text style={styles.detalle}>Motivo: {item.motivo_sol || 'No especificado'}</Text>
-      <Text style={styles.detalle}>Ingreso: {item.tipo_ingreso_sol || 'N/A'}</Text>
+      <Text style={styles.cell}>{item.nombre_sol || 'Sin nombre'}</Text>
+      <Text style={styles.cell}>{item.motivo_sol || 'No especificado'}</Text>
+      <Text style={styles.cell}>{item.estado_sol?.toUpperCase()}</Text>
+      <Text style={styles.cell}>{new Date(item.fecha_reg_sol).toLocaleString()}</Text>
+      <Text style={styles.cell}>{item.tipo_ingreso_sol || 'N/A'}</Text>
     </View>
   );
 
@@ -131,14 +128,38 @@ const styles = StyleSheet.create({
     color: '#0D47A1',
     textAlign: 'center',
   },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderColor: '#ddd',
+    marginBottom: 4,
+  },
+  headerRow: {
+    backgroundColor: '#E3F2FD',
+    borderRadius: 8,
+    marginBottom: 6,
+  },
+  headerCell: {
+    fontWeight: 'bold',
+    color: '#0D47A1',
+  },
   card: {
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderRadius: 10,
+    marginBottom: 8,
+    backgroundColor: '#fff',
+    elevation: 2,
+    marginHorizontal: 2,
+  },
+  cell: {
+    flex: 1,
+    fontSize: 13,
+    paddingHorizontal: 4,
+    color: '#333',
   },
   cardPermitido: {
     backgroundColor: '#E8F5E9',
@@ -149,19 +170,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFEBEE',
     borderLeftColor: '#D32F2F',
     borderLeftWidth: 5,
-  },
-  estado: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  fecha: {
-    fontSize: 14,
-    color: '#555',
-  },
-  detalle: {
-    fontSize: 14,
-    color: '#777',
   },
   volverButton: {
     backgroundColor: '#1565C0',

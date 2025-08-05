@@ -19,7 +19,7 @@ export default function LoginScreen({ navigation }) {
   const { login } = useContext(AuthContext);
 
   const handleLogin = async () => {
-    if (!correo || !password) {
+    if (!correo.trim() || !password.trim()) {
       Alert.alert('Campos vacíos', 'Por favor ingresa tu correo y contraseña.');
       return;
     }
@@ -28,7 +28,7 @@ export default function LoginScreen({ navigation }) {
       const response = await fetch(`${API_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ correo, contrasena: password }) // o "password", según tu backend
+        body: JSON.stringify({ correo, contrasena: password }) // El backend espera "contrasena"
       });
 
       const data = await response.json();
@@ -38,7 +38,7 @@ export default function LoginScreen({ navigation }) {
         // Guarda el token en AsyncStorage para que esté disponible en toda la app
         await AsyncStorage.setItem('token', data.token);
 
-        // Guarda usuario y token juntos en el contexto
+        // Guarda usuario y token juntos en el contexto para uso global
         login({
           ...data.usuario,
           token: data.token
@@ -66,6 +66,7 @@ export default function LoginScreen({ navigation }) {
             style={styles.logo}
           />
           <Title style={styles.title}>EZACCESS</Title>
+
           <Text style={styles.subtitle}>Inicio de Sesión</Text>
 
           <TextInput
@@ -98,7 +99,7 @@ export default function LoginScreen({ navigation }) {
             style={styles.button}
             contentStyle={{ paddingVertical: 6 }}
           >
-            <Text>Iniciar Sesión</Text>
+            Iniciar Sesión
           </Button>
         </Animatable.View>
       </View>

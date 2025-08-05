@@ -12,7 +12,7 @@ export default function Dashboard({ navigation }) {
         <Text style={styles.subtitle}>Selecciona una opción:</Text>
 
         <View style={styles.buttons}>
-          {/* 🔹 Estado + Cajón */}
+          {/* Estado + Cajón */}
           <Button
             mode="outlined"
             icon={() => <Icon name="garage" size={20} color="#1565C0" />}
@@ -23,7 +23,7 @@ export default function Dashboard({ navigation }) {
             Revisar Estado y Cajón
           </Button>
 
-          {/* 🔹 Solicitar Visitante */}
+          {/* Solicitar Visitante */}
           <Button
             mode="outlined"
             icon={() => <Icon name="account-plus" size={20} color="#1565C0" />}
@@ -34,7 +34,7 @@ export default function Dashboard({ navigation }) {
             Solicitar Visitante
           </Button>
 
-          {/* 🔹 Escanear NFC */}
+          {/* Escanear NFC */}
           <Button
             mode="outlined"
             icon={() => <Icon name="nfc" size={20} color="#1565C0" />}
@@ -45,7 +45,7 @@ export default function Dashboard({ navigation }) {
             Escanear NFC
           </Button>
 
-          {/* 🔹 Historial de Visitas */}
+          {/* Historial de Visitas */}
           <Button
             mode="outlined"
             icon={() => <Icon name="history" size={20} color="#1565C0" />}
@@ -56,7 +56,7 @@ export default function Dashboard({ navigation }) {
             Historial de Visitas
           </Button>
 
-          {/* 🔹 Nuevo botón: Seleccionar Cajón */}
+          {/* Seleccionar Cajón */}
           <Button
             mode="outlined"
             icon={() => <Icon name="car-arrow-right" size={20} color="#1565C0" />}
@@ -110,13 +110,13 @@ const styles = StyleSheet.create({
     color: '#555',
   },
   buttons: {
-    gap: 10,
+    // Remplazamos gap por marginBottom en los botones
   },
   button: {
     borderColor: '#1565C0',
     borderWidth: 1,
     borderRadius: 10,
-    marginBottom: 10,
+    marginBottom: 10, // para espacio entre botones
   },
   buttonText: {
     color: '#1565C0',
