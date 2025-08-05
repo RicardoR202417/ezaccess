@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { TextInput, Button, Text, Title, RadioButton } from 'react-native-paper';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Animatable from 'react-native-animatable';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -10,11 +11,16 @@ export default function SolicitudVisitante({ navigation }) {
   const [modoEntrada, setModoEntrada] = useState('peaton');
   const [tipoVehiculo, setTipoVehiculo] = useState('');
   const [placas, setPlacas] = useState('');
-  const [fechaVisita, setFechaVisita] = useState('');
+  const [fechaVisita, setFechaVisita] = useState(new Date());
+  const [mostrarCalendario, setMostrarCalendario] = useState(false);
   const [mensaje, setMensaje] = useState('');
 
+  const formatearFecha = (fecha) => {
+    return fecha.toISOString().split('T')[0]; // formato YYYY-MM-DD
+  };
+
   const handleEnviar = async () => {
-    if (!nombre.trim() || !motivo.trim() || !fechaVisita.trim()) {
+    if (!nombre.trim() || !motivo.trim() || !fechaVisita) {
       setMensaje('Por favor llena todos los campos obligatorios.');
       return;
     }
@@ -44,7 +50,7 @@ export default function SolicitudVisitante({ navigation }) {
           tipo_ingreso_sol: modoEntrada,
           modelo_veh_sol: modoEntrada === 'vehiculo' ? tipoVehiculo : null,
           placas_veh_sol: modoEntrada === 'vehiculo' ? placas : null,
-          fecha_visita_sol: fechaVisita
+          fecha_visita_sol: formatearFecha(fechaVisita)
         })
       });
 
@@ -57,7 +63,7 @@ export default function SolicitudVisitante({ navigation }) {
         setModoEntrada('peaton');
         setTipoVehiculo('');
         setPlacas('');
-        setFechaVisita('');
+        setFechaVisita(new Date());
       } else {
         setMensaje(`❌ Error: ${data.mensaje || 'No se pudo registrar la solicitud'}`);
       }
@@ -96,16 +102,23 @@ export default function SolicitudVisitante({ navigation }) {
             activeOutlineColor="#0D47A1"
           />
 
-          <TextInput
-            label="Fecha de visita (YYYY-MM-DD)"
-            mode="outlined"
-            value={fechaVisita}
-            onChangeText={setFechaVisita}
-            style={styles.input}
-            outlineColor="#1565C0"
-            activeOutlineColor="#0D47A1"
-            placeholder="Ej. 2025-08-04"
-          />
+          <Text style={styles.label}>Fecha de visita</Text>
+          <Button mode="outlined" onPress={() => setMostrarCalendario(true)} style={{ marginBottom: 10 }}>
+            {formatearFecha(fechaVisita)}
+          </Button>
+
+          {mostrarCalendario && (
+            <DateTimePicker
+              value={fechaVisita}
+              mode="date"
+              display="default"
+              minimumDate={new Date()} // Solo hoy o futuras
+              onChange={(event, selectedDate) => {
+                setMostrarCalendario(false);
+                if (selectedDate) setFechaVisita(selectedDate);
+              }}
+            />
+          )}
 
           <Text style={styles.label}>¿Cómo ingresa el visitante?</Text>
           <RadioButton.Group onValueChange={setModoEntrada} value={modoEntrada}>
@@ -130,7 +143,6 @@ export default function SolicitudVisitante({ navigation }) {
                 outlineColor="#1565C0"
                 activeOutlineColor="#0D47A1"
               />
-
               <TextInput
                 label="Placas"
                 mode="outlined"
