@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 
 // Firebase
 import { getFirestore, collection, addDoc } from "firebase/firestore";
-import { app } from "../firebaseConfig"; // Asegúrate que este archivo existe y exporta tu app
+import { app } from "../firebaseConfig";
 
 export default function UsuariosPage() {
   const [usuarios, setUsuarios] = useState([]);
@@ -18,8 +18,9 @@ export default function UsuariosPage() {
 
   const [filtroTipo, setFiltroTipo] = useState("todos");
   const [busquedaUsuario, setBusquedaUsuario] = useState("");
-  const [filtroFecha, setFiltroFecha] = useState("");
+  const [filtroFechaVisita, setFiltroFechaVisita] = useState("");
   const [busquedaSolicitud, setBusquedaSolicitud] = useState("");
+  const [filtroEstadoSolicitud, setFiltroEstadoSolicitud] = useState("todas"); // NUEVO
 
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -55,7 +56,12 @@ export default function UsuariosPage() {
   };
 
   const eliminarUsuario = async (id) => {
-    if (!window.confirm("¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer.")) return;
+    if (
+      !window.confirm(
+        "¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer."
+      )
+    )
+      return;
 
     try {
       const res = await fetch(
@@ -132,19 +138,31 @@ export default function UsuariosPage() {
       filtroTipo === "todos" ? true : user.tipo_usu === filtroTipo;
     const coincideBusqueda =
       user.nombre_usu.toLowerCase().includes(busquedaUsuario.toLowerCase()) ||
-      user.apellido_pat_usu.toLowerCase().includes(busquedaUsuario.toLowerCase()) ||
+      user.apellido_pat_usu
+        .toLowerCase()
+        .includes(busquedaUsuario.toLowerCase()) ||
       user.correo_usu.toLowerCase().includes(busquedaUsuario.toLowerCase());
     return coincideTipo && coincideBusqueda;
   });
 
+  // Lógica de filtro de solicitudes
   const solicitudesFiltradas = solicitudes.filter((sol) => {
-    const coincideFecha = filtroFecha
-      ? new Date(sol.fecha_reg_sol).toISOString().slice(0, 10) === filtroFecha
+    // Filtro por estado
+    const coincideEstado =
+      filtroEstadoSolicitud === "todas"
+        ? true
+        : sol.estado_sol === "pendiente";
+    // Filtro por fecha
+    const coincideFecha = filtroFechaVisita
+      ? new Date(sol.fecha_visita_sol).toLocaleDateString("sv-SE") ===
+        filtroFechaVisita
       : true;
+    // Filtro por búsqueda
     const coincideBusqueda =
       sol.nombre_sol.toLowerCase().includes(busquedaSolicitud.toLowerCase()) ||
       sol.motivo_sol.toLowerCase().includes(busquedaSolicitud.toLowerCase());
-    return coincideFecha && coincideBusqueda;
+
+    return coincideEstado && coincideFecha && coincideBusqueda;
   });
 
   return (
@@ -196,15 +214,26 @@ export default function UsuariosPage() {
               </span>
             </div>
             <Row className="mb-3">
-              <Col md={4}>
+              <Col md={3}>
+                <Form.Select
+                  value={filtroEstadoSolicitud}
+                  onChange={(e) => setFiltroEstadoSolicitud(e.target.value)}
+                >
+                  <option value="todas">Todas las solicitudes</option>
+                  <option value="pendiente">
+                    Solo pendientes (sin aceptar o rechazar)
+                  </option>
+                </Form.Select>
+              </Col>
+              <Col md={3}>
                 <Form.Control
                   type="date"
-                  value={filtroFecha}
-                  onChange={(e) => setFiltroFecha(e.target.value)}
-                  placeholder="Filtrar por fecha"
+                  value={filtroFechaVisita}
+                  onChange={(e) => setFiltroFechaVisita(e.target.value)}
+                  placeholder="Filtrar por fecha de visita"
                 />
               </Col>
-              <Col md={8}>
+              <Col md={6}>
                 <Form.Control
                   type="text"
                   placeholder="Buscar por nombre o motivo"
@@ -220,18 +249,19 @@ export default function UsuariosPage() {
                   <th>Nombre</th>
                   <th>Motivo</th>
                   <th>Estado</th>
-                  <th>Fecha Registro</th>
+                  <th>Fecha Visita</th>
                   <th>Tipo Ingreso</th>
                   <th>Modelo Vehículo</th>
                   <th>Placas Vehículo</th>
                   <th>ID Usuario</th>
+                  <th>Fecha Registro</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {solicitudesFiltradas.length === 0 ? (
                   <tr>
-                    <td colSpan={10} className="text-center">
+                    <td colSpan={11} className="text-center">
                       No hay solicitudes registradas.
                     </td>
                   </tr>
@@ -257,11 +287,16 @@ export default function UsuariosPage() {
                             sol.estado_sol.slice(1)}
                         </span>
                       </td>
-                      <td>{new Date(sol.fecha_reg_sol).toLocaleString()}</td>
+                      <td>
+                        {sol.fecha_visita_sol
+                          ? new Date(sol.fecha_visita_sol).toLocaleString()
+                          : "No especificada"}
+                      </td>
                       <td>{sol.tipo_ingreso_sol}</td>
                       <td>{sol.modelo_veh_sol}</td>
                       <td>{sol.placas_veh_sol}</td>
                       <td>{sol.id_usu}</td>
+                      <td>{new Date(sol.fecha_reg_sol).toLocaleString()}</td>
                       <td>
                         {sol.estado_sol === "pendiente" ? (
                           <>
@@ -269,7 +304,10 @@ export default function UsuariosPage() {
                               className="btn btn-success btn-sm me-2"
                               title="Aceptar"
                               onClick={() =>
-                                actualizarEstadoSolicitud(sol.id_sol, "aceptada")
+                                actualizarEstadoSolicitud(
+                                  sol.id_sol,
+                                  "aceptada"
+                                )
                               }
                             >
                               <FaCheck />
@@ -278,10 +316,18 @@ export default function UsuariosPage() {
                               className="btn btn-danger btn-sm"
                               title="Rechazar"
                               onClick={async () => {
-                                const comentario = prompt("Ingresa el motivo del rechazo:");
+                                const comentario = prompt(
+                                  "Ingresa el motivo del rechazo:"
+                                );
                                 if (!comentario) return;
-                                await actualizarEstadoSolicitud(sol.id_sol, "rechazada");
-                                await guardarComentarioEnFirebase(sol.id_sol, comentario);
+                                await actualizarEstadoSolicitud(
+                                  sol.id_sol,
+                                  "rechazada"
+                                );
+                                await guardarComentarioEnFirebase(
+                                  sol.id_sol,
+                                  comentario
+                                );
                               }}
                             >
                               <FaTimes />
@@ -352,7 +398,9 @@ export default function UsuariosPage() {
                     <button
                       className="btn btn-warning btn-sm me-2"
                       title="Editar"
-                      onClick={() => navigate(`/usuarios/editar/${user.id_usu}`)}
+                      onClick={() =>
+                        navigate(`/usuarios/editar/${user.id_usu}`)
+                      }
                     >
                       <FaEdit />
                     </button>
