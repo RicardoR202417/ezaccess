@@ -1,13 +1,7 @@
-// routes/nfcRoutes.js
-
 const express = require('express');
 const router = express.Router();
+const nfcController = require('../controllers/nfcController');
 
-// Controlador
-const { validarUID } = require('../controllers/nfcController');
-
-// Ruta para validar el UID del escaneo NFC
-// Espera un body como: { "uid": "ABC123XYZ" }
-router.post('/validar-uid', validarUID);
+router.post('/validate', nfcController.validarNFC);
 
 module.exports = router;
