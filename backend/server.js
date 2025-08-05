@@ -4,6 +4,9 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const sequelize = require('./config/db');
+const nfcRoutes = require('./routes/nfcRoutes');
+
+
 
 const asignacionRoutes = require('./routes/asignacionRoutes');
 const cajonesRoutes = require('./routes/cajonesRoutes');
@@ -11,7 +14,7 @@ const actuadorRoutes = require('./routes/actuadorRoutes');
 const authRoutes = require('./routes/authRoutes');
 const rutasProtegidas = require('./routes/protegidasRoutes');
 const visitaRoutes = require('./routes/visitaRoutes');
-const nfcRoutes = require('./routes/nfcRoutes'); // ✅ AÑADIDO
+
 
 // CORS
 app.use(cors({
@@ -45,6 +48,7 @@ app.use('/api', asignacionRoutes);
 app.use('/api', cajonesRoutes);
 app.use('/api', actuadorRoutes);
 app.use('/api', nfcRoutes); // ✅ AÑADIDO
+app.use('/api/nfc', nfcRoutes);
 
 // Rutas protegidas
 app.use('/api', rutasProtegidas);
