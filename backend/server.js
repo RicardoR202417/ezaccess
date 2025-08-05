@@ -14,7 +14,7 @@ const actuadorRoutes = require('./routes/actuadorRoutes');
 const authRoutes = require('./routes/authRoutes');
 const rutasProtegidas = require('./routes/protegidasRoutes');
 const visitaRoutes = require('./routes/visitaRoutes');
-const nfcRoutes = require('./routes/nfcRoutes'); // ✅ AÑADIDO
+
 
 // CORS
 app.use(cors({
