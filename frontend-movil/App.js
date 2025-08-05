@@ -1,13 +1,16 @@
 // src/App.js
 import React from 'react';
 import { Provider as PaperProvider } from 'react-native-paper';
-import AppNavigator from './src/navigation/AppNavigator';  // Verifica que esta importación sea correcta
-import { AuthProvider } from './src/context/AuthContext';  // Verifica que esta importación sea correcta
+import AppNavigator from './src/navigation/AppNavigator';
+import { AuthProvider } from './src/context/AuthContext';
 
 export default function App() {
   return (
-    <AuthProvider>  {/* Asegúrate de envolver el AppNavigator con AuthProvider */}
+    // Contexto global para manejo de autenticación
+    <AuthProvider>
+      {/* Proveedor para estilos y componentes de React Native Paper */}
       <PaperProvider>
+        {/* Navegación principal de la app */}
         <AppNavigator />
       </PaperProvider>
     </AuthProvider>

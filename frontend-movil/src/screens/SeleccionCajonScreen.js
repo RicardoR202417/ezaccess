@@ -1,7 +1,5 @@
-// src/screens/SeleccionCajonScreen.js
-
 import React, { useEffect, useState } from 'react';
-import { View, FlatList, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, FlatList, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { Text, Title } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -18,14 +16,20 @@ export default function SeleccionCajonScreen() {
   useEffect(() => {
     const obtenerUsuario = async () => {
       try {
-        const id = await AsyncStorage.getItem('user_id');
-        if (id) {
-          setUsuarioId(parseInt(id));
+        const usuarioJSON = await AsyncStorage.getItem('usuario');
+        if (usuarioJSON) {
+          const usuario = JSON.parse(usuarioJSON);
+          if (usuario.id) {
+            setUsuarioId(usuario.id);
+          } else {
+            Alert.alert('Error', 'ID de usuario no encontrado en sesión');
+          }
         } else {
-          Alert.alert('Error', 'No se encontró el ID de usuario en sesión');
+          Alert.alert('Error', 'No se encontró usuario en sesión');
         }
       } catch (e) {
         console.error('Error leyendo AsyncStorage:', e);
+        Alert.alert('Error', 'Error al obtener usuario');
       }
     };
     obtenerUsuario();
@@ -40,7 +44,7 @@ export default function SeleccionCajonScreen() {
   const obtenerCajones = async () => {
     try {
       setCargando(true);
-     const response = await axios.get(`${API_BASE}/cajones`);
+      const response = await axios.get(`${API_BASE}/cajones`);
       setCajones(response.data);
     } catch (error) {
       console.error('❌ Error al obtener cajones:', error);
@@ -58,18 +62,21 @@ export default function SeleccionCajonScreen() {
     try {
       const res = await axios.put(`${API_BASE}/cajones/${id_caj}/estado`, {
         accion: 'activar',
-        id_usu: usuarioId
+        id_usu: usuarioId,
       });
 
       if (res.status === 200 && res.data.cajon) {
         const cajon = res.data.cajon;
 
-        // ✅ Guardar cajón asignado en AsyncStorage
-        await AsyncStorage.setItem('cajon_asignado', JSON.stringify({
-          id_caj: cajon.id_caj,
-          numero: cajon.numero_caj,
-          ubicacion: cajon.ubicacion_caj
-        }));
+        // Guardar cajón asignado en AsyncStorage
+        await AsyncStorage.setItem(
+          'cajon_asignado',
+          JSON.stringify({
+            id_caj: cajon.id_caj,
+            numero: cajon.numero_caj,
+            ubicacion: cajon.ubicacion_caj,
+          })
+        );
 
         Alert.alert(
           '✅ Cajón asignado',
@@ -77,12 +84,12 @@ export default function SeleccionCajonScreen() {
           [
             {
               text: 'OK',
-              onPress: () => navigation.navigate('Dashboard')
-            }
+              onPress: () => navigation.navigate('Dashboard'),
+            },
           ]
         );
       } else {
-        throw new Error('Respuesta inesperada');
+        throw new Error('Respuesta inesperada del servidor');
       }
     } catch (error) {
       console.error('❌ Error al asignar cajón:', error.response?.data || error.message);
@@ -103,9 +110,7 @@ export default function SeleccionCajonScreen() {
           Cajón {item.numero_caj}
         </Text>
         <Text style={styles.ubicacion}>{item.ubicacion_caj}</Text>
-        {!disponible && (
-          <Text style={styles.estado}>No disponible</Text>
-        )}
+        {!disponible && <Text style={styles.estado}>No disponible</Text>}
       </TouchableOpacity>
     );
   };
@@ -114,7 +119,9 @@ export default function SeleccionCajonScreen() {
     <View style={styles.container}>
       <Title style={styles.titulo}>Selecciona un cajón</Title>
 
-      {cajones.length === 0 && !cargando ? (
+      {cargando ? (
+        <ActivityIndicator size="large" color="#1565C0" style={{ marginTop: 20 }} />
+      ) : cajones.length === 0 ? (
         <Text style={{ textAlign: 'center', marginTop: 20, color: '#999' }}>
           No hay cajones registrados
         </Text>
@@ -158,12 +165,12 @@ const styles = StyleSheet.create({
   noDisponible: {
     backgroundColor: '#E0E0E0',
     borderColor: '#ccc',
-    borderWidth: 1
+    borderWidth: 1,
   },
   numero: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#1B5E20'
+    color: '#1B5E20',
   },
   ubicacion: {
     fontSize: 14,
@@ -174,6 +181,6 @@ const styles = StyleSheet.create({
     marginTop: 6,
     fontSize: 13,
     color: '#B71C1C',
-    fontStyle: 'italic'
-  }
+    fontStyle: 'italic',
+  },
 });

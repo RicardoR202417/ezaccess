@@ -24,20 +24,16 @@ export default function SolicitudVisitante({ navigation }) {
       setMensaje('Por favor llena todos los campos obligatorios.');
       return;
     }
-
     if (modoEntrada === 'vehiculo' && (!tipoVehiculo.trim() || !placas.trim())) {
       setMensaje('Completa los campos del vehículo.');
       return;
     }
-
     try {
       const token = await AsyncStorage.getItem('token');
-
       if (!token) {
         setMensaje('Token no encontrado. Inicia sesión de nuevo.');
         return;
       }
-
       const response = await fetch('https://ezaccess-backend.onrender.com/api/solicitudes-visita', {
         method: 'POST',
         headers: {
@@ -53,9 +49,7 @@ export default function SolicitudVisitante({ navigation }) {
           fecha_visita_sol: formatearFecha(fechaVisita)
         })
       });
-
       const data = await response.json();
-
       if (response.ok) {
         setMensaje(`✅ ${data.mensaje}`);
         setNombre('');
@@ -175,7 +169,7 @@ export default function SolicitudVisitante({ navigation }) {
             style={styles.volverBtn}
             textColor="#1565C0"
           >
-            <Text>Volver al Dashboard</Text>
+            Volver al Dashboard
           </Button>
         </Animatable.View>
       </View>
