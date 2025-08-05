@@ -1,4 +1,4 @@
-const Usuario = require('../models/usuarios');
+const Usuario = require('../models/Usuario');
 
 exports.validarNFC = async (req, res) => {
   try {
