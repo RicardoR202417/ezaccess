@@ -306,7 +306,7 @@ export default function UsuariosPage() {
                       <td>{new Date(sol.fecha_reg_sol).toLocaleString()}</td>
                       <td>
                         {sol.estado_sol === "pendiente" ? (
-                          <>
+                          <> 
                             <button
                               className="btn btn-success btn-sm me-2"
                               title="Aceptar"
