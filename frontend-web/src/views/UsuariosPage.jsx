@@ -149,9 +149,7 @@ export default function UsuariosPage() {
   const solicitudesFiltradas = solicitudes.filter((sol) => {
     // Filtro por estado
     const coincideEstado =
-      filtroEstadoSolicitud === "todas"
-        ? true
-        : sol.estado_sol === "pendiente";
+      filtroEstadoSolicitud === "todas" ? true : sol.estado_sol === "pendiente";
     // Filtro por fecha
     const coincideFecha = filtroFechaVisita
       ? new Date(sol.fecha_visita_sol).toLocaleDateString("sv-SE") ===
@@ -253,7 +251,7 @@ export default function UsuariosPage() {
                   <th>Tipo Ingreso</th>
                   <th>Modelo Vehículo</th>
                   <th>Placas Vehículo</th>
-                  <th>ID Usuario</th>
+                  <th>Residente Responsable</th>
                   <th>Fecha Registro</th>
                   <th>Acciones</th>
                 </tr>
@@ -295,7 +293,16 @@ export default function UsuariosPage() {
                       <td>{sol.tipo_ingreso_sol}</td>
                       <td>{sol.modelo_veh_sol}</td>
                       <td>{sol.placas_veh_sol}</td>
-                      <td>{sol.id_usu}</td>
+                      <td>
+                        {(() => {
+                          const user = usuarios.find(
+                            (u) => u.id_usu === sol.id_usu
+                          );
+                          return user
+                            ? `${user.nombre_usu} ${user.apellido_pat_usu}`
+                            : "No especificado";
+                        })()}
+                      </td>
                       <td>{new Date(sol.fecha_reg_sol).toLocaleString()}</td>
                       <td>
                         {sol.estado_sol === "pendiente" ? (
