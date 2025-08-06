@@ -1,3 +1,4 @@
+// src/views/CajonesPage.jsx
 import React, { useEffect, useState } from "react";
 import { Button, Spinner, Alert, Form } from "react-bootstrap";
 import NavBarMonitor from "../components/NavBarMonitor";
@@ -12,20 +13,18 @@ export default function CajonesPage() {
   const [filtroEstado, setFiltroEstado] = useState("todos");
   const token = localStorage.getItem("token");
 
+  // 1) Traer cajones desde el endpoint que devuelve:
+  //    [{ id_caj, numero_caj, ubicacion_caj, estado, usuario_ocupante, id_usuario_ocupante }, ...]
   const obtenerCajones = async () => {
     setCargando(true);
     try {
       const res = await fetch(
-        "https://ezaccess-backend.onrender.com/api/cajones", // ← ruta corregida
+        "https://ezaccess-backend.onrender.com/api/cajones",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
-      if (!res.ok) {
-        throw new Error(`Error HTTP: ${res.status}`);
-      }
-
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setCajones(data);
     } catch (error) {
@@ -36,8 +35,14 @@ export default function CajonesPage() {
     }
   };
 
+  // 2) Llamada a activar/finalizar (manteniendo el id_usu en el body si es manual)
   const cambiarAsignacion = async (id_caj, accion) => {
     try {
+      const body = { accion };
+      // si es manual y viene el id de sesión, añádelo:
+      const idUsu = localStorage.getItem("id_usuario");
+      if (accion === "activar" && idUsu) body.id_usu = +idUsu;
+
       const res = await fetch(
         `https://ezaccess-backend.onrender.com/api/cajones/${id_caj}/estado`,
         {
@@ -46,26 +51,26 @@ export default function CajonesPage() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ accion }),
+          body: JSON.stringify(body),
         }
       );
-
       const data = await res.json();
-      if (res.ok) {
-        setMensaje(data.mensaje);
-        obtenerCajones();
-      } else {
-        setMensaje(data.mensaje || "Error al cambiar estado");
-      }
+      setMensaje(data.mensaje);
+      await obtenerCajones();
     } catch (err) {
       console.error("Error al cambiar estado:", err);
       setMensaje("Error en la conexión con el servidor.");
     }
   };
 
+  // 3) Activar/Finalizar todos
   const cambiarEstadoTodos = async (accion) => {
     setCargando(true);
     try {
+      const body = { accion };
+      const idUsu = localStorage.getItem("id_usuario");
+      if (accion === "activar" && idUsu) body.id_usu = +idUsu;
+
       const res = await fetch(
         "https://ezaccess-backend.onrender.com/api/cajones/estado/todos",
         {
@@ -74,13 +79,14 @@ export default function CajonesPage() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ accion }),
+          body: JSON.stringify(body),
         }
       );
       const data = await res.json();
       setMensaje(data.mensaje);
-      obtenerCajones();
+      await obtenerCajones();
     } catch (err) {
+      console.error(err);
       setMensaje("Error al cambiar el estado de todos los cajones.");
     } finally {
       setCargando(false);
@@ -93,6 +99,7 @@ export default function CajonesPage() {
 
   const zonas = ["Zona A", "Zona C", "Zona D", "Zona E"];
 
+  // 4) Filtrado
   const cajonesFiltrados = cajones.filter((cajon) => {
     const coincideZona =
       cajon.ubicacion_caj && cajon.ubicacion_caj.includes(zonaActiva);
@@ -190,6 +197,15 @@ export default function CajonesPage() {
                   <p className="estado">
                     Estado: <strong>{cajon.estado}</strong>
                   </p>
+
+                  {cajon.estado === "ocupado" ? (
+                    <p className="residente-ocupante">
+                      Ocupado por: <b>{cajon.usuario_ocupante}</b>
+                    </p>
+                  ) : (
+                    <p className="residente-ocupante text-muted">Libre</p>
+                  )}
+
                   <Button
                     variant={cajon.estado === "ocupado" ? "danger" : "success"}
                     size="sm"

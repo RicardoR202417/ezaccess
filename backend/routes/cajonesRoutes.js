@@ -5,6 +5,11 @@ const cajonesController = require('../controllers/cajonesController');
 // Rutas GET
 router.get('/estado', cajonesController.obtenerCajonesConEstado);
 router.get('/cajones', cajonesController.obtenerCajonesConEstado);
+
+// Reemplaza la línea que tenías de obtenerCajonesConEstado por la versión completa:
+router.get('/cajones', cajonesController.obtenerEstadoCompleto);
+
+
 router.get('/estado-completo', cajonesController.obtenerEstadoCompleto);
 
 // ⚠️ Orden IMPORTANTE de las rutas PUT

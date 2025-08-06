@@ -1,25 +1,43 @@
-const { Cajon, Asignacion, Actuador, Sensor } = require('../models');
+const { Cajon, Asignacion, Usuario, Actuador, Sensor } = require('../models');
 
-// Obtener todos los cajones con su estado (ocupado o libre)
+// Obtener todos los cajones con su estado (ocupado o libre) y el usuario que lo ocupa
 exports.obtenerCajonesConEstado = async (req, res) => {
   try {
-    const cajones = await Cajon.findAll();
+    const cajones = await Cajon.findAll({
+      include: [
+        {
+          model: Asignacion,
+          where: { estado_asig: 'activa' },
+          required: false,
+          include: [
+            {
+              model: Usuario,
+              attributes: ['id_usu', 'nombre_usu'],
+              required: false
+            }
+          ]
+        }
+      ]
+    });
 
-    const cajonesConEstado = await Promise.all(
-      cajones.map(async (cajon) => {
-        const asignacionActiva = await Asignacion.findOne({
-          where: {
-            id_caj: cajon.id_caj,
-            estado_asig: 'activa'
-          }
-        });
-
-        return {
-          ...cajon.toJSON(),
-          estado: asignacionActiva ? 'ocupado' : 'libre'
-        };
-      })
-    );
+    const cajonesConEstado = cajones.map((cajon) => {
+      // Buscar la primera asignación activa (si existe)
+      const asignacionActiva = cajon.Asignacions && cajon.Asignacions.length > 0
+        ? cajon.Asignacions[0]
+        : null;
+      return {
+        id_caj: cajon.id_caj,
+        numero_caj: cajon.numero_caj,
+        ubicacion_caj: cajon.ubicacion_caj,
+        estado: asignacionActiva ? 'ocupado' : 'libre',
+        usuario_ocupante: asignacionActiva && asignacionActiva.Usuario
+          ? asignacionActiva.Usuario.nombre_usu
+          : null,
+        id_usuario_ocupante: asignacionActiva && asignacionActiva.Usuario
+          ? asignacionActiva.Usuario.id_usu
+          : null
+      };
+    });
 
     res.json(cajonesConEstado);
   } catch (error) {
@@ -31,7 +49,7 @@ exports.obtenerCajonesConEstado = async (req, res) => {
 // Cambiar el estado de un cajón manualmente (activar o finalizar asignación)
 exports.cambiarEstadoCajon = async (req, res) => {
   const { id_caj } = req.params;
-  const { accion } = req.body; // 'activar' o 'finalizar'
+  const { accion, id_usu } = req.body; // ← ahora id_usu se toma del body
 
   try {
     const cajon = await Cajon.findByPk(id_caj);
@@ -40,6 +58,9 @@ exports.cambiarEstadoCajon = async (req, res) => {
     }
 
     if (accion === 'activar') {
+      if (!id_usu) {
+        return res.status(400).json({ mensaje: 'Falta el id_usu en la solicitud.' });
+      }
       // Solo se crea una asignación si no existe una activa
       const asignacionExistente = await Asignacion.findOne({
         where: {
@@ -54,7 +75,7 @@ exports.cambiarEstadoCajon = async (req, res) => {
 
       await Asignacion.create({
         id_caj,
-        id_usu: 1, // Este ID debe venir desde sesión o solicitud
+        id_usu,
         tipo_asig: 'manual',
         estado_asig: 'activa'
       });
@@ -96,7 +117,14 @@ exports.obtenerEstadoCompleto = async (req, res) => {
         {
           model: Asignacion,
           where: { estado_asig: 'activa' },
-          required: false
+          required: false,
+          include: [
+            {
+              model: Usuario,
+              attributes: ['id_usu', 'nombre_usu'],
+              required: false
+            }
+          ]
         },
         {
           model: Actuador,
@@ -111,14 +139,22 @@ exports.obtenerEstadoCompleto = async (req, res) => {
       ]
     });
 
-    const resultado = cajones.map(cajon => ({
-      id_caj: cajon.id_caj,
-      numero_caj: cajon.numero_caj,
-      ubicacion_caj: cajon.ubicacion_caj,
-      estado: cajon.asignacions?.length > 0 ? 'ocupado' : 'libre',
-      actuador: cajon.actuadore || null,
-      sensor: cajon.sensore || null
-    }));
+    const resultado = cajones.map(cajon => {
+      const asignacionActiva = cajon.Asignacions && cajon.Asignacions.length > 0
+        ? cajon.Asignacions[0]
+        : null;
+      return {
+        id_caj: cajon.id_caj,
+        numero_caj: cajon.numero_caj,
+        ubicacion_caj: cajon.ubicacion_caj,
+        estado: asignacionActiva ? 'ocupado' : 'libre',
+        usuario_ocupante: asignacionActiva && asignacionActiva.Usuario
+          ? asignacionActiva.Usuario.nombre_usu
+          : null,
+        actuador: cajon.actuadore || null,
+        sensor: cajon.sensore || null
+      };
+    });
 
     res.json(resultado);
   } catch (error) {
@@ -126,14 +162,16 @@ exports.obtenerEstadoCompleto = async (req, res) => {
     res.status(500).json({ mensaje: 'Error del servidor' });
   }
 };
+
 exports.cambiarEstadoTodos = async (req, res) => {
-  const { accion } = req.body;
+  const { accion, id_usu } = req.body; // ← ahora id_usu se toma del body
 
   try {
     const cajones = await Cajon.findAll();
 
     for (const cajon of cajones) {
       if (accion === 'activar') {
+        if (!id_usu) continue; // Evita crear asignaciones sin usuario
         const existeAsignacion = await Asignacion.findOne({
           where: {
             id_caj: cajon.id_caj,
@@ -144,7 +182,7 @@ exports.cambiarEstadoTodos = async (req, res) => {
         if (!existeAsignacion) {
           await Asignacion.create({
             id_caj: cajon.id_caj,
-            id_usu: 1, // Este ID se puede reemplazar luego por el de sesión
+            id_usu,
             tipo_asig: 'manual',
             estado_asig: 'activa',
           });

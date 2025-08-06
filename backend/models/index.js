@@ -21,9 +21,11 @@ Sensor.belongsTo(Cajon, { foreignKey: 'id_caj' });
 
 Asignacion.belongsTo(Usuario, { foreignKey: 'id_usu' });
 Asignacion.belongsTo(Cajon, { foreignKey: 'id_caj' });
+// ← RELACIÓN QUE FALTABA:
+Cajon.hasMany(Asignacion, { foreignKey: 'id_caj' });
 
 module.exports = {
-  sequelize,
+  sequelize, // NECESARIO para controladores personalizados
   Usuario,
   Cajon,
   Actuador,
