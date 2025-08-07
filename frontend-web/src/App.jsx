@@ -15,6 +15,7 @@ import DashboardPage from "./views/DashboardPage";
 import UsuariosPage from "./views/UsuariosPage";
 import EditarUsuarioPage from "./views/EditarUsuarioPage";
 import CajonesPage from "./views/CajonesPage";
+import ReportesPage from './views/ReportesPage'   // ← importar
 
 // Contexto de sesión
 import { AuthProvider } from "./contexts/AuthContext";
@@ -62,7 +63,14 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-
+          <Route
+            path="/reportes"
+            element={
+              <ProtectedRoute>
+                <ReportesPage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="*"
             element={

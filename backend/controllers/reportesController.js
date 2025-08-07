@@ -6,14 +6,14 @@ exports.getHistorial = async (req, res) => {
   try {
     const { usuario, cajon, desde, hasta } = req.query;
 
-    // Armar cláusula where dinámico
+    // Armar cláusula where dinámico SOLO si hay valor real
     const where = {};
-    if (usuario) where.id_usu = usuario;
-    if (cajon) where.id_caj = cajon;
-    if (desde || hasta) {
+    if (usuario && usuario !== "") where.id_usu = usuario;
+    if (cajon && cajon !== "")     where.id_caj = cajon;
+    if ((desde && desde !== "") || (hasta && hasta !== "")) {
       where.fecha = {};
-      if (desde) where.fecha[Op.gte] = new Date(desde);
-      if (hasta) where.fecha[Op.lte] = new Date(hasta);
+      if (desde && desde !== "") where.fecha[Op.gte] = new Date(desde);
+      if (hasta && hasta !== "") where.fecha[Op.lte] = new Date(hasta);
     }
 
     const registros = await HistorialAsignacion.findAll({
@@ -26,7 +26,7 @@ exports.getHistorial = async (req, res) => {
         },
         {
           model: Cajon,
-          as: "cajon", // ← coincide con el alias anterior
+          as: "cajon",
           attributes: ["id_caj", "numero_caj"],
         },
       ],
@@ -50,7 +50,7 @@ exports.getHistorial = async (req, res) => {
       accion: r.accion,
     }));
 
-    res.json({ datos: resultado });
+    res.json({ datos: resultado }); // Siempre responde 200 y array (aunque esté vacío)
   } catch (error) {
     console.error("Error en getHistorial:", error);
     res.status(500).json({ mensaje: "Error del servidor" });
