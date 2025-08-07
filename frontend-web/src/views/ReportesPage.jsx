@@ -2,32 +2,31 @@
 import { useState } from "react";
 import { Alert, Button, Form, Table, Nav, Tab } from "react-bootstrap";
 import NavBarMonitor from "../components/NavBarMonitor";
-// si quieres estilos propios, importa tu layout general
 import "../styles/layout.css";
 
 export default function ReportesPage() {
-  // filtros
+  // Filtros
   const [usuario, setUsuario] = useState("");
-  const [cajon, setCajon]     = useState("");
-  const [desde, setDesde]     = useState("");
-  const [hasta, setHasta]     = useState("");
+  const [numeroCajon, setNumeroCajon] = useState(""); // ← cambia a texto
+  const [desde, setDesde] = useState("");
+  const [hasta, setHasta] = useState("");
   
-  // datos y estado UI
+  // Datos y estado UI
   const [registros, setRegistros] = useState([]);
-  const [cargando,   setCargando] = useState(false);
-  const [error,      setError]    = useState("");
+  const [cargando, setCargando] = useState(false);
+  const [error, setError] = useState("");
 
   const handleBuscar = async () => {
     setError("");
     setRegistros([]);
     setCargando(true);
 
-    // construimos query params
+    // Construimos query params
     const params = new URLSearchParams();
     if (usuario) params.append("usuario", usuario);
-    if (cajon)   params.append("cajon",   cajon);
-    if (desde)   params.append("desde",   desde);
-    if (hasta)   params.append("hasta",   hasta);
+    if (numeroCajon) params.append("numero_caj", numeroCajon); // ← ahora es por número
+    if (desde) params.append("desde", desde);
+    if (hasta) params.append("hasta", hasta);
 
     const url =
       "https://ezaccess-backend.onrender.com" +
@@ -37,7 +36,6 @@ export default function ReportesPage() {
     try {
       const res = await fetch(url, { method: "GET" });
       if (!res.ok) {
-        // leemos mensaje de error si viene JSON, si no tiramos genérico
         let msg = `HTTP ${res.status}`;
         try {
           const errJson = await res.json();
@@ -55,21 +53,23 @@ export default function ReportesPage() {
     }
   };
 
+  // Para que cargue todo el historial al entrar:
+  React.useEffect(() => {
+    handleBuscar();
+    // eslint-disable-next-line
+  }, []);
+
   return (
     <>
       <NavBarMonitor />
-
       <div className="container py-4">
         <h1>Reportes</h1>
-
         <Tab.Container defaultActiveKey="historial">
           <Nav variant="tabs" className="mb-3">
             <Nav.Item>
               <Nav.Link eventKey="historial">Historial</Nav.Link>
             </Nav.Item>
-            {/* En el futuro podrás añadir más pestañas aquí */}
           </Nav>
-
           <Tab.Content>
             <Tab.Pane eventKey="historial">
               <Form className="row g-3 align-items-end">
@@ -83,12 +83,12 @@ export default function ReportesPage() {
                   />
                 </Form.Group>
                 <Form.Group className="col-md-3">
-                  <Form.Label>Cajón (ID)</Form.Label>
+                  <Form.Label>Número de Cajón</Form.Label>
                   <Form.Control
-                    type="number"
-                    placeholder="e.j. 5"
-                    value={cajon}
-                    onChange={(e) => setCajon(e.target.value)}
+                    type="text"
+                    placeholder="e.j. C1"
+                    value={numeroCajon}
+                    onChange={(e) => setNumeroCajon(e.target.value)}
                   />
                 </Form.Group>
                 <Form.Group className="col-md-2">
@@ -117,17 +117,16 @@ export default function ReportesPage() {
                   </Button>
                 </div>
               </Form>
-
               {error && (
                 <Alert variant="danger" className="mt-3">
                   {error}
                 </Alert>
               )}
-
               <Table striped bordered hover className="mt-3">
                 <thead>
                   <tr>
                     <th>Fecha</th>
+                    <th>ID Usuario</th>
                     <th>Usuario</th>
                     <th>Cajón</th>
                     <th>Tipo</th>
@@ -138,7 +137,7 @@ export default function ReportesPage() {
                 <tbody>
                   {!cargando && registros.length === 0 && (
                     <tr>
-                      <td colSpan="6" className="text-center">
+                      <td colSpan="7" className="text-center">
                         No hay registros
                       </td>
                     </tr>
@@ -146,6 +145,7 @@ export default function ReportesPage() {
                   {registros.map((r) => (
                     <tr key={r.id_historial}>
                       <td>{new Date(r.fecha_evento).toLocaleString()}</td>
+                      <td>{r.usuario.id_usu}</td>
                       <td>{r.usuario.nombre_usu}</td>
                       <td>{r.cajon.numero_caj}</td>
                       <td>{r.tipo_asig}</td>
@@ -155,7 +155,6 @@ export default function ReportesPage() {
                   ))}
                 </tbody>
               </Table>
-
               <Button variant="primary" disabled={registros.length === 0}>
                 Exportar PDF
               </Button>
