@@ -11,6 +11,7 @@ import {
   ResponsiveContainer,
   LabelList,
 } from "recharts";
+import WeatherWidget from "../components/WeatherWidget"; // Importamos el componente.
 
 export default function DashboardPage() {
   const navigate = useNavigate();
@@ -223,6 +224,13 @@ export default function DashboardPage() {
                 )}
               </Card.Body>
             </Card>
+          </Col>
+        </Row>
+
+        {/* Aquí mostramos el widget del clima */}
+        <Row className="mt-4">
+          <Col>
+            <WeatherWidget />
           </Col>
         </Row>
       </Container>
