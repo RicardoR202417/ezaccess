@@ -208,3 +208,34 @@ exports.cambiarEstadoTodos = async (req, res) => {
     res.status(500).json({ mensaje: "Error al procesar los cajones." });
   }
 };
+
+// Obtener el cupo por zona (ocupados y libres)
+exports.obtenerCupoPorZona = async (req, res) => {
+  const { zona } = req.params; // Recibe la zona como parámetro
+
+  try {
+    const cajones = await Cajon.findAll({
+      where: { ubicacion_caj: zona }, // Filtra por zona
+      include: [
+        {
+          model: Asignacion,
+          where: { estado_asig: 'activa' },
+          required: false,
+        },
+      ],
+    });
+
+    const totalOcupados = cajones.filter((cajon) => cajon.Asignacions && cajon.Asignacions.length > 0).length;
+    const totalLibres = cajones.length - totalOcupados;
+
+    res.json({
+      zona,
+      totalOcupados,
+      totalLibres,
+      totalCajones: cajones.length,
+    });
+  } catch (error) {
+    console.error('Error al obtener el cupo por zona:', error);
+    res.status(500).json({ mensaje: 'Error del servidor' });
+  }
+};

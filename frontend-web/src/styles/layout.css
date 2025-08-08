@@ -349,3 +349,182 @@ form .form-control {
   font-weight: 500;
   color: #333;
 }
+.container-reportes {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(44, 62, 80, 0.08);
+  padding: 2rem 2.5rem;
+  margin-top: 2rem;
+  min-height: 80vh;
+}
+
+.titulo-reportes {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #2980b9;
+  margin-bottom: 1.5rem;
+}
+
+.form-reportes .form-label {
+  font-weight: 500;
+  color: #34495e;
+}
+
+.btn-buscar {
+  width: 100%;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.btn-exportar {
+  font-weight: 600;
+  letter-spacing: 1px;
+  background: #27ae60;
+  border: none;
+  transition: background 0.2s;
+}
+
+.btn-exportar:hover {
+  background: #219150;
+}
+
+.tabla-responsive-reportes {
+  overflow-x: auto;
+}
+
+.tabla-reportes {
+  background: #f8fafd;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.tabla-reportes th {
+  background: #2980b9;
+  color: #fff;
+  font-weight: 600;
+  text-align: center;
+}
+
+.tabla-reportes td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.recharts-wrapper {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(44,62,80,0.07);
+  padding: 1rem;
+}
+
+/* Histograma y estructura visual para reportes */
+.histograma-container {
+  background: #f8fafd;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(44,62,80,0.10);
+  padding: 2rem 1.5rem 1.5rem 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.btn-toggle-tabla {
+  font-weight: 600;
+  letter-spacing: 1px;
+  min-width: 180px;
+}
+
+.panel-tabla-filtros {
+  background: #f8fafd;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(44,62,80,0.07);
+  transition: box-shadow 0.2s;
+}
+
+.titulo-reportes {
+  font-size: 2.3rem;
+  font-weight: 700;
+  color: #1565C0;
+  margin-bottom: 2rem;
+  letter-spacing: 1px;
+}
+
+.sidebar-reportes {
+  background: #f8fafd;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(44,62,80,0.07);
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sidebar-btn-reportes {
+  background: none;
+  border: none;
+  color: #1565C0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-align: left;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  transition: background 0.2s, color 0.2s;
+  cursor: pointer;
+}
+
+.sidebar-btn-reportes.active,
+.sidebar-btn-reportes:hover {
+  background: #e3f0fc;
+  color: #0d47a1;
+}
+
+.vista-previa-reportes .recharts-wrapper,
+.vista-previa-reportes .histograma-container {
+  min-height: 320px;
+}
+
+.vista-previa-reportes {
+  padding: 1rem 0;
+}
+
+.grafica-preview-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(44, 62, 80, 0.1);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden; /* Evita que las gráficas sobresalgan */
+}
+
+.grafica-preview-card h5 {
+  text-align: center;
+  font-size: 1.4rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .container-reportes {
+    padding: 1rem 0.5rem;
+  }
+  .form-reportes .form-group,
+  .form-reportes .col-md-2,
+  .form-reportes .col-md-3 {
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+  .histograma-container {
+    padding: 1rem 0.2rem;
+  }
+  .panel-tabla-filtros {
+    padding: 1rem 0.2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .grafica-preview-card {
+    min-height: 320px; /* Reduce la altura en pantallas pequeñas */
+    padding: 1.5rem; /* Ajusta el padding en pantallas pequeñas */
+  }
+}
