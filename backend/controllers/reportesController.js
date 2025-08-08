@@ -4,6 +4,7 @@ const { HistorialAsignacion, Usuario, Cajon } = require("../models");
 
 exports.getHistorial = async (req, res) => {
   try {
+    console.log("Query recibida:", req.query);
     const { usuario, numero_caj, desde, hasta } = req.query;
     const where = {};
 
@@ -39,17 +40,12 @@ exports.getHistorial = async (req, res) => {
       order: [["fecha", "DESC"]],
     });
 
+    // Formatea la respuesta para el frontend
     const resultado = registros.map((r) => ({
       id_historial: r.id_historial,
       fecha: r.fecha, // <-- usa el campo correcto
-      usuario: {
-        id_usu: r.Usuario?.id_usu,
-        nombre_usu: r.Usuario?.nombre_usu,
-      },
-      cajon: {
-        id_caj: r.Cajon?.id_caj,
-        numero_caj: r.Cajon?.numero_caj,
-      },
+      usuario: r.Usuario?.nombre_usu || "Sin usuario",
+      cajon: r.Cajon?.numero_caj || "Sin cajón",
       tipo_asig: r.tipo_asig,
       estado_asig: r.estado_asig,
       accion: r.accion,

@@ -1,55 +1,60 @@
 import React, { useState, useEffect } from "react";
-import { Alert, Button, Form, Table, Nav, Tab } from "react-bootstrap";
+import { Table, Alert, Form, Button, Nav, Tab } from "react-bootstrap";
 import NavBarMonitor from "../components/NavBarMonitor";
 import "../styles/layout.css";
 
 export default function ReportesPage() {
+  const [registros, setRegistros] = useState([]);
+  const [registrosFiltrados, setRegistrosFiltrados] = useState([]);
   const [usuario, setUsuario] = useState("");
   const [numeroCajon, setNumeroCajon] = useState("");
   const [desde, setDesde] = useState("");
   const [hasta, setHasta] = useState("");
-  const [registros, setRegistros] = useState([]);
+  const [mensaje, setMensaje] = useState("");
   const [cargando, setCargando] = useState(false);
-  const [error, setError] = useState("");
-
-  const handleBuscar = async () => {
-    setError("");
-    setRegistros([]);
-    setCargando(true);
-
-    const params = new URLSearchParams();
-    if (usuario) params.append("usuario", usuario);
-    if (numeroCajon) params.append("numero_caj", numeroCajon);
-    if (desde) params.append("desde", desde);
-    if (hasta) params.append("hasta", hasta);
-
-    const url =
-      "https://ezaccess-backend.onrender.com/api/reportes/historial?" +
-      params.toString();
-
-    try {
-      const res = await fetch(url, { method: "GET" });
-      if (!res.ok) {
-        let msg = `HTTP ${res.status}`;
-        try {
-          const errJson = await res.json();
-          msg = errJson.mensaje || JSON.stringify(errJson);
-        } catch {}
-        throw new Error(msg);
-      }
-      const { datos } = await res.json();
-      setRegistros(datos);
-    } catch (err) {
-      setError("No se pudo cargar el historial. " + err.message);
-    } finally {
-      setCargando(false);
-    }
-  };
 
   useEffect(() => {
-    handleBuscar();
-    // eslint-disable-next-line
+    const obtenerHistorial = async () => {
+      setCargando(true);
+      setMensaje("");
+      try {
+        const res = await fetch(
+          "https://ezaccess-backend.onrender.com/api/reportes/historial"
+        );
+        if (!res.ok) throw new Error("No se pudo obtener el historial");
+        const data = await res.json();
+        setRegistros(data);
+        setRegistrosFiltrados(data);
+      } catch (err) {
+        setMensaje("No se pudo cargar el historial.");
+      } finally {
+        setCargando(false);
+      }
+    };
+    obtenerHistorial();
   }, []);
+
+  const handleFiltrar = (e) => {
+    e.preventDefault();
+    let filtrados = [...registros];
+    if (usuario) {
+      filtrados = filtrados.filter((r) =>
+        r.usuario && r.usuario.toLowerCase().includes(usuario.toLowerCase())
+      );
+    }
+    if (numeroCajon) {
+      filtrados = filtrados.filter((r) =>
+        r.cajon && r.cajon.toLowerCase().includes(numeroCajon.toLowerCase())
+      );
+    }
+    if (desde) {
+      filtrados = filtrados.filter((r) => r.fecha >= desde);
+    }
+    if (hasta) {
+      filtrados = filtrados.filter((r) => r.fecha <= hasta + "T23:59:59");
+    }
+    setRegistrosFiltrados(filtrados);
+  };
 
   return (
     <>
@@ -64,12 +69,15 @@ export default function ReportesPage() {
           </Nav>
           <Tab.Content>
             <Tab.Pane eventKey="historial">
-              <Form className="row g-3 align-items-end">
+              <Form
+                className="row g-3 align-items-end"
+                onSubmit={handleFiltrar}
+              >
                 <Form.Group className="col-md-3">
-                  <Form.Label>Usuario (ID)</Form.Label>
+                  <Form.Label>Usuario (Nombre)</Form.Label>
                   <Form.Control
-                    type="number"
-                    placeholder="e.j. 16"
+                    type="text"
+                    placeholder="e.j. Luis"
                     value={usuario}
                     onChange={(e) => setUsuario(e.target.value)}
                   />
@@ -102,23 +110,22 @@ export default function ReportesPage() {
                 <div className="col-md-2">
                   <Button
                     variant="primary"
-                    onClick={handleBuscar}
+                    type="submit"
                     disabled={cargando}
                   >
                     {cargando ? "Cargando..." : "Buscar"}
                   </Button>
                 </div>
               </Form>
-              {error && (
+              {mensaje && (
                 <Alert variant="danger" className="mt-3">
-                  {error}
+                  {mensaje}
                 </Alert>
               )}
               <Table striped bordered hover className="mt-3">
                 <thead>
                   <tr>
                     <th>Fecha</th>
-                    <th>ID Usuario</th>
                     <th>Usuario</th>
                     <th>Cajón</th>
                     <th>Tipo</th>
@@ -127,19 +134,18 @@ export default function ReportesPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {!cargando && registros.length === 0 && (
+                  {!cargando && registrosFiltrados.length === 0 && (
                     <tr>
-                      <td colSpan="7" className="text-center">
+                      <td colSpan="6" className="text-center">
                         No hay registros
                       </td>
                     </tr>
                   )}
-                  {registros.map((r) => (
+                  {registrosFiltrados.map((r) => (
                     <tr key={r.id_historial}>
                       <td>{new Date(r.fecha).toLocaleString()}</td>
-                      <td>{r.usuario.id_usu}</td>
-                      <td>{r.usuario.nombre_usu}</td>
-                      <td>{r.cajon.numero_caj}</td>
+                      <td>{r.usuario}</td>
+                      <td>{r.cajon}</td>
                       <td>{r.tipo_asig}</td>
                       <td>{r.estado_asig}</td>
                       <td>{r.accion}</td>
@@ -147,7 +153,10 @@ export default function ReportesPage() {
                   ))}
                 </tbody>
               </Table>
-              <Button variant="primary" disabled={registros.length === 0}>
+              <Button
+                variant="primary"
+                disabled={registrosFiltrados.length === 0}
+              >
                 Exportar PDF
               </Button>
             </Tab.Pane>
