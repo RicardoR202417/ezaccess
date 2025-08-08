@@ -2,8 +2,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const Usuario = require('../models/Usuario');
 require('dotenv').config();
-
 // LOGIN
+
 exports.login = async (req, res) => {
   const { correo, contrasena } = req.body;
 
@@ -39,14 +39,15 @@ exports.login = async (req, res) => {
       { expiresIn: process.env.JWT_EXPIRES_IN || '1d' }
     );
 
-    res.json({
-      mensaje: 'Inicio de sesión exitoso',
-      token,
-      usuario: {
-        id: usuario.id_usu,
-        nombre: usuario.nombre_usu,
-        tipo: usuario.tipo_usu,
-      },
+   res.json({
+  mensaje: 'Inicio de sesión exitoso',
+  token,
+  usuario: {
+    id: usuario.id_usu,
+    nombre: usuario.nombre_usu,
+    tipo: usuario.tipo_usu,
+    codigo_nfc_usu: usuario.codigo_nfc_usu, // <--- aquí debe estar
+  },
     });
 
   } catch (error) {
