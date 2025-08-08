@@ -19,14 +19,26 @@ export default function ReportesPage() {
       setMensaje("");
       try {
         const res = await fetch(
-          "https://ezaccess-backend.onrender.com/api/reportes/historial"
+          "https://ezaccess-backend.onrender.com/api/reportes/historial",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
         );
-        if (!res.ok) throw new Error("No se pudo obtener el historial");
+        if (!res.ok) {
+          const errorText = await res.text(); // Obtener más detalles del error
+          throw new Error(`Error ${res.status}: ${errorText}`);
+        }
         const data = await res.json();
         setRegistros(data);
         setRegistrosFiltrados(data);
       } catch (err) {
-        setMensaje("No se pudo cargar el historial.");
+        console.error("Error al obtener el historial:", err); // Log detallado
+        setMensaje(
+          "No se pudo cargar el historial. Verifique la conexión o contacte al administrador."
+        );
       } finally {
         setCargando(false);
       }
