@@ -29,9 +29,7 @@ Usuario.hasMany(HistorialAsignacion, { foreignKey: "id_usu" });
 HistorialAsignacion.belongsTo(Usuario, { foreignKey: "id_usu" });
 
 Cajon.hasMany(HistorialAsignacion, { foreignKey: "id_caj" });
-HistorialAsignacion.belongsTo(Cajon, { 
-  as: 'cajon',
-  foreignKey: "id_caj" });
+HistorialAsignacion.belongsTo(Cajon, { foreignKey: "id_caj" });
 
 module.exports = {
   sequelize, // NECESARIO para controladores personalizados

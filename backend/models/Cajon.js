@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
-const Cajon = sequelize.define('cajones', {
+const Cajon = sequelize.define('Cajon', { // <-- Nombre del modelo en singular
   id_caj: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -16,6 +16,7 @@ const Cajon = sequelize.define('cajones', {
     allowNull: true,
   },
 }, {
+  tableName: 'cajones', // <-- Nombre real de la tabla
   timestamps: false,
 });
 

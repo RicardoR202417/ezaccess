@@ -1,17 +1,13 @@
-// src/views/ReportesPage.jsx
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Alert, Button, Form, Table, Nav, Tab } from "react-bootstrap";
 import NavBarMonitor from "../components/NavBarMonitor";
 import "../styles/layout.css";
 
 export default function ReportesPage() {
-  // Filtros
   const [usuario, setUsuario] = useState("");
-  const [numeroCajon, setNumeroCajon] = useState(""); // ← cambia a texto
+  const [numeroCajon, setNumeroCajon] = useState("");
   const [desde, setDesde] = useState("");
   const [hasta, setHasta] = useState("");
-  
-  // Datos y estado UI
   const [registros, setRegistros] = useState([]);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState("");
@@ -21,16 +17,14 @@ export default function ReportesPage() {
     setRegistros([]);
     setCargando(true);
 
-    // Construimos query params
     const params = new URLSearchParams();
     if (usuario) params.append("usuario", usuario);
-    if (numeroCajon) params.append("numero_caj", numeroCajon); // ← ahora es por número
+    if (numeroCajon) params.append("numero_caj", numeroCajon);
     if (desde) params.append("desde", desde);
     if (hasta) params.append("hasta", hasta);
 
     const url =
-      "https://ezaccess-backend.onrender.com" +
-      "/api/reportes/historial?" +
+      "https://ezaccess-backend.onrender.com/api/reportes/historial?" +
       params.toString();
 
     try {
@@ -46,15 +40,13 @@ export default function ReportesPage() {
       const { datos } = await res.json();
       setRegistros(datos);
     } catch (err) {
-      console.error("Error en fetchHistorial:", err);
       setError("No se pudo cargar el historial. " + err.message);
     } finally {
       setCargando(false);
     }
   };
 
-  // Para que cargue todo el historial al entrar:
-  React.useEffect(() => {
+  useEffect(() => {
     handleBuscar();
     // eslint-disable-next-line
   }, []);
@@ -144,7 +136,7 @@ export default function ReportesPage() {
                   )}
                   {registros.map((r) => (
                     <tr key={r.id_historial}>
-                      <td>{new Date(r.fecha_evento).toLocaleString()}</td>
+                      <td>{new Date(r.fecha).toLocaleString()}</td>
                       <td>{r.usuario.id_usu}</td>
                       <td>{r.usuario.nombre_usu}</td>
                       <td>{r.cajon.numero_caj}</td>
