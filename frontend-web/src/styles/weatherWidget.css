@@ -2,16 +2,16 @@
   background-color: #f0f4f8;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  padding: 16px;
+  padding: 32px; /* Aumentamos el padding para que se vea más espacioso */
   text-align: center;
-  width: 250px;
-  margin: auto;
+  width: 100%; /* Ajustamos el ancho para que ocupe todo el espacio disponible */
+  height: 250px; /* Incrementamos la altura para que sea igual al contenedor del gráfico */
 }
 
 .city-name {
-  font-size: 1.5rem;
+  font-size: 2.2rem; /* Aumentamos el tamaño de la fuente */
   font-weight: bold;
-  margin-bottom: 8px;
+  margin-bottom: 20px; /* Incrementamos el espacio inferior */
 }
 
 .weather-info {
@@ -21,9 +21,9 @@
 }
 
 .weather-icon {
-  width: 50px;
-  height: 50px;
-  margin-right: 8px;
+  width: 120px; /* Incrementamos el tamaño del ícono */
+  height: 120px;
+  margin-right: 20px; /* Incrementamos el espacio entre el ícono y los detalles */
 }
 
 .weather-details {
@@ -31,12 +31,12 @@
 }
 
 .temperature {
-  font-size: 1.2rem;
+  font-size: 2rem; /* Aumentamos el tamaño de la fuente */
   font-weight: bold;
 }
 
 .description {
-  font-size: 1rem;
+  font-size: 1.6rem; /* Aumentamos el tamaño de la fuente */
   color: #555;
 }
 

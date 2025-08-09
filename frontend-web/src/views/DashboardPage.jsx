@@ -11,7 +11,7 @@ import {
   ResponsiveContainer,
   LabelList,
 } from "recharts";
-import WeatherWidget from "../components/WeatherWidget"; // Importamos el componente.
+import WeatherWidget from "../components/WeatherWidget";
 
 export default function DashboardPage() {
   const navigate = useNavigate();
@@ -71,9 +71,11 @@ export default function DashboardPage() {
     <div>
       <NavBarMonitor />
       <Container className="mt-4">
-        <h2 className="mb-4">Panel de Control</h2>
-        <Row>
-          <Col md={4} className="mb-3">
+        <h2 className="mb-4 text-center">Panel de Control</h2>
+
+        {/* Primera fila: Tarjetas principales */}
+        <Row className="mb-4">
+          <Col md={4}>
             <Card className="shadow-sm rounded-4">
               <Card.Body>
                 <Card.Title>Gestión de Usuarios</Card.Title>
@@ -86,7 +88,7 @@ export default function DashboardPage() {
               </Card.Body>
             </Card>
           </Col>
-          <Col md={4} className="mb-3">
+          <Col md={4}>
             <Card className="shadow-sm rounded-4">
               <Card.Body>
                 <Card.Title>Estado de Cajones</Card.Title>
@@ -99,7 +101,7 @@ export default function DashboardPage() {
               </Card.Body>
             </Card>
           </Col>
-          <Col md={4} className="mb-3">
+          <Col md={4}>
             <Card className="shadow-sm rounded-4">
               <Card.Body>
                 <Card.Title>Reportes</Card.Title>
@@ -114,9 +116,9 @@ export default function DashboardPage() {
           </Col>
         </Row>
 
-        {/* Tarjetas de plumas */}
-        <Row className="mb-4 justify-content-center">
-          <Col md={5} className="mb-3">
+        {/* Segunda fila: Plumas */}
+        <Row className="mb-4">
+          <Col md={6}>
             <Card className="shadow-sm rounded-4">
               <Card.Body className="text-center">
                 <Card.Title className="mb-2">Pluma de Entrada</Card.Title>
@@ -137,7 +139,7 @@ export default function DashboardPage() {
               </Card.Body>
             </Card>
           </Col>
-          <Col md={5} className="mb-3">
+          <Col md={6}>
             <Card className="shadow-sm rounded-4">
               <Card.Body className="text-center">
                 <Card.Title className="mb-2">Pluma de Salida</Card.Title>
@@ -160,16 +162,16 @@ export default function DashboardPage() {
           </Col>
         </Row>
 
-        {/* Gráfico de barras */}
-        <Row className="mt-4">
-          <Col>
+        {/* Tercera fila: Gráfico y widget del clima */}
+        <Row className="mb-4">
+          <Col md={6}>
             <Card className="shadow-sm rounded-4">
               <Card.Body>
                 <Card.Title>Cupo total del estacionamiento</Card.Title>
                 {cargando ? (
                   <p>Cargando gráfico...</p>
                 ) : (
-                  <ResponsiveContainer width="100%" height={100}>
+                  <ResponsiveContainer width="100%" height={162}>
                     <BarChart
                       layout="vertical"
                       data={datosGrafica}
@@ -225,12 +227,12 @@ export default function DashboardPage() {
               </Card.Body>
             </Card>
           </Col>
-        </Row>
-
-        {/* Aquí mostramos el widget del clima */}
-        <Row className="mt-4">
-          <Col>
-            <WeatherWidget />
+          <Col md={6}>
+            <Card className="shadow-sm rounded-4">
+              <Card.Body>
+                <WeatherWidget />
+              </Card.Body>
+            </Card>
           </Col>
         </Row>
       </Container>
