@@ -1,0 +1,12 @@
+node_modules
+# Android/Gradle junk
+**/.gradle/
+**/build/
+**/.cxx/
+**/.idea/
+**/.ninja_*
+**/CMakeFiles/
+**/CMakeCache.txt
+**/executionHistory/
+**/fileHashes/
+.vscode/
