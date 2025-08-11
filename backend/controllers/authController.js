@@ -93,6 +93,9 @@ exports.registrar = async (req, res) => {
 
     const hash = await bcrypt.hash(contrasena, 10);
 
+    // 🆕 Generar automáticamente un código NFC único
+    const codigoNFC = `NFC-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+
     const nuevoUsuario = await Usuario.create({
       nombre_usu: nombre,
       apellido_pat_usu: apellido_paterno,
@@ -106,18 +109,22 @@ exports.registrar = async (req, res) => {
       colonia_usu: colonia || null,
       calle_usu: calle || null,
       num_ext_usu: num_ext || null,
-      codigo_nfc_usu: null,
+      codigo_nfc_usu: codigoNFC, // ← Aquí se asigna automáticamente
       estado_usu: 'activo',
       fecha_reg_usu: new Date(),
     });
 
-    res.status(201).json({ mensaje: 'Usuario registrado exitosamente' });
+    res.status(201).json({
+      mensaje: 'Usuario registrado exitosamente',
+      codigo_nfc_usu: codigoNFC // ← (opcional) si lo quieres mostrar
+    });
 
   } catch (error) {
     console.error('Error al registrar usuario:', error);
     res.status(500).json({ mensaje: 'Error del servidor' });
   }
 };
+
 
 // EDITAR USUARIO
 exports.editarUsuario = async (req, res) => {
