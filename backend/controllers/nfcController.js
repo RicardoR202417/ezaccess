@@ -1,53 +1,98 @@
-const Usuario = require('../models/Usuario');
+// controllers/nfcController.js
+const { Asignacion, Usuario, Cajon, sequelize } = require('../models');
 
 // UIDs físicos fijos
 const UID_ENTRADA = 'AE381C06';
-const UID_SALIDA = '1AA51C06';
+const UID_SALIDA  = '1AA51C06';
 
 exports.validarNFC = async (req, res) => {
   try {
     const { uid } = req.params;
-    const usuario = req.usuario;
+    const usuarioToken = req.usuario; // lo setea verificarToken
+    const idUsuario = usuarioToken?.id || usuarioToken?.id_usu;
 
-    if (!uid || !usuario?.id) {
-      return res.status(400).json({ mensaje: 'Faltan datos requeridos' });
+    if (!uid || !idUsuario) {
+      return res.status(400).json({ mensaje: 'Faltan datos requeridos (uid o usuario)' });
     }
 
-    const tipo_tag = uid.toUpperCase() === UID_ENTRADA
-      ? 'entrada'
-      : uid.toUpperCase() === UID_SALIDA
-      ? 'salida'
-      : null;
+    const uidUpper = String(uid).toUpperCase();
+    const tipo_tag =
+      uidUpper === UID_ENTRADA ? 'entrada' :
+      uidUpper === UID_SALIDA  ? 'salida'  :
+      null;
 
     if (!tipo_tag) {
       return res.status(403).json({ mensaje: 'UID no reconocido' });
     }
 
-    const id_usu = usuario.id;
-
+    // ============= ENTRADA =============
     if (tipo_tag === 'entrada') {
-      // Lógica de asignación automática (puede ser un stored procedure o función)
-      const result = await db.query(`SELECT asignar_cajon(${id_usu})`);
-      if (result.rows[0].asignar_cajon === 'YA_DENTRO') {
-        return res.json({ mensaje: 'Ya tienes acceso activo.' });
+      // 1) ¿Ya tiene asignación activa?
+      const asignacionActiva = await Asignacion.findOne({
+        where: { id_usu: idUsuario, estado_asig: 'activa' },
+        include: [{ model: Cajon, attributes: ['id_caj','numero_caj','ubicacion_caj'] }]
+      });
+
+      if (asignacionActiva) {
+        return res.json({
+          mensaje: 'Ya tienes acceso activo.',
+          tipo: 'entrada',
+          asignacion: {
+            id_asig: asignacionActiva.id_asig,
+            cajon: asignacionActiva.Cajon || null
+          }
+        });
       }
-      return res.json({ mensaje: 'Acceso otorgado. Cajón asignado.' });
+
+      // 2) Ejecuta el procedimiento de asignación automática
+      //    (ajusta el nombre si en tu DB se llama distinto)
+      await sequelize.query('CALL asignar_cajon_automatico(:p_id_usu)', {
+        replacements: { p_id_usu: idUsuario }
+      });
+
+      // 3) Confirma qué asignación quedó activa
+      const nuevaAsignacion = await Asignacion.findOne({
+        where: { id_usu: idUsuario, estado_asig: 'activa' },
+        order: [['fecha_asig', 'DESC']],
+        include: [{ model: Cajon, attributes: ['id_caj','numero_caj','ubicacion_caj'] }]
+      });
+
+      if (!nuevaAsignacion) {
+        // No se asignó nada: ya tenía una, no hay disponibles, etc.
+        return res.status(200).json({
+          mensaje: 'No se pudo asignar un cajón (ya tenías uno o no hay disponibles).',
+          tipo: 'entrada'
+        });
+      }
+
+      return res.json({
+        mensaje: 'Acceso otorgado. Cajón asignado automáticamente.',
+        tipo: 'entrada',
+        asignacion: {
+          id_asig: nuevaAsignacion.id_asig,
+          cajon: nuevaAsignacion.Cajon || null
+        }
+      });
     }
 
+    // ============= SALIDA =============
     if (tipo_tag === 'salida') {
-      // Liberar cajón (desasignar)
-      const result = await db.query(`
-        UPDATE asignaciones SET estado_asig = 'finalizada'
-        WHERE id_usu = $1 AND estado_asig = 'activa'
-        RETURNING *;
-      `, [id_usu]);
+      const asignacionActiva = await Asignacion.findOne({
+        where: { id_usu: idUsuario, estado_asig: 'activa' }
+      });
 
-      if (result.rowCount === 0) {
-        return res.json({ mensaje: 'No tenías un acceso activo.' });
+      if (!asignacionActiva) {
+        return res.json({ mensaje: 'No tenías un acceso activo.', tipo: 'salida' });
       }
 
-      return res.json({ mensaje: 'Salida registrada. Cajón liberado.' });
+      asignacionActiva.estado_asig = 'finalizada';
+      await asignacionActiva.save();
+
+      return res.json({ mensaje: 'Salida registrada. Cajón liberado.', tipo: 'salida' });
     }
+
+    // (por seguridad, aunque nunca llega aquí)
+    return res.status(400).json({ mensaje: 'Tipo de tag no válido' });
 
   } catch (error) {
     console.error('Error en validarNFC:', error);
