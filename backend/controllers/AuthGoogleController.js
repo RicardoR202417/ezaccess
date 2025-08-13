@@ -54,6 +54,8 @@ exports.loginConGoogle = async (req, res) => {
 
   } catch (error) {
     console.error(error);
-    res.status(401).json({ error: 'Token inválido o expirado.' });
+    console.error('Error real en login con Google:', error);
+    return res.status(500).json({ error: error.message || 'Error desconocido' });
+
   }
 };
