@@ -1,7 +1,8 @@
 const { OAuth2Client } = require('google-auth-library');
 const jwt = require('jsonwebtoken');
-const db = require('../models'); // Tu modelo Sequelize
-const Usuario = db.Usuario; // Asegúrate de tener este modelo
+const bcrypt = require('bcryptjs');
+const db = require('../models'); // Asegúrate de que tu carpeta models/index.js exporta Usuario
+const Usuario = db.Usuario;
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -9,6 +10,7 @@ exports.loginConGoogle = async (req, res) => {
   const { id_token } = req.body;
 
   try {
+    // Verificar token de Google
     const ticket = await client.verifyIdToken({
       idToken: id_token,
       audience: process.env.GOOGLE_CLIENT_ID,
@@ -17,30 +19,45 @@ exports.loginConGoogle = async (req, res) => {
     const payload = ticket.getPayload();
     const { sub, email, name } = payload;
 
-    // 1. Buscar por google_uid
+    if (!email || !name) {
+      return res.status(400).json({ error: 'No se pudo extraer la información del perfil de Google.' });
+    }
+
+    // Separar nombre y apellido (simple)
+    const [nombre, apellido] = name.split(' ');
+    const nombreFinal = nombre || 'NombreDesconocido';
+    const apellidoFinal = apellido || 'ApellidoDesconocido';
+
+    // 1. Buscar usuario por google_uid
     let usuario = await Usuario.findOne({ where: { google_uid: sub } });
 
-    // 2. Si no existe, buscar por correo
+    // 2. Si no existe por google_uid, buscar por correo
     if (!usuario) {
       usuario = await Usuario.findOne({ where: { correo_usu: email } });
 
-      // 2.1 Si existe, asociar el UID de Google
+      // 2.1 Si existe, asociar UID de Google
       if (usuario) {
         usuario.google_uid = sub;
         await usuario.save();
+        console.log('✅ Usuario existente vinculado con UID de Google');
       }
     }
 
-    // ✅ 3. Si sigue sin existir, registrar automáticamente
+    // 3. Si no existe ninguno, registrar automáticamente
     if (!usuario) {
+      const passHash = await bcrypt.hash(sub + process.env.JWT_SECRET, 10);
+
       usuario = await Usuario.create({
-        nombre_usu: name,
+        nombre_usu: nombreFinal,
+        apellido_pat_usu: apellidoFinal,
         correo_usu: email,
         google_uid: sub,
-        tipo_usu: 'residente',
-        pass_usu: '', // o una cadena aleatoria encriptada
+        tipo_usu: 'residente', // Puedes cambiar según lo necesites
+        pass_usu: passHash,
         estado_usu: 'activo'
       });
+
+      console.log('✅ Usuario nuevo registrado automáticamente:', usuario.correo_usu);
     }
 
     // 4. Generar token
@@ -53,9 +70,7 @@ exports.loginConGoogle = async (req, res) => {
     res.json({ token, usuario });
 
   } catch (error) {
-    console.error(error);
-    console.error('Error real en login con Google:', error);
-    return res.status(500).json({ error: error.message || 'Error desconocido' });
-
+    console.error('❌ Error en login con Google:', error);
+    res.status(500).json({ error: error.message || 'Error interno en login con Google.' });
   }
 };
