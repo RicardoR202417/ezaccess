@@ -14,7 +14,6 @@ exports.loginConGoogle = async (req, res) => {
       return res.status(400).json({ error: 'Falta el id_token en la solicitud.' });
     }
 
-    // Verificar el token
     const ticket = await client.verifyIdToken({
       idToken: id_token,
       audience: process.env.GOOGLE_CLIENT_ID,
@@ -25,29 +24,33 @@ exports.loginConGoogle = async (req, res) => {
 
     const { sub, email, name } = payload;
 
-    if (!email || !name) {
-      console.warn('⚠️ Payload incompleto. email:', email, 'name:', name);
-      return res.status(400).json({ error: 'No se pudo extraer la información del perfil de Google.' });
+    if (!email) {
+      return res.status(400).json({ error: 'No se pudo extraer el correo del perfil de Google.' });
     }
 
-    // Separar nombre y apellido
-    const [nombre, apellido] = name.split(' ');
-    const nombreFinal = nombre || 'NombreDesconocido';
-    const apellidoFinal = apellido || 'ApellidoDesconocido';
+    // 🔁 Fallback para nombres incompletos o ausentes
+    const usernameCorreo = email.split('@')[0];
+    const [nombreRaw, apellidoRaw] = (name || '').split(' ');
 
-    // Buscar usuario
+    const nombreFinal = nombreRaw || 'Usuario';
+    const apellidoFinal = apellidoRaw || usernameCorreo || 'GoogleUser';
+
+    // Buscar usuario por google_uid
     let usuario = await Usuario.findOne({ where: { google_uid: sub } });
 
+    // Si no existe por UID, buscar por correo
     if (!usuario) {
       usuario = await Usuario.findOne({ where: { correo_usu: email } });
 
+      // Si ya existe, asociar UID
       if (usuario) {
         usuario.google_uid = sub;
         await usuario.save();
-        console.log('🔗 Usuario existente vinculado a cuenta Google.');
+        console.log('🔗 Usuario existente vinculado con cuenta Google.');
       }
     }
 
+    // Si no existe, registrar nuevo
     if (!usuario) {
       const passHash = await bcrypt.hash(sub + process.env.JWT_SECRET, 10);
 
@@ -64,6 +67,7 @@ exports.loginConGoogle = async (req, res) => {
       console.log('🆕 Usuario nuevo registrado:', email);
     }
 
+    // Generar JWT
     const token = jwt.sign(
       { id: usuario.id_usu, tipo: usuario.tipo_usu },
       process.env.JWT_SECRET,
