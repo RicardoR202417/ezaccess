@@ -3,7 +3,7 @@ import { Form, Button, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { app } from '../firebaseConfig';
+import { app } from '../firebaseConfig'; // Asegúrate de que la ruta es correcta
 
 export default function LoginForm() {
   const [correo, setCorreo] = useState('');
@@ -16,7 +16,7 @@ export default function LoginForm() {
     setError('');
 
     try {
-      const response = await axios.post('https://ezaccess-backend.onrender.com/api/login/', {
+      const response = await axios.post('https://ezaccess-backend.onrender.com/api/login', {
         correo,
         contrasena
       });
@@ -39,17 +39,27 @@ export default function LoginForm() {
       const result = await signInWithPopup(auth, provider);
       const idToken = await result.user.getIdToken();
 
-      const response = await axios.post('https://ezaccess-backend.onrender.com/api/auth/google', {
-        id_token: idToken
+      const response = await fetch("https://ezaccess-backend.onrender.com/api/google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id_token: idToken }),
       });
 
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('usuario', JSON.stringify(response.data.usuario));
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.log('❌ Error del backend:', data);
+        setError(data.error || 'Error al iniciar sesión con Google.');
+        return;
+      }
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("usuario", JSON.stringify(data.usuario));
 
       navigate('/dashboard');
     } catch (err) {
-      setError('Error al iniciar sesión con Google. Verifica que estés registrado.');
-      console.error(err);
+      console.error('❌ Error en fetch Google:', err);
+      setError('Error al iniciar sesión con Google.');
     }
   };
 

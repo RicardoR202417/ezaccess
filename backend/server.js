@@ -28,8 +28,10 @@ app.use(cors({
     'https://ezaccess-backend.onrender.com'
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true // ✅ AÑADE ESTO
 }));
+
 
 app.use(express.json());
 
