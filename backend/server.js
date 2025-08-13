@@ -57,6 +57,7 @@ app.use('/api/reportes', reportesRoutes);
 app.use('/api/vehiculos', vehiculosRoutes);
 
 
+
 // Rutas protegidas
 app.use('/api', rutasProtegidas);
 

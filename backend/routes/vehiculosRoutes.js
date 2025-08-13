@@ -13,6 +13,7 @@ router.get('/usuario/:id_usu', verificarToken, vehiculosController.listarVehicul
 // ✅ Marcar vehículo como en uso (restringido)
 router.put('/en-uso', verificarToken, vehiculosController.marcarEnUso);
 
+
 // ✏️ Actualizar vehículo (restringido)
 router.put('/:id', verificarToken, vehiculosController.actualizarVehiculo);
 

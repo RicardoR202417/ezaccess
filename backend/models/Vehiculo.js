@@ -32,6 +32,17 @@ const Vehiculo = sequelize.define('Vehiculo', {
 }, {
   tableName: 'vehiculos',
   timestamps: false,
+
+
+
+
+en_uso: {
+  type: DataTypes.BOOLEAN,
+  defaultValue: false,
+},
+
+
 });
+
 
 module.exports = Vehiculo;
