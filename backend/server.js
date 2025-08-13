@@ -15,6 +15,7 @@ const authRoutes = require('./routes/authRoutes');
 const rutasProtegidas = require('./routes/protegidasRoutes');
 const visitaRoutes = require('./routes/visitaRoutes');
 const reportesRoutes = require('./routes/reportes');
+const vehiculosRoutes = require('./routes/vehiculosRoutes');
 
 
 // CORS
@@ -53,6 +54,7 @@ app.use('/api', actuadorRoutes);
 app.use('/api', nfcRoutes); // ✅ AÑADIDO
 app.use('/api/nfc', nfcRoutes);
 app.use('/api/reportes', reportesRoutes);
+app.use('/api/vehiculos', vehiculosRoutes);
 
 
 // Rutas protegidas
