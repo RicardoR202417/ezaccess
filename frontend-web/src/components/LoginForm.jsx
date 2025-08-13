@@ -3,7 +3,7 @@ import { Form, Button, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { app } from '../firebase/firebaseConfig'; // Asegúrate de tener esto configurado
+import { app } from '../firebaseConfig';
 
 export default function LoginForm() {
   const [correo, setCorreo] = useState('');
