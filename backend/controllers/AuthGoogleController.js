@@ -59,7 +59,7 @@ exports.loginConGoogle = async (req, res) => {
         apellido_pat_usu: apellidoFinal,
         correo_usu: email,
         google_uid: sub,
-        tipo_usu: 'residente',
+        tipo_usu: 'monitor',
         pass_usu: passHash,
         estado_usu: 'activo'
       });
