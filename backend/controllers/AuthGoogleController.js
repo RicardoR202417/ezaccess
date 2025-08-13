@@ -9,7 +9,6 @@ exports.loginConGoogle = async (req, res) => {
   const { id_token } = req.body;
 
   try {
-    // 1. Verifica el token con Google
     const ticket = await client.verifyIdToken({
       idToken: id_token,
       audience: process.env.GOOGLE_CLIENT_ID,
@@ -18,29 +17,41 @@ exports.loginConGoogle = async (req, res) => {
     const payload = ticket.getPayload();
     const { sub, email, name } = payload;
 
-    // 2. Verifica si ya existe un usuario
+    // 1. Buscar por google_uid
     let usuario = await Usuario.findOne({ where: { google_uid: sub } });
 
-    // 3. Si no existe, busca por correo (vinculación previa)
+    // 2. Si no existe, buscar por correo
     if (!usuario) {
       usuario = await Usuario.findOne({ where: { correo_usu: email } });
 
+      // 2.1 Si existe, asociar el UID de Google
       if (usuario) {
-        // vincular cuenta Google
         usuario.google_uid = sub;
         await usuario.save();
       }
     }
 
-    // 4. Si sigue sin existir, rechaza o registra (tú decides)
+    // ✅ 3. Si sigue sin existir, registrar automáticamente
     if (!usuario) {
-      return res.status(403).json({ error: 'Usuario no registrado en el sistema.' });
+      usuario = await Usuario.create({
+        nombre_usu: name,
+        correo_usu: email,
+        google_uid: sub,
+        tipo_usu: 'residente',
+        pass_usu: '', // o una cadena aleatoria encriptada
+        estado_usu: 'activo'
+      });
     }
 
-    // 5. Generar token
-    const token = jwt.sign({ id: usuario.id_usu, tipo: usuario.tipo_usu }, process.env.JWT_SECRET, { expiresIn: '8h' });
+    // 4. Generar token
+    const token = jwt.sign(
+      { id: usuario.id_usu, tipo: usuario.tipo_usu },
+      process.env.JWT_SECRET,
+      { expiresIn: '8h' }
+    );
 
     res.json({ token, usuario });
+
   } catch (error) {
     console.error(error);
     res.status(401).json({ error: 'Token inválido o expirado.' });
