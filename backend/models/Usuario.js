@@ -36,6 +36,12 @@ const Usuario = sequelize.define('Usuario', {
     allowNull: true,
     unique: true,
   },
+  google_uid: {
+  type: DataTypes.STRING(255),
+  allowNull: true,
+  unique: true,
+},
+
   pass_usu: {
     type: DataTypes.STRING(255),
     allowNull: false,

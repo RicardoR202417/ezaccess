@@ -1,5 +1,6 @@
-// src/firebaseConfig.js
+// src/firebase/firebaseConfig.js
 import { initializeApp } from "firebase/app";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 // Configuración de Firebase de tu proyecto
 const firebaseConfig = {
@@ -12,8 +13,12 @@ const firebaseConfig = {
   measurementId: "G-TMKTYB58DS",
 };
 
-// Inicializa Firebase una sola vez
+// Inicializa Firebase
 const app = initializeApp(firebaseConfig);
 
-// Exporta la instancia de Firebase para usar en otras partes
-export { app };
+// Configura Firebase Auth y proveedor de Google
+const auth = getAuth(app);
+const googleProvider = new GoogleAuthProvider();
+
+// Exporta todo lo necesario
+export { app, auth, googleProvider };
