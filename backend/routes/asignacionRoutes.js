@@ -8,6 +8,9 @@ router.put('/asignaciones/:id', asignacionController.actualizarEstadoAsignacion)
 // NUEVO ENDPOINT: Asignación automática con procedure
 router.post('/asignar-automatica', asignacionController.asignacionAutomatica);
 
+// NUEVO ENDPOINT: Asignación manual de parqueaderos
+router.post('/asignaciones/manual', asignacionController.asignacionManual);
+
 router.get('/asignaciones/usuario/:id_usu', asignacionController.obtenerAsignacionActivaPorUsuario);
 
 

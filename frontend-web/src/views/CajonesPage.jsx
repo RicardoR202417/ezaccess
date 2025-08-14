@@ -1,6 +1,6 @@
 // src/views/CajonesPage.jsx
 import React, { useEffect, useState } from "react";
-import { Button, Spinner, Alert, Form } from "react-bootstrap";
+import { Button, Spinner, Alert, Form, Modal } from "react-bootstrap";
 import NavBarMonitor from "../components/NavBarMonitor";
 import "../styles/layout.css";
 
@@ -11,6 +11,10 @@ export default function CajonesPage() {
   const [zonaActiva, setZonaActiva] = useState("Zona A");
   const [filtroNumero, setFiltroNumero] = useState("");
   const [filtroEstado, setFiltroEstado] = useState("todos");
+  const [residentes, setResidentes] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedCajon, setSelectedCajon] = useState(null);
+  const [selectedUsuario, setSelectedUsuario] = useState(null);
   const token = localStorage.getItem("token");
 
   // 1) Traer cajones desde el endpoint que devuelve:
@@ -38,9 +42,13 @@ export default function CajonesPage() {
   // 2) Llamada a activar/finalizar (manteniendo el id_usu en el body si es manual)
   const cambiarAsignacion = async (id_caj, accion) => {
     try {
-      const body = { accion };
-      // si es manual y viene el id de sesión, añádelo:
       const idUsu = localStorage.getItem("id_usuario");
+      if (!idUsu && accion === "activar") {
+        abrirModal(id_caj);
+        return;
+      }
+
+      const body = { accion };
       if (accion === "activar" && idUsu) body.id_usu = +idUsu;
 
       const res = await fetch(
@@ -91,6 +99,53 @@ export default function CajonesPage() {
     } finally {
       setCargando(false);
     }
+  };
+
+  const obtenerResidentes = async () => {
+    try {
+      const res = await fetch(
+        "https://ezaccess-backend.onrender.com/api/usuarios/residentes",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setResidentes(data);
+    } catch (error) {
+      console.error("Error al obtener residentes:", error);
+    }
+  };
+
+  const asignarCajon = async () => {
+    try {
+      const res = await fetch(
+        "https://ezaccess-backend.onrender.com/api/asignaciones/manual",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ id_caj: selectedCajon, id_usu: selectedUsuario }),
+        }
+      );
+      const data = await res.json();
+      if (res.ok) {
+        setMensaje("Cajón asignado correctamente");
+        await obtenerCajones();
+      } else {
+        setMensaje(data.mensaje || "Error en la asignación");
+      }
+    } catch (error) {
+      setMensaje("Error en la conexión con el servidor.");
+    }
+  };
+
+  const abrirModal = (id_caj) => {
+    setSelectedCajon(id_caj);
+    setModalVisible(true);
+    obtenerResidentes();
   };
 
   useEffect(() => {
@@ -228,6 +283,43 @@ export default function CajonesPage() {
           </div>
         )}
       </div>
+
+      <Modal show={modalVisible} onHide={() => setModalVisible(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Asignar cajón #{selectedCajon}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form.Select
+            onChange={(e) => setSelectedUsuario(e.target.value)}
+            value={selectedUsuario || ""}
+          >
+            <option value="" disabled>
+              Seleccione un usuario
+            </option>
+            {residentes.map((usuario) => (
+              <option key={usuario.id_usu} value={usuario.id_usu}>
+                {usuario.nombre_usu}
+              </option>
+            ))}
+          </Form.Select>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setModalVisible(false)}>
+            Cancelar
+          </Button>
+          <Button
+            variant="primary"
+            disabled={!selectedUsuario}
+            onClick={async () => {
+              await asignarCajon();
+              setModalVisible(false);
+              setSelectedUsuario(null);
+            }}
+          >
+            Asignar
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }

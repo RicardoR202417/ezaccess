@@ -124,3 +124,48 @@ exports.obtenerAsignacionActivaPorUsuario = async (req, res) => {
     res.status(500).json({ mensaje: 'Error del servidor' });
   }
 };
+
+// NUEVA FUNCIÓN: Asignación manual de cajones
+exports.asignacionManual = async (req, res) => {
+  const { id_caj, id_usu } = req.body;
+
+  try {
+    // Verificar que el cajón no esté asignado activamente
+    const cajon = await Cajon.findByPk(id_caj);
+    if (!cajon) {
+      return res.status(404).json({ mensaje: 'Cajón no encontrado' });
+    }
+
+    const asignacionActivaCajon = await Asignacion.findOne({
+      where: { id_caj, estado_asig: 'activa' }
+    });
+    if (asignacionActivaCajon) {
+      return res.status(400).json({ mensaje: 'El cajón ya está asignado activamente' });
+    }
+
+    // Verificar que el usuario no tenga una asignación activa
+    const asignacionActivaUsuario = await Asignacion.findOne({
+      where: { id_usu, estado_asig: 'activa' }
+    });
+    if (asignacionActivaUsuario) {
+      return res.status(400).json({ mensaje: 'El usuario ya tiene una asignación activa' });
+    }
+
+    // Crear nueva asignación
+    const nuevaAsignacion = await Asignacion.create({
+      id_caj,
+      id_usu,
+      tipo_asig: 'manual',
+      estado_asig: 'activa',
+      fecha_asig: new Date()
+    });
+
+    // Cambiar estado del cajón a ocupado
+    await Cajon.update({ estado_caj: 'ocupado' }, { where: { id_caj } });
+
+    res.status(200).json({ mensaje: 'Cajón asignado correctamente', asignacion: nuevaAsignacion });
+  } catch (error) {
+    console.error('Error en asignación manual:', error);
+    res.status(500).json({ mensaje: 'Error del servidor' });
+  }
+};

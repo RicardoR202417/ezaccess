@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const Usuario = require('../models/Usuario');
+const { Sequelize, sequelize } = require('../models'); // <-- Asegúrate de tener esto para Sequelize
 require('dotenv').config();
 // LOGIN
 
@@ -218,5 +219,20 @@ exports.obtenerUsuarioPorId = async (req, res) => {
   } catch (error) {
     console.error('Error al obtener usuario:', error);
     res.status(500).json({ mensaje: 'Error del servidor' });
+  }
+};
+
+// OBTENER RESIDENTES
+exports.obtenerResidentes = async (req, res) => {
+  try {
+    console.log("Iniciando consulta para obtener residentes...");
+    const [residentes] = await sequelize.query(
+      `SELECT * FROM usuarios WHERE tipo_usu = 'residente' AND estado_usu = 'activo'`
+    );
+    console.log("Residentes encontrados:", residentes);
+    res.json(residentes);
+  } catch (error) {
+    console.error("Error al obtener residentes:", error);
+    res.status(500).json({ mensaje: "Error al obtener residentes", error: error.message });
   }
 };
