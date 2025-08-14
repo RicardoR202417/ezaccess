@@ -47,7 +47,8 @@ app.get('/', (req, res) => {
 app.use('/api', authRoutes);
 app.use('/api', visitaRoutes);
 app.use('/api', require('./routes/asignacionRoutes'));
-app.use('/api', require('./routes/cajonesRoutes'));
+app.use('/api/cajones', require('./routes/cajonesRoutes'));
+
 
 app.use('/api', actuadorRoutes);
 app.use('/api', nfcRoutes);

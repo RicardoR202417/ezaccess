@@ -2,8 +2,9 @@ const express = require('express');
 const router = express.Router();
 const cajonesController = require('../controllers/cajonesController');
 
-// Rutas GET
+// Ruta principal para obtener todos los cajones
 router.get('/', cajonesController.obtenerCajonesConEstado);
+
 router.get('/estado-completo', cajonesController.obtenerEstadoCompleto);
 router.get('/estado', cajonesController.obtenerCajonesConEstado);
 
