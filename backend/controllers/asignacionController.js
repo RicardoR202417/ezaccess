@@ -142,7 +142,7 @@ exports.asignacionManual = async (req, res) => {
 
     // Verificar que no esté ocupado ni pendiente
     const ocupacion = await Asignacion.findOne({
-      where: { id_caj, estado_asig: ['activa', 'pendiente'] }
+      where: { id_caj, estado_asig: { [Op.in]: ['activa', 'pendiente'] } }
     });
     if (ocupacion) {
       return res.status(400).json({ mensaje: 'El cajón ya está asignado' });
@@ -150,7 +150,7 @@ exports.asignacionManual = async (req, res) => {
 
     // Verificar que el usuario no tenga ya asignación
     const asignacionUsuario = await Asignacion.findOne({
-      where: { id_usu, estado_asig: ['activa', 'pendiente'] }
+      where: { id_usu, estado_asig: { [Op.in]: ['activa', 'pendiente'] } }
     });
     if (asignacionUsuario) {
       return res.status(400).json({ mensaje: 'El usuario ya tiene un cajón' });

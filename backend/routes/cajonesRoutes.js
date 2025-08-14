@@ -3,12 +3,9 @@ const router = express.Router();
 const cajonesController = require('../controllers/cajonesController');
 
 // Rutas GET
-router.get('/estado', cajonesController.obtenerCajonesConEstado);
 router.get('/cajones', cajonesController.obtenerCajonesConEstado);
 router.get('/cajones/estado-completo', cajonesController.obtenerEstadoCompleto);
-
-
-
+router.get('/estado', cajonesController.obtenerCajonesConEstado);
 router.get('/estado-completo', cajonesController.obtenerEstadoCompleto);
 
 // ⚠️ Orden IMPORTANTE de las rutas PUT
