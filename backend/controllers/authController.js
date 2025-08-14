@@ -59,7 +59,9 @@ exports.login = async (req, res) => {
 // OBTENER TODOS LOS USUARIOS
 exports.obtenerUsuarios = async (req, res) => {
   try {
-    const usuarios = await Usuario.findAll();
+  const usuarios = await Usuario.findAll({
+  where: { estado_usu: 'activo' }
+});
     res.json(usuarios);
   } catch (error) {
     console.error('Error al obtener usuarios:', error);
@@ -183,7 +185,11 @@ exports.eliminarUsuario = async (req, res) => {
     }
 
     // Eliminar usuario físicamente de la base de datos
-    await usuario.destroy();
+   await Usuario.update(
+  { estado_usu: 'inactivo' },
+  { where: { id_usu: req.params.id } }
+);
+
 
     res.json({
       mensaje: 'Usuario eliminado correctamente',
