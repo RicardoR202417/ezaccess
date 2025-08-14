@@ -64,3 +64,10 @@ exports.marcarEnUso = async (req, res) => {
     res.status(500).json({ mensaje: 'Error interno al actualizar vehículo' });
   }
 };
+module.exports = {
+  crearVehiculo,
+  listarVehiculosPorUsuario,
+  marcarEnUso, // 👈 este debe estar presente
+  actualizarVehiculo, // si ya lo tienes implementado
+  eliminarVehiculo     // si ya lo tienes implementado
+};
