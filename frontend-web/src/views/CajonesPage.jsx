@@ -249,30 +249,50 @@ export default function CajonesPage() {
                 >
                   <h5>{cajon.numero_caj}</h5>
                   <p className="ubicacion">{cajon.ubicacion_caj}</p>
-                  <p className="estado">
-                    Estado: <strong>{cajon.estado}</strong>
-                  </p>
+ <p className="estado">
+  Estado: <strong>
+    {cajon.estado_asig === 'pendiente'
+      ? 'Pendiente'
+      : cajon.estado}
+  </strong>
+</p>
 
-                  {cajon.estado === "ocupado" ? (
-                    <p className="residente-ocupante">
-                      Ocupado por: <b>{cajon.usuario_ocupante}</b>
-                    </p>
-                  ) : (
-                    <p className="residente-ocupante text-muted">Libre</p>
-                  )}
+{cajon.estado === "ocupado" ? (
+  <p className="residente-ocupante">
+    Ocupado por: <b>{cajon.usuario_ocupante}</b>
+  </p>
+) : cajon.estado_asig === 'pendiente' ? (
+  <p className="residente-ocupante">
+    Reservado para: <b>{cajon.usuario_ocupante || '—'}</b>
+  </p>
+) : (
+  <p className="residente-ocupante text-muted">Libre</p>
+)}
 
-                  <Button
-                    variant={cajon.estado === "ocupado" ? "danger" : "success"}
-                    size="sm"
-                    onClick={() =>
-                      cambiarAsignacion(
-                        cajon.id_caj,
-                        cajon.estado === "ocupado" ? "finalizar" : "activar"
-                      )
-                    }
-                  >
-                    {cajon.estado === "ocupado" ? "Finalizar" : "Activar"}
-                  </Button>
+<Button
+  variant={
+    cajon.estado === "ocupado" || cajon.estado_asig === "pendiente"
+      ? "danger"
+      : "success"
+  }
+  size="sm"
+  onClick={() =>
+    cambiarAsignacion(
+      cajon.id_caj,
+      cajon.estado === "ocupado" || cajon.estado_asig === "pendiente"
+        ? "finalizar"
+        : "activar"
+    )
+  }
+>
+  {cajon.estado === "ocupado"
+    ? "Finalizar"
+    : cajon.estado_asig === "pendiente"
+      ? "Cancelar reserva"
+      : "Activar"}
+</Button>
+
+
                 </div>
               ))
             ) : (
