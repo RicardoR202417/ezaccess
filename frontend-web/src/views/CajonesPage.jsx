@@ -30,15 +30,15 @@ export default function CajonesPage() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
 
-      // Normalizar estado para que siempre sea "ocupado" o "libre"
+      // Estado separado: activa, pendiente y libre
       const cajonesNormalizados = data.map(c => ({
         ...c,
         estado:
-          c.estado === "ocupado" ||
-          c.estado_asig === "activa" ||
-          c.estado_asig === "pendiente"
+          c.estado_asig === "activa"
             ? "ocupado"
-            : "libre",
+            : c.estado_asig === "pendiente"
+              ? "pendiente"
+              : "libre",
       }));
 
       setCajones(cajonesNormalizados);
@@ -136,18 +136,17 @@ export default function CajonesPage() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+            Authorization: `Bearer ${token}` },
           body: JSON.stringify({
             id_caj: selectedCajon,
             id_usu: selectedUsuario,
-            estado_asig: "activa", // asignación directa activa
+            estado_asig: "pendiente", // 🚀 ahora se asigna como pendiente
           }),
         }
       );
       const data = await res.json();
       if (res.ok) {
-        setMensaje("Cajón asignado correctamente");
+        setMensaje("Cajón asignado como pendiente correctamente");
         await obtenerCajones();
       } else {
         setMensaje(data.mensaje || "Error en la asignación");
@@ -223,17 +222,12 @@ export default function CajonesPage() {
               <option value="todos">Todos</option>
               <option value="libre">Libres</option>
               <option value="ocupado">Ocupados</option>
+              <option value="pendiente">Pendientes</option>
             </Form.Select>
             <Button
               size="sm"
               variant="danger"
               className="align-self-end"
-              style={{
-                fontSize: "0.8rem",
-                padding: "0.25rem 0.6rem",
-                maxWidth: "105px",
-                border: "none",
-              }}
               onClick={() => cambiarEstadoTodos("finalizar")}
               disabled={cargando}
             >
@@ -253,7 +247,11 @@ export default function CajonesPage() {
                 <div
                   key={cajon.id_caj}
                   className={`card-cajon ${
-                    cajon.estado === "ocupado" ? "ocupado" : "libre"
+                    cajon.estado === "ocupado"
+                      ? "ocupado"
+                      : cajon.estado === "pendiente"
+                        ? "pendiente"
+                        : "libre"
                   }`}
                 >
                   <h5>{cajon.numero_caj}</h5>
@@ -262,7 +260,7 @@ export default function CajonesPage() {
                     Estado: <strong>{cajon.estado}</strong>
                   </p>
 
-                  {cajon.estado === "ocupado" ? (
+                  {cajon.estado !== "libre" ? (
                     <p className="residente-ocupante">
                       Ocupado por: <b>{cajon.usuario_ocupante}</b>
                     </p>
@@ -275,8 +273,8 @@ export default function CajonesPage() {
                       cajon.estado_asig === "activa"
                         ? "danger"
                         : cajon.estado_asig === "pendiente"
-                        ? "warning"
-                        : "success"
+                          ? "warning"
+                          : "success"
                     }
                     size="sm"
                     onClick={() =>
@@ -291,8 +289,8 @@ export default function CajonesPage() {
                     {cajon.estado_asig === "activa"
                       ? "Finalizar"
                       : cajon.estado_asig === "pendiente"
-                      ? "Cancelar"
-                      : "Activar"}
+                        ? "Cancelar"
+                        : "Activar"}
                   </Button>
                 </div>
               ))

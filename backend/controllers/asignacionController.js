@@ -111,11 +111,10 @@ exports.obtenerAsignacionActivaPorUsuario = async (req, res) => {
   const { id_usu } = req.params;
   try {
     const asignacion = await Asignacion.findOne({
-      where: { id_usu, estado_asig: 'activa' },
-      include: [
-        { model: Cajon, attributes: ['id_caj', 'numero_caj', 'ubicacion_caj'] }
-      ]
-    });
+  where: { id_usu: idUsuario, estado_asig: ['activa', 'pendiente'] },
+  include: [{ model: Cajon, attributes: ['id_caj', 'numero_caj', 'ubicacion_caj'] }]
+});
+
     if (!asignacion) {
       return res.json({ mensaje: 'No hay cajón asignado', asignacion: null });
     }
