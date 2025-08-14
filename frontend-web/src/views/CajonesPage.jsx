@@ -162,9 +162,17 @@ export default function CajonesPage() {
     obtenerResidentes();
   };
 
-  useEffect(() => {
+ useEffect(() => {
+  obtenerCajones(); // Primera carga de cajones
+
+  // Refresco automático cada 5 segundos
+  const interval = setInterval(() => {
     obtenerCajones();
-  }, []);
+  }, 5000);
+
+  return () => clearInterval(interval); // Limpia el intervalo al desmontar
+}, []);
+
 
   const zonas = ["Zona A", "Zona C", "Zona D", "Zona E"];
 
