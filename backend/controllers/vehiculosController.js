@@ -35,16 +35,14 @@ const crearVehiculo = async (req, res) => {
 };
 
 // 🔍 Obtener vehículos de un usuario
+// 🔍 Obtener todos los vehículos de un usuario
 const listarVehiculosPorUsuario = async (req, res) => {
   try {
     const { id_usu } = req.params;
-    if (!id_usu) {
-      return res.status(400).json({ error: 'ID de usuario requerido.' });
-    }
 
     const vehiculos = await Vehiculo.findAll({
       where: { id_usu },
-      attributes: ['id_veh', 'id_usu', 'marca_veh', 'modelo_veh', 'desc_veh', 'placas_veh', 'en_uso'], // 👈 aquí
+      attributes: ['id_veh', 'id_usu', 'marca_veh', 'modelo_veh', 'desc_veh', 'placas_veh', 'en_uso'], // 👈 INCLUIR aquí
       order: [['id_veh', 'ASC']],
     });
 
