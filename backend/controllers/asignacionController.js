@@ -130,43 +130,51 @@ exports.asignacionManual = async (req, res) => {
   const { id_caj, id_usu } = req.body;
 
   try {
-    // Verificar que el cajón exista
+    if (!id_caj || !id_usu) {
+      return res.status(400).json({ mensaje: "Faltan datos para la asignación" });
+    }
+
+    // Verificar cajón
     const cajon = await Cajon.findByPk(id_caj);
     if (!cajon) {
       return res.status(404).json({ mensaje: 'Cajón no encontrado' });
     }
 
-    // Verificar que el cajón no esté asignado activamente
-    const asignacionActivaCajon = await Asignacion.findOne({
+    // Verificar que no esté ocupado ni pendiente
+    const ocupacion = await Asignacion.findOne({
       where: { id_caj, estado_asig: ['activa', 'pendiente'] }
     });
-    if (asignacionActivaCajon) {
+    if (ocupacion) {
       return res.status(400).json({ mensaje: 'El cajón ya está asignado' });
     }
 
-    // Verificar que el usuario no tenga una asignación pendiente o activa
+    // Verificar que el usuario no tenga ya asignación
     const asignacionUsuario = await Asignacion.findOne({
       where: { id_usu, estado_asig: ['activa', 'pendiente'] }
     });
     if (asignacionUsuario) {
-      return res.status(400).json({ mensaje: 'El usuario ya tiene una asignación' });
+      return res.status(400).json({ mensaje: 'El usuario ya tiene un cajón' });
     }
 
-    // Crear nueva asignación con estado "pendiente"
+    // Crear asignación en estado pendiente
     const nuevaAsignacion = await Asignacion.create({
       id_caj,
       id_usu,
       tipo_asig: 'manual',
-      estado_asig: 'pendiente', // ← ahora pendiente
+      estado_asig: 'pendiente',
       fecha_asig: new Date()
     });
 
-    // Cambiar estado del cajón a ocupado
-    await Cajon.update({ estado_caj: 'ocupado' }, { where: { id_caj } });
+    // Actualizar estado cajón
+    await Cajon.update({ estado: 'ocupado' }, { where: { id_caj } });
 
-    res.status(200).json({ mensaje: 'Cajón asignado correctamente', asignacion: nuevaAsignacion });
+    return res.status(201).json({
+      mensaje: 'Cajón asignado correctamente',
+      asignacion: nuevaAsignacion
+    });
+
   } catch (error) {
     console.error('Error en asignación manual:', error);
-    res.status(500).json({ mensaje: 'Error del servidor' });
+    return res.status(500).json({ mensaje: 'Error interno del servidor' });
   }
 };
