@@ -17,8 +17,7 @@ export default function CajonesPage() {
   const [selectedUsuario, setSelectedUsuario] = useState(null);
   const token = localStorage.getItem("token");
 
-  // 1) Traer cajones desde el endpoint que devuelve:
-  //    [{ id_caj, numero_caj, ubicacion_caj, estado, usuario_ocupante, id_usuario_ocupante }, ...]
+  // 1) Traer cajones y normalizar estado
   const obtenerCajones = async () => {
     setCargando(true);
     try {
@@ -30,7 +29,19 @@ export default function CajonesPage() {
       );
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      setCajones(data);
+
+      // Normalizar estado para que siempre sea "ocupado" o "libre"
+      const cajonesNormalizados = data.map(c => ({
+        ...c,
+        estado:
+          c.estado === "ocupado" ||
+          c.estado_asig === "activa" ||
+          c.estado_asig === "pendiente"
+            ? "ocupado"
+            : "libre",
+      }));
+
+      setCajones(cajonesNormalizados);
     } catch (error) {
       console.error("Error al obtener cajones:", error);
       setMensaje("No se pudo obtener el listado de cajones.");
@@ -39,7 +50,7 @@ export default function CajonesPage() {
     }
   };
 
-  // 2) Llamada a activar/finalizar (manteniendo el id_usu en el body si es manual)
+  // 2) Llamada a activar/finalizar
   const cambiarAsignacion = async (id_caj, accion) => {
     try {
       const idUsu = localStorage.getItem("id_usuario");
@@ -128,11 +139,10 @@ export default function CajonesPage() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-  id_caj: selectedCajon,
-  id_usu: selectedUsuario,
-  estado_asig: 'pendiente' // o 'activa' según el caso
-})
-,
+            id_caj: selectedCajon,
+            id_usu: selectedUsuario,
+            estado_asig: "activa", // asignación directa activa
+          }),
         }
       );
       const data = await res.json();
@@ -197,7 +207,7 @@ export default function CajonesPage() {
             ))}
           </div>
 
-          <div className="d-flex flex-column align-items-end" style={{ minWidth: '260px' }}>
+          <div className="d-flex flex-column align-items-end" style={{ minWidth: "260px" }}>
             <Form.Control
               type="text"
               placeholder="Buscar por número"
@@ -218,11 +228,11 @@ export default function CajonesPage() {
               size="sm"
               variant="danger"
               className="align-self-end"
-              style={{ 
-                fontSize: '0.8rem',
-                padding: '0.25rem 0.6rem',
-                maxWidth: '105px',
-                border: 'none'
+              style={{
+                fontSize: "0.8rem",
+                padding: "0.25rem 0.6rem",
+                maxWidth: "105px",
+                border: "none",
               }}
               onClick={() => cambiarEstadoTodos("finalizar")}
               disabled={cargando}
@@ -248,9 +258,9 @@ export default function CajonesPage() {
                 >
                   <h5>{cajon.numero_caj}</h5>
                   <p className="ubicacion">{cajon.ubicacion_caj}</p>
-                <p className="estado">
-  Estado: <strong>{cajon.estado}</strong>
-</p>
+                  <p className="estado">
+                    Estado: <strong>{cajon.estado}</strong>
+                  </p>
 
                   {cajon.estado === "ocupado" ? (
                     <p className="residente-ocupante">
@@ -260,31 +270,30 @@ export default function CajonesPage() {
                     <p className="residente-ocupante text-muted">Libre</p>
                   )}
 
-                 <Button
-  variant={
-    cajon.estado === "activa"
-      ? "danger"
-      : cajon.estado === "pendiente"
-        ? "warning"
-        : "success"
-  }
-  size="sm"
-  onClick={() =>
-    cambiarAsignacion(
-      cajon.id_caj,
-      cajon.estado === "activa" || cajon.estado === "pendiente"
-        ? "finalizar"
-        : "activar"
-    )
-  }
->
-  {cajon.estado === "activa"
-    ? "Finalizar"
-    : cajon.estado === "pendiente"
-      ? "Cancelar"
-      : "Activar"}
-</Button>
-
+                  <Button
+                    variant={
+                      cajon.estado_asig === "activa"
+                        ? "danger"
+                        : cajon.estado_asig === "pendiente"
+                        ? "warning"
+                        : "success"
+                    }
+                    size="sm"
+                    onClick={() =>
+                      cambiarAsignacion(
+                        cajon.id_caj,
+                        cajon.estado_asig === "activa" || cajon.estado_asig === "pendiente"
+                          ? "finalizar"
+                          : "activar"
+                      )
+                    }
+                  >
+                    {cajon.estado_asig === "activa"
+                      ? "Finalizar"
+                      : cajon.estado_asig === "pendiente"
+                      ? "Cancelar"
+                      : "Activar"}
+                  </Button>
                 </div>
               ))
             ) : (
