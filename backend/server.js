@@ -54,14 +54,8 @@ app.use('/api/reportes', reportesRoutes);
 app.use('/api/vehiculos', vehiculosRoutes);
 app.use('/api', rutasProtegidas);
 
-// 🚨 SINCRONIZAR MODELO PARA FORZAR LECTURA DE CAMPOS NUEVOS
-sequelize.sync({ alter: true })
-  .then(() => console.log('🛠 Modelo Vehiculo sincronizado con éxito (incluye en_uso)'))
-  .catch(err => console.error('❌ Error al sincronizar modelo Vehiculo:', err));
-
 // Escucha
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Servidor corriendo en http://0.0.0.0:${PORT}`);
 });
-  
