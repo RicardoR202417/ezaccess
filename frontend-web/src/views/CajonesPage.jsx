@@ -172,25 +172,6 @@ export default function CajonesPage() {
       <div className="container mt-4">
         <h2 className="text-center mb-3">Mapa de Cajones</h2>
 
-        <div className="text-end mb-2">
-          <div className="btn-group" role="group">
-            <Button
-              className="btn-control-cajon activar btn-sm"
-              onClick={() => cambiarEstadoTodos("activar")}
-              disabled={cargando}
-            >
-              Activar todos
-            </Button>
-            <Button
-              className="btn-control-cajon finalizar btn-sm"
-              onClick={() => cambiarEstadoTodos("finalizar")}
-              disabled={cargando}
-            >
-              Finalizar todos
-            </Button>
-          </div>
-        </div>
-
         {mensaje && (
           <Alert variant="info" onClose={() => setMensaje("")} dismissible>
             {mensaje}
@@ -203,9 +184,7 @@ export default function CajonesPage() {
               <Button
                 key={zona}
                 variant={zona === zonaActiva ? "primary" : "outline-primary"}
-                className={`zona-btn ${
-                  zona === zonaActiva ? "zona-activa" : ""
-                }`}
+                className={`zona-btn ${zona === zonaActiva ? "zona-activa" : ""}`}
                 onClick={() => setZonaActiva(zona)}
               >
                 {zona}
@@ -213,13 +192,13 @@ export default function CajonesPage() {
             ))}
           </div>
 
-          <div className="d-flex flex-wrap align-items-center">
+          <div className="d-flex flex-column align-items-end" style={{ minWidth: '260px' }}>
             <Form.Control
               type="text"
               placeholder="Buscar por número"
               value={filtroNumero}
               onChange={(e) => setFiltroNumero(e.target.value)}
-              className="me-2 mb-2"
+              className="mb-2"
             />
             <Form.Select
               value={filtroEstado}
@@ -230,6 +209,21 @@ export default function CajonesPage() {
               <option value="libre">Libres</option>
               <option value="ocupado">Ocupados</option>
             </Form.Select>
+            <Button
+              size="sm"
+              variant="danger"
+              className="align-self-end"
+              style={{ 
+                fontSize: '0.8rem',
+                padding: '0.25rem 0.6rem',
+                maxWidth: '105px',
+                border: 'none'
+              }}
+              onClick={() => cambiarEstadoTodos("finalizar")}
+              disabled={cargando}
+            >
+              Finalizar todos
+            </Button>
           </div>
         </div>
 
