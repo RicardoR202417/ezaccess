@@ -4,10 +4,9 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const sequelize = require('./config/db');
+const Vehiculo = require('./models/Vehiculo'); // 👈 IMPORTANTE
+
 const nfcRoutes = require('./routes/nfcRoutes');
-
-
-
 const asignacionRoutes = require('./routes/asignacionRoutes');
 const cajonesRoutes = require('./routes/cajonesRoutes');
 const actuadorRoutes = require('./routes/actuadorRoutes');
@@ -16,7 +15,6 @@ const rutasProtegidas = require('./routes/protegidasRoutes');
 const visitaRoutes = require('./routes/visitaRoutes');
 const reportesRoutes = require('./routes/reportes');
 const vehiculosRoutes = require('./routes/vehiculosRoutes');
-
 
 // CORS
 app.use(cors({
@@ -30,9 +28,8 @@ app.use(cors({
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true // ✅ AÑADE ESTO
+  credentials: true
 }));
-
 
 app.use(express.json());
 
@@ -45,21 +42,22 @@ app.get('/', (req, res) => {
   res.send('API del sistema de acceso vehicular funcionando');
 });
 
-// Rutas públicas
+// Rutas
 app.use('/api', authRoutes);
 app.use('/api', visitaRoutes);
 app.use('/api', asignacionRoutes);
 app.use('/api', cajonesRoutes);
 app.use('/api', actuadorRoutes);
-app.use('/api', nfcRoutes); // ✅ AÑADIDO
+app.use('/api', nfcRoutes);
 app.use('/api/nfc', nfcRoutes);
 app.use('/api/reportes', reportesRoutes);
 app.use('/api/vehiculos', vehiculosRoutes);
-
-
-
-// Rutas protegidas
 app.use('/api', rutasProtegidas);
+
+// 🚨 SINCRONIZAR MODELO PARA FORZAR LECTURA DE CAMPOS NUEVOS
+sequelize.sync({ alter: true })
+  .then(() => console.log('🛠 Modelo Vehiculo sincronizado con éxito (incluye en_uso)'))
+  .catch(err => console.error('❌ Error al sincronizar modelo Vehiculo:', err));
 
 // Escucha
 const PORT = process.env.PORT || 5000;
