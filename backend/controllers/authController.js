@@ -185,9 +185,9 @@ exports.eliminarUsuario = async (req, res) => {
     }
 
     // Eliminar usuario físicamente de la base de datos
-   await Usuario.update(
+await Usuario.update(
   { estado_usu: 'inactivo' },
-  { where: { id_usu: req.params.id } }
+  { where: { id_usu: id_usu } }
 );
 
 
