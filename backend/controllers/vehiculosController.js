@@ -81,12 +81,11 @@ const activarVehiculo = async (req, res) => {
     vehiculo.en_uso = true;
     await vehiculo.save({ transaction: t });
 
-    await t.commit();
+  await t.commit();
 
-    // 🔄 Recargar desde base de datos para asegurar reflejo de cambios
-    const actualizado = await Vehiculo.findByPk(id_veh);
-
-    res.json({ mensaje: 'Vehículo activado correctamente', vehiculo: actualizado });
+// 🔁 Reconsulta el vehículo para asegurar que venga con `en_uso`
+const actualizado = await Vehiculo.findByPk(id_veh);
+res.json({ mensaje: 'Vehículo activado correctamente', vehiculo: actualizado });
   } catch (error) {
     console.error('❌ Error al activar vehículo:', error.message);
     await t.rollback();
