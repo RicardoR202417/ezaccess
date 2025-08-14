@@ -130,44 +130,50 @@ exports.obtenerAsignacionActivaPorUsuario = async (req, res) => {
 
 
 exports.asignacionManual = async (req, res) => {
-  const { id_caj, id_usu } = req.body;
+  const { id_caj, id_usu, estado_asig } = req.body;
+
+  console.log("Body recibido en asignacionManual:", req.body);
 
   try {
+    // Verificar que el cajón exista
     const cajon = await Cajon.findByPk(id_caj);
     if (!cajon) {
       return res.status(404).json({ mensaje: 'Cajón no encontrado' });
     }
 
-    const asignacionExistente = await Asignacion.findOne({
-      where: { id_caj, estado_asig: { [Op.in]: ['activa', 'pendiente'] } }
+    // Verificar que el cajón no esté asignado en estado activa o pendiente
+    const asignacionActivaCajon = await Asignacion.findOne({
+      where: { id_caj, estado_asig: ['activa', 'pendiente'] }
     });
-    if (asignacionExistente) {
-      return res.status(400).json({ mensaje: 'El cajón ya está asignado' });
+    if (asignacionActivaCajon) {
+      return res.status(400).json({ mensaje: 'El cajón ya está asignado (activo o pendiente)' });
     }
 
-    const asignacionUsuario = await Asignacion.findOne({
-      where: { id_usu, estado_asig: { [Op.in]: ['activa', 'pendiente'] } }
+    // Verificar que el usuario no tenga una asignación en estado activa o pendiente
+    const asignacionActivaUsuario = await Asignacion.findOne({
+      where: { id_usu, estado_asig: ['activa', 'pendiente'] }
     });
-    if (asignacionUsuario) {
-      return res.status(400).json({ mensaje: 'El usuario ya tiene un cajón asignado' });
+    if (asignacionActivaUsuario) {
+      return res.status(400).json({ mensaje: 'El usuario ya tiene una asignación activa o pendiente' });
     }
 
+    // Crear nueva asignación con estado recibido o "activa" por defecto
     const nuevaAsignacion = await Asignacion.create({
       id_caj,
       id_usu,
       tipo_asig: 'manual',
-      estado_asig: 'pendiente', // <- aquí el nuevo estado
+      estado_asig: estado_asig || 'activa', // aquí puedes pasar 'pendiente' desde el frontend
       fecha_asig: new Date()
     });
 
-    await Cajon.update({ estado_caj: 'ocupado' }, { where: { id_caj } });
+    // Si es activa, cambiar estado del cajón a ocupado
+    if ((estado_asig || 'activa') === 'activa') {
+      await Cajon.update({ estado_caj: 'ocupado' }, { where: { id_caj } });
+    }
 
-    res.status(201).json({
-      mensaje: 'Cajón asignado en espera (pendiente)',
-      asignacion: nuevaAsignacion
-    });
+    res.status(200).json({ mensaje: 'Cajón asignado correctamente', asignacion: nuevaAsignacion });
   } catch (error) {
     console.error('Error en asignación manual:', error);
-    res.status(500).json({ mensaje: 'Error interno del servidor', error: error.message });
+    res.status(500).json({ mensaje: 'Error del servidor' });
   }
 };

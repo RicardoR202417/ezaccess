@@ -127,7 +127,12 @@ export default function CajonesPage() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ id_caj: selectedCajon, id_usu: selectedUsuario }),
+          body: JSON.stringify({
+  id_caj: selectedCajon,
+  id_usu: selectedUsuario,
+  estado_asig: 'pendiente' // o 'activa' según el caso
+})
+,
         }
       );
       const data = await res.json();
@@ -255,11 +260,11 @@ export default function CajonesPage() {
                     <p className="residente-ocupante text-muted">Libre</p>
                   )}
 
-             <Button
+                 <Button
   variant={
-    cajon.estado_asig === "activa"
+    cajon.estado === "activa"
       ? "danger"
-      : cajon.estado_asig === "pendiente"
+      : cajon.estado === "pendiente"
         ? "warning"
         : "success"
   }
@@ -267,15 +272,15 @@ export default function CajonesPage() {
   onClick={() =>
     cambiarAsignacion(
       cajon.id_caj,
-      cajon.estado_asig === "activa" || cajon.estado_asig === "pendiente"
+      cajon.estado === "activa" || cajon.estado === "pendiente"
         ? "finalizar"
         : "activar"
     )
   }
 >
-  {cajon.estado_asig === "activa"
+  {cajon.estado === "activa"
     ? "Finalizar"
-    : cajon.estado_asig === "pendiente"
+    : cajon.estado === "pendiente"
       ? "Cancelar"
       : "Activar"}
 </Button>
