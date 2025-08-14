@@ -1,6 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
-const Usuario = require('./Usuario');
+
 const Asignacion = sequelize.define('Asignacion', {
   id_asig: {
     type: DataTypes.INTEGER,
@@ -37,9 +37,6 @@ const Asignacion = sequelize.define('Asignacion', {
   tableName: 'asignaciones',
   timestamps: false,
 });
-Asignacion.belongsTo(Usuario, {
-  foreignKey: 'id_usu',
-  onDelete: 'CASCADE', // 🔥 Aquí aplicas el borrado en cascada
-});
+
 
 module.exports = Asignacion;
