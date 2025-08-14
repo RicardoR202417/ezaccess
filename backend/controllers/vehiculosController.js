@@ -1,7 +1,7 @@
 const Vehiculo = require('../models/Vehiculo');
 
 // ✅ Crear nuevo vehículo
-exports.crearVehiculo = async (req, res) => {
+const crearVehiculo = async (req, res) => {
   try {
     const { id_usu, marca_veh, modelo_veh, desc_veh, placas_veh } = req.body;
 
@@ -25,7 +25,7 @@ exports.crearVehiculo = async (req, res) => {
 };
 
 // 🔍 Obtener todos los vehículos de un usuario
-exports.listarVehiculosPorUsuario = async (req, res) => {
+const listarVehiculosPorUsuario = async (req, res) => {
   try {
     const { id_usu } = req.params;
     if (!id_usu) {
@@ -33,7 +33,6 @@ exports.listarVehiculosPorUsuario = async (req, res) => {
     }
 
     const vehiculos = await Vehiculo.findAll({ where: { id_usu } });
-
     res.json(vehiculos);
   } catch (error) {
     console.error('❌ Error al obtener vehículos:', error);
@@ -42,7 +41,7 @@ exports.listarVehiculosPorUsuario = async (req, res) => {
 };
 
 // ✅ Marcar un vehículo como en uso
-exports.marcarEnUso = async (req, res) => {
+const marcarEnUso = async (req, res) => {
   try {
     const { id_veh } = req.body;
 
@@ -64,10 +63,49 @@ exports.marcarEnUso = async (req, res) => {
     res.status(500).json({ mensaje: 'Error interno al actualizar vehículo' });
   }
 };
+
+// ✏️ Actualizar vehículo
+const actualizarVehiculo = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const datos = req.body;
+
+    const vehiculo = await Vehiculo.findByPk(id);
+    if (!vehiculo) {
+      return res.status(404).json({ mensaje: 'Vehículo no encontrado' });
+    }
+
+    await vehiculo.update(datos);
+    res.json({ mensaje: 'Vehículo actualizado', vehiculo });
+  } catch (error) {
+    console.error('❌ Error al actualizar vehículo:', error.message);
+    res.status(500).json({ mensaje: 'Error interno al actualizar vehículo' });
+  }
+};
+
+// ❌ Eliminar vehículo
+const eliminarVehiculo = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const vehiculo = await Vehiculo.findByPk(id);
+    if (!vehiculo) {
+      return res.status(404).json({ mensaje: 'Vehículo no encontrado' });
+    }
+
+    await vehiculo.destroy();
+    res.json({ mensaje: 'Vehículo eliminado' });
+  } catch (error) {
+    console.error('❌ Error al eliminar vehículo:', error.message);
+    res.status(500).json({ mensaje: 'Error interno al eliminar vehículo' });
+  }
+};
+
+// ✅ Exportar todas las funciones correctamente
 module.exports = {
   crearVehiculo,
   listarVehiculosPorUsuario,
-  marcarEnUso, // 👈 este debe estar presente
-  actualizarVehiculo, // si ya lo tienes implementado
-  eliminarVehiculo     // si ya lo tienes implementado
+  marcarEnUso,
+  actualizarVehiculo,
+  eliminarVehiculo
 };
