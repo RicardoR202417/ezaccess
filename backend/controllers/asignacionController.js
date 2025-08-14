@@ -130,33 +130,34 @@ exports.asignacionManual = async (req, res) => {
   const { id_caj, id_usu } = req.body;
 
   try {
-    // Verificar que el cajón no esté asignado activamente
+    // Verificar que el cajón exista
     const cajon = await Cajon.findByPk(id_caj);
     if (!cajon) {
       return res.status(404).json({ mensaje: 'Cajón no encontrado' });
     }
 
+    // Verificar que el cajón no esté asignado activamente
     const asignacionActivaCajon = await Asignacion.findOne({
-      where: { id_caj, estado_asig: 'activa' }
+      where: { id_caj, estado_asig: ['activa', 'pendiente'] }
     });
     if (asignacionActivaCajon) {
-      return res.status(400).json({ mensaje: 'El cajón ya está asignado activamente' });
+      return res.status(400).json({ mensaje: 'El cajón ya está asignado' });
     }
 
-    // Verificar que el usuario no tenga una asignación activa
-    const asignacionActivaUsuario = await Asignacion.findOne({
-      where: { id_usu, estado_asig: 'activa' }
+    // Verificar que el usuario no tenga una asignación pendiente o activa
+    const asignacionUsuario = await Asignacion.findOne({
+      where: { id_usu, estado_asig: ['activa', 'pendiente'] }
     });
-    if (asignacionActivaUsuario) {
-      return res.status(400).json({ mensaje: 'El usuario ya tiene una asignación activa' });
+    if (asignacionUsuario) {
+      return res.status(400).json({ mensaje: 'El usuario ya tiene una asignación' });
     }
 
-    // Crear nueva asignación
+    // Crear nueva asignación con estado "pendiente"
     const nuevaAsignacion = await Asignacion.create({
       id_caj,
       id_usu,
       tipo_asig: 'manual',
-      estado_asig: 'activa',
+      estado_asig: 'pendiente', // ← ahora pendiente
       fecha_asig: new Date()
     });
 

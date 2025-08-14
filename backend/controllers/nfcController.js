@@ -25,54 +25,54 @@ exports.validarNFC = async (req, res) => {
     }
 
     // ============= ENTRADA =============
-    if (tipo_tag === 'entrada') {
-      // 1) ¿Ya tiene asignación activa?
-      const asignacionActiva = await Asignacion.findOne({
-        where: { id_usu: idUsuario, estado_asig: 'activa' },
-        include: [{ model: Cajon, attributes: ['id_caj','numero_caj','ubicacion_caj'] }]
-      });
+   if (tipo_tag === 'entrada') {
+  // ¿Tiene asignación pendiente?
+  const asignacionPendiente = await Asignacion.findOne({
+    where: { id_usu: idUsuario, estado_asig: 'pendiente' },
+    include: [{ model: Cajon, attributes: ['id_caj','numero_caj','ubicacion_caj'] }]
+  });
 
-      if (asignacionActiva) {
-        return res.json({
-          mensaje: 'Ya tienes acceso activo.',
-          tipo: 'entrada',
-          asignacion: {
-            id_asig: asignacionActiva.id_asig,
-            cajon: asignacionActiva.Cajon || null
-          }
-        });
+  if (asignacionPendiente) {
+    asignacionPendiente.estado_asig = 'activa';
+    await asignacionPendiente.save();
+
+    return res.json({
+      mensaje: 'Entrada registrada. Cajón confirmado.',
+      tipo: 'entrada',
+      asignacion: {
+        id_asig: asignacionPendiente.id_asig,
+        cajon: asignacionPendiente.Cajon || null
       }
+    });
+  }
 
-      // 2) Ejecuta el procedimiento de asignación automática
-      //    (ajusta el nombre si en tu DB se llama distinto)
-      await sequelize.query('CALL asignar_cajon_automatico(:p_id_usu)', {
-        replacements: { p_id_usu: idUsuario }
-      });
+  // Si no tiene pendiente, usar asignación automática
+  await sequelize.query('CALL asignar_cajon_automatico(:p_id_usu)', {
+    replacements: { p_id_usu: idUsuario }
+  });
 
-      // 3) Confirma qué asignación quedó activa
-      const nuevaAsignacion = await Asignacion.findOne({
-        where: { id_usu: idUsuario, estado_asig: 'activa' },
-        order: [['fecha_asig', 'DESC']],
-        include: [{ model: Cajon, attributes: ['id_caj','numero_caj','ubicacion_caj'] }]
-      });
+  const nuevaAsignacion = await Asignacion.findOne({
+    where: { id_usu: idUsuario, estado_asig: 'activa' },
+    order: [['fecha_asig', 'DESC']],
+    include: [{ model: Cajon, attributes: ['id_caj','numero_caj','ubicacion_caj'] }]
+  });
 
-      if (!nuevaAsignacion) {
-        // No se asignó nada: ya tenía una, no hay disponibles, etc.
-        return res.status(200).json({
-          mensaje: 'No se pudo asignar un cajón (ya tenías uno o no hay disponibles).',
-          tipo: 'entrada'
-        });
-      }
+  if (!nuevaAsignacion) {
+    return res.status(200).json({
+      mensaje: 'No se pudo asignar un cajón (ya tenías uno o no hay disponibles).',
+      tipo: 'entrada'
+    });
+  }
 
-      return res.json({
-        mensaje: 'Acceso otorgado. Cajón asignado automáticamente.',
-        tipo: 'entrada',
-        asignacion: {
-          id_asig: nuevaAsignacion.id_asig,
-          cajon: nuevaAsignacion.Cajon || null
-        }
-      });
+  return res.json({
+    mensaje: 'Acceso otorgado. Cajón asignado automáticamente.',
+    tipo: 'entrada',
+    asignacion: {
+      id_asig: nuevaAsignacion.id_asig,
+      cajon: nuevaAsignacion.Cajon || null
     }
+  });
+}
 
     // ============= SALIDA =============
     if (tipo_tag === 'salida') {
