@@ -30,13 +30,13 @@ const Asignacion = sequelize.define('Asignacion', {
     type: DataTypes.TEXT,
     defaultValue: 'activa',
     validate: {
-      isIn: [['activa', 'finalizada']],
+      // Ahora acepta "pendiente" además de activa y finalizada
+      isIn: [['activa', 'finalizada', 'pendiente']],
     },
   },
 }, {
   tableName: 'asignaciones',
   timestamps: false,
 });
-
 
 module.exports = Asignacion;

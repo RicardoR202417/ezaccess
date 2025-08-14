@@ -17,8 +17,7 @@ export default function CajonesPage() {
   const [selectedUsuario, setSelectedUsuario] = useState(null);
   const token = localStorage.getItem("token");
 
-  // 1) Traer cajones desde el endpoint que devuelve:
-  //    [{ id_caj, numero_caj, ubicacion_caj, estado, usuario_ocupante, id_usuario_ocupante }, ...]
+  // 1) Traer cajones y normalizar estado
   const obtenerCajones = async () => {
     setCargando(true);
     try {
@@ -30,7 +29,19 @@ export default function CajonesPage() {
       );
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      setCajones(data);
+
+      // Estado separado: activa, pendiente y libre
+      const cajonesNormalizados = data.map(c => ({
+        ...c,
+        estado:
+          c.estado_asig === "activa"
+            ? "ocupado"
+            : c.estado_asig === "pendiente"
+              ? "pendiente"
+              : "libre",
+      }));
+
+      setCajones(cajonesNormalizados);
     } catch (error) {
       console.error("Error al obtener cajones:", error);
       setMensaje("No se pudo obtener el listado de cajones.");
@@ -39,7 +50,7 @@ export default function CajonesPage() {
     }
   };
 
-  // 2) Llamada a activar/finalizar (manteniendo el id_usu en el body si es manual)
+  // 2) Llamada a activar/finalizar
   const cambiarAsignacion = async (id_caj, accion) => {
     try {
       const idUsu = localStorage.getItem("id_usuario");
@@ -125,14 +136,17 @@ export default function CajonesPage() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ id_caj: selectedCajon, id_usu: selectedUsuario }),
+            Authorization: `Bearer ${token}` },
+          body: JSON.stringify({
+            id_caj: selectedCajon,
+            id_usu: selectedUsuario,
+            estado_asig: "pendiente", // 🚀 ahora se asigna como pendiente
+          }),
         }
       );
       const data = await res.json();
       if (res.ok) {
-        setMensaje("Cajón asignado correctamente");
+        setMensaje("Cajón asignado como pendiente correctamente");
         await obtenerCajones();
       } else {
         setMensaje(data.mensaje || "Error en la asignación");
@@ -192,7 +206,7 @@ export default function CajonesPage() {
             ))}
           </div>
 
-          <div className="d-flex flex-column align-items-end" style={{ minWidth: '260px' }}>
+          <div className="d-flex flex-column align-items-end" style={{ minWidth: "260px" }}>
             <Form.Control
               type="text"
               placeholder="Buscar por número"
@@ -208,17 +222,12 @@ export default function CajonesPage() {
               <option value="todos">Todos</option>
               <option value="libre">Libres</option>
               <option value="ocupado">Ocupados</option>
+              <option value="pendiente">Pendientes</option>
             </Form.Select>
             <Button
               size="sm"
               variant="danger"
               className="align-self-end"
-              style={{ 
-                fontSize: '0.8rem',
-                padding: '0.25rem 0.6rem',
-                maxWidth: '105px',
-                border: 'none'
-              }}
               onClick={() => cambiarEstadoTodos("finalizar")}
               disabled={cargando}
             >
@@ -238,7 +247,11 @@ export default function CajonesPage() {
                 <div
                   key={cajon.id_caj}
                   className={`card-cajon ${
-                    cajon.estado === "ocupado" ? "ocupado" : "libre"
+                    cajon.estado === "ocupado"
+                      ? "ocupado"
+                      : cajon.estado === "pendiente"
+                        ? "pendiente"
+                        : "libre"
                   }`}
                 >
                   <h5>{cajon.numero_caj}</h5>
@@ -247,7 +260,7 @@ export default function CajonesPage() {
                     Estado: <strong>{cajon.estado}</strong>
                   </p>
 
-                  {cajon.estado === "ocupado" ? (
+                  {cajon.estado !== "libre" ? (
                     <p className="residente-ocupante">
                       Ocupado por: <b>{cajon.usuario_ocupante}</b>
                     </p>
@@ -256,16 +269,28 @@ export default function CajonesPage() {
                   )}
 
                   <Button
-                    variant={cajon.estado === "ocupado" ? "danger" : "success"}
+                    variant={
+                      cajon.estado_asig === "activa"
+                        ? "danger"
+                        : cajon.estado_asig === "pendiente"
+                          ? "warning"
+                          : "success"
+                    }
                     size="sm"
                     onClick={() =>
                       cambiarAsignacion(
                         cajon.id_caj,
-                        cajon.estado === "ocupado" ? "finalizar" : "activar"
+                        cajon.estado_asig === "activa" || cajon.estado_asig === "pendiente"
+                          ? "finalizar"
+                          : "activar"
                       )
                     }
                   >
-                    {cajon.estado === "ocupado" ? "Finalizar" : "Activar"}
+                    {cajon.estado_asig === "activa"
+                      ? "Finalizar"
+                      : cajon.estado_asig === "pendiente"
+                        ? "Cancelar"
+                        : "Activar"}
                   </Button>
                 </div>
               ))
