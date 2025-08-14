@@ -255,11 +255,11 @@ export default function CajonesPage() {
                     <p className="residente-ocupante text-muted">Libre</p>
                   )}
 
-                 <Button
+             <Button
   variant={
-    cajon.estado === "activa"
+    cajon.estado_asig === "activa"
       ? "danger"
-      : cajon.estado === "pendiente"
+      : cajon.estado_asig === "pendiente"
         ? "warning"
         : "success"
   }
@@ -267,15 +267,15 @@ export default function CajonesPage() {
   onClick={() =>
     cambiarAsignacion(
       cajon.id_caj,
-      cajon.estado === "activa" || cajon.estado === "pendiente"
+      cajon.estado_asig === "activa" || cajon.estado_asig === "pendiente"
         ? "finalizar"
         : "activar"
     )
   }
 >
-  {cajon.estado === "activa"
+  {cajon.estado_asig === "activa"
     ? "Finalizar"
-    : cajon.estado === "pendiente"
+    : cajon.estado_asig === "pendiente"
       ? "Cancelar"
       : "Activar"}
 </Button>
