@@ -10,9 +10,12 @@ router.post('/crear', verificarToken, vehiculosController.crearVehiculo);
 // 🔍 Obtener vehículos del usuario (restringido)
 router.get('/usuario/:id_usu', verificarToken, vehiculosController.listarVehiculosPorUsuario);
 
-// ✅ Marcar vehículo como en uso (restringido)
-router.put('/en-uso', verificarToken, vehiculosController.marcarEnUso);
+// ✅ Activar vehículo (dos formas soportadas)
+// Opción RESTful: /vehiculos/:id/activar
+router.put('/:id/activar', verificarToken, vehiculosController.activarVehiculo);
 
+// Compatibilidad con tu ruta previa: /vehiculos/en-uso { id_veh }
+router.put('/en-uso', verificarToken, vehiculosController.activarVehiculo);
 
 // ✏️ Actualizar vehículo (restringido)
 router.put('/:id', verificarToken, vehiculosController.actualizarVehiculo);
