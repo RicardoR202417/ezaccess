@@ -37,5 +37,9 @@ const Asignacion = sequelize.define('Asignacion', {
   tableName: 'asignaciones',
   timestamps: false,
 });
+Asignacion.belongsTo(Usuario, {
+  foreignKey: 'id_usu',
+  onDelete: 'CASCADE', // 🔥 Aquí aplicas el borrado en cascada
+});
 
 module.exports = Asignacion;
