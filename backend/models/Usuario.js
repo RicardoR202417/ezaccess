@@ -82,9 +82,5 @@ const Usuario = sequelize.define('Usuario', {
   timestamps: false,
   freezeTableName: true,
 });
-Usuario.hasMany(Asignacion, {
-  foreignKey: 'id_usu',
-  onDelete: 'CASCADE',
-});
 
 module.exports = Usuario;
