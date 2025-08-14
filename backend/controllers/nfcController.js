@@ -2,9 +2,8 @@
 const { Asignacion, Usuario, Cajon, sequelize } = require('../models');
 
 // UIDs físicos fijos
-const UID_ENTRADA = 'C51FF905';
-const UID_SALIDA  = '827C3906';
-
+const UID_ENTRADA = 'AE381C06';
+const UID_SALIDA  = '1AA51C06';
 exports.validarNFC = async (req, res) => {
   try {
     const { uid } = req.params;
