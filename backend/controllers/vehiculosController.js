@@ -1,9 +1,8 @@
-// controllers/vehiculosController.js
 const { Sequelize } = require('sequelize');
 const Vehiculo = require('../models/Vehiculo');
 const sequelize = require('../config/db');
 
-// ✅ Crear nuevo vehículo (máx. 3 por usuario; si es el primero, se marca activo opcionalmente)
+// ✅ Crear nuevo vehículo
 const crearVehiculo = async (req, res) => {
   try {
     const { id_usu, marca_veh, modelo_veh, desc_veh, placas_veh } = req.body;
@@ -12,13 +11,11 @@ const crearVehiculo = async (req, res) => {
       return res.status(400).json({ error: 'Faltan datos obligatorios.' });
     }
 
-    // Regla: máximo 3 vehículos por usuario
     const totalUsuario = await Vehiculo.count({ where: { id_usu } });
     if (totalUsuario >= 3) {
       return res.status(409).json({ error: 'Límite alcanzado: máximo 3 vehículos por usuario.' });
     }
 
-    // Opcional: si no tiene vehículos, crear el primero como activo
     const en_uso = totalUsuario === 0;
 
     const nuevoVehiculo = await Vehiculo.create({
@@ -37,7 +34,7 @@ const crearVehiculo = async (req, res) => {
   }
 };
 
-// 🔍 Obtener todos los vehículos de un usuario
+// 🔍 Obtener vehículos de un usuario
 const listarVehiculosPorUsuario = async (req, res) => {
   try {
     const { id_usu } = req.params;
@@ -57,8 +54,7 @@ const listarVehiculosPorUsuario = async (req, res) => {
   }
 };
 
-// ✅ Activar un vehículo (deja solo 1 activo por usuario, desactiva los demás)
-// Puedes mantener esta ruta como /en-uso o /:id/activar; aquí dejo ambas soportadas.
+// ✅ Activar un vehículo (dejando solo uno activo)
 const activarVehiculo = async (req, res) => {
   const t = await sequelize.transaction();
   try {
@@ -77,18 +73,20 @@ const activarVehiculo = async (req, res) => {
 
     const id_usu = vehiculo.id_usu;
 
-    // Desactivar todos los vehículos del usuario
     await Vehiculo.update(
       { en_uso: false },
       { where: { id_usu }, transaction: t }
     );
 
-    // Activar el seleccionado
     vehiculo.en_uso = true;
     await vehiculo.save({ transaction: t });
 
     await t.commit();
-    res.json({ mensaje: 'Vehículo activado correctamente', vehiculo });
+
+    // 🔄 Recargar desde base de datos para asegurar reflejo de cambios
+    const actualizado = await Vehiculo.findByPk(id_veh);
+
+    res.json({ mensaje: 'Vehículo activado correctamente', vehiculo: actualizado });
   } catch (error) {
     console.error('❌ Error al activar vehículo:', error.message);
     await t.rollback();
@@ -96,7 +94,7 @@ const activarVehiculo = async (req, res) => {
   }
 };
 
-// ✏️ Actualizar vehículo (no altera en_uso a menos que lo envíes explícito)
+// ✏️ Actualizar vehículo
 const actualizarVehiculo = async (req, res) => {
   try {
     const { id } = req.params;
@@ -107,7 +105,6 @@ const actualizarVehiculo = async (req, res) => {
       return res.status(404).json({ mensaje: 'Vehículo no encontrado' });
     }
 
-    // Evitar que por accidente envíen en_uso=true a varios; usar el endpoint de activar
     if (typeof datos.en_uso !== 'undefined') {
       delete datos.en_uso;
     }
@@ -120,7 +117,7 @@ const actualizarVehiculo = async (req, res) => {
   }
 };
 
-// ❌ Eliminar vehículo (si es el activo, no se reasigna automáticamente)
+// ❌ Eliminar vehículo
 const eliminarVehiculo = async (req, res) => {
   try {
     const { id } = req.params;
