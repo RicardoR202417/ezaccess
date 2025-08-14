@@ -178,3 +178,57 @@ exports.obtenerCupoPorZona = async (req, res) => {
     res.status(500).json({ mensaje: 'Error del servidor' });
   }
 };
+exports.cambiarEstadoCajon = async (req, res) => {
+  const { id_caj } = req.params;
+  const { accion, id_usu } = req.body;
+
+  try {
+    const cajon = await Cajon.findByPk(id_caj);
+    if (!cajon) {
+      return res.status(404).json({ mensaje: 'Cajón no encontrado' });
+    }
+
+    if (accion === 'activar') {
+      if (!id_usu) {
+        return res.status(400).json({ mensaje: 'Falta el id_usu en la solicitud.' });
+      }
+
+      const existeAsignacion = await Asignacion.findOne({
+        where: { id_caj, estado_asig: 'activa' },
+      });
+
+      if (existeAsignacion) {
+        return res.status(400).json({ mensaje: 'El cajón ya está asignado.' });
+      }
+
+      await Asignacion.create({
+        id_caj,
+        id_usu,
+        tipo_asig: 'manual',
+        estado_asig: 'activa',
+      });
+
+      return res.json({ mensaje: 'Cajón asignado correctamente' });
+    }
+
+    if (accion === 'finalizar') {
+      const asignacion = await Asignacion.findOne({
+        where: { id_caj, estado_asig: 'activa' },
+      });
+
+      if (!asignacion) {
+        return res.status(400).json({ mensaje: 'No hay asignación activa en este cajón' });
+      }
+
+      asignacion.estado_asig = 'finalizada';
+      await asignacion.save();
+
+      return res.json({ mensaje: 'Asignación finalizada correctamente' });
+    }
+
+    return res.status(400).json({ mensaje: 'Acción no válida' });
+  } catch (error) {
+    console.error('Error al cambiar el estado del cajón:', error);
+    res.status(500).json({ mensaje: 'Error del servidor' });
+  }
+};
