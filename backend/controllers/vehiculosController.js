@@ -44,6 +44,7 @@ const listarVehiculosPorUsuario = async (req, res) => {
 
     const vehiculos = await Vehiculo.findAll({
       where: { id_usu },
+      attributes: ['id_veh', 'id_usu', 'marca_veh', 'modelo_veh', 'desc_veh', 'placas_veh', 'en_uso'], // 👈 aquí
       order: [['id_veh', 'ASC']],
     });
 
@@ -53,6 +54,7 @@ const listarVehiculosPorUsuario = async (req, res) => {
     res.status(500).json({ error: 'Error del servidor al obtener vehículos.' });
   }
 };
+
 
 // ✅ Activar un vehículo (dejando solo uno activo)
 const activarVehiculo = async (req, res) => {
