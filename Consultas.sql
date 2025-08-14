@@ -90,3 +90,112 @@ FROM visitas v
 INNER JOIN usuarios u ON u.id_usu = v.id_usu
 WHERE v.estado_vis = 'aprobada'
 ORDER BY v.fecha_vis DESC;
+
+
+1️⃣ v_todas_asignaciones — Todas las asignaciones
+
+Objetivo: Muestra todas las asignaciones, sin importar si están activas o finalizadas.
+
+Funcionamiento:
+
+Lee la tabla asignaciones (a) y la cruza con:
+
+usuarios (u) para obtener el nombre completo del residente.
+
+cajones (c) para saber el número y ubicación del cajón.
+
+Usa CONCAT_WS para unir nombre y apellidos en un solo campo residente.
+
+Ordena los resultados desde la más reciente (ORDER BY fecha_asig DESC).
+
+Uso real: Ver el historial completo de quién ha tenido cada cajón.
+
+Comprobación:
+
+SELECT * FROM v_todas_asignaciones;
+
+2️⃣ v_asignaciones_activas — Asignaciones vigentes
+
+Objetivo: Filtra y muestra solo las asignaciones activas.
+
+Funcionamiento:
+
+Misma estructura que la vista anterior, pero con un WHERE estado_asig = 'activa'.
+
+Esto asegura que solo se ve quién tiene actualmente un cajón asignado.
+
+Uso real: Dashboard en tiempo real para saber qué cajones están ocupados.
+
+Comprobación:
+
+SELECT * FROM v_asignaciones_activas;
+
+4️⃣ v_historial_asignaciones_detalle — Bitácora de cambios
+
+Objetivo: Mostrar los eventos registrados por el trigger sobre asignaciones (alta, actualización, baja).
+
+Funcionamiento:
+
+Lee de historial_asignaciones (h), que es llenada automáticamente por el trigger.
+
+Se une con asignaciones y usuarios para saber qué residente estaba involucrado en cada evento.
+
+Ordena de lo más reciente a lo más antiguo (ORDER BY fecha_accion DESC).
+
+Uso real: Auditoría y seguimiento de cambios en las asignaciones.
+
+Comprobación:
+
+SELECT * FROM v_historial_asignaciones_detalle;
+
+5️⃣ v_cupo_cajones_zona — Cupo por zona
+
+Objetivo: Mostrar cuántos cajones hay libres y ocupados en cada zona del estacionamiento.
+
+Funcionamiento:
+
+Agrupa los cajones por ubicacion_caj.
+
+Cuenta el total de cajones (COUNT(*)).
+
+Suma cuántos están libres (estado_caj = 'libre') y cuántos ocupados (estado_caj = 'ocupado').
+
+Uso real: Ver disponibilidad por zonas para asignaciones automáticas o reportes.
+
+Comprobación:
+
+SELECT * FROM v_cupo_cajones_zona;
+
+7️⃣ v_ultimas_entradas — Últimos accesos
+
+Objetivo: Mostrar las últimas 10 entradas registradas.
+
+Funcionamiento:
+
+Lee la tabla accesos y une con usuarios para mostrar el nombre completo.
+
+Ordena por fecha_ent_acc en descendente y limita a 10 resultados.
+
+Uso real: Monitorear quién ha ingresado más recientemente.
+
+Comprobación:
+
+SELECT * FROM v_ultimas_entradas;
+
+🔟 v_visitantes_aprobados — Lista de visitantes con acceso autorizado
+
+Objetivo: Mostrar únicamente las visitas que fueron aprobadas.
+
+Funcionamiento:
+
+Lee de visitas (v) y une con usuarios para mostrar el residente que registró al visitante.
+
+Filtra por estado_vis = 'aprobada'.
+
+Ordena de más reciente a más antigua.
+
+Uso real: Control de acceso para visitantes autorizados.
+
+Comprobación:
+
+SELECT * FROM v_visitantes_aprobados;
