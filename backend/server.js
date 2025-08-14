@@ -5,6 +5,7 @@ const cors = require('cors');
 const app = express();
 const sequelize = require('./config/db');
 const Vehiculo = require('./models/Vehiculo'); // 👈 IMPORTANTE
+const iotRoutes = require('./routes/iotRoutes');
 
 const nfcRoutes = require('./routes/nfcRoutes');
 const asignacionRoutes = require('./routes/asignacionRoutes');
@@ -53,6 +54,7 @@ app.use('/api/nfc', nfcRoutes);
 app.use('/api/reportes', reportesRoutes);
 app.use('/api/vehiculos', vehiculosRoutes);
 app.use('/api', rutasProtegidas);
+app.use('/api/iot', iotRoutes); 
 
 // Escucha
 const PORT = process.env.PORT || 5000;
