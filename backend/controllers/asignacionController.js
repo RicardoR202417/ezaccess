@@ -1,4 +1,5 @@
 const { Asignacion, Usuario, Cajon, Actuador, Sensor, sequelize } = require('../models');
+const { Op } = require('sequelize'); // <- asegurarnos que está importado
 
 // Obtener todas las asignaciones
 exports.obtenerAsignaciones = async (req, res) => {
@@ -126,55 +127,47 @@ exports.obtenerAsignacionActivaPorUsuario = async (req, res) => {
 };
 
 // NUEVA FUNCIÓN: Asignación manual de cajones
+
+
 exports.asignacionManual = async (req, res) => {
   const { id_caj, id_usu } = req.body;
 
   try {
-    if (!id_caj || !id_usu) {
-      return res.status(400).json({ mensaje: "Faltan datos para la asignación" });
-    }
-
-    // Verificar cajón
     const cajon = await Cajon.findByPk(id_caj);
     if (!cajon) {
       return res.status(404).json({ mensaje: 'Cajón no encontrado' });
     }
 
-    // Verificar que no esté ocupado ni pendiente
-    const ocupacion = await Asignacion.findOne({
+    const asignacionExistente = await Asignacion.findOne({
       where: { id_caj, estado_asig: { [Op.in]: ['activa', 'pendiente'] } }
     });
-    if (ocupacion) {
+    if (asignacionExistente) {
       return res.status(400).json({ mensaje: 'El cajón ya está asignado' });
     }
 
-    // Verificar que el usuario no tenga ya asignación
     const asignacionUsuario = await Asignacion.findOne({
       where: { id_usu, estado_asig: { [Op.in]: ['activa', 'pendiente'] } }
     });
     if (asignacionUsuario) {
-      return res.status(400).json({ mensaje: 'El usuario ya tiene un cajón' });
+      return res.status(400).json({ mensaje: 'El usuario ya tiene un cajón asignado' });
     }
 
-    // Crear asignación en estado pendiente
     const nuevaAsignacion = await Asignacion.create({
       id_caj,
       id_usu,
       tipo_asig: 'manual',
-      estado_asig: 'pendiente',
+      estado_asig: 'pendiente', // <- aquí el nuevo estado
       fecha_asig: new Date()
     });
 
-    // Actualizar estado cajón
-    await Cajon.update({ estado: 'ocupado' }, { where: { id_caj } });
+    await Cajon.update({ estado_caj: 'ocupado' }, { where: { id_caj } });
 
-    return res.status(201).json({
-      mensaje: 'Cajón asignado correctamente',
+    res.status(201).json({
+      mensaje: 'Cajón asignado en espera (pendiente)',
       asignacion: nuevaAsignacion
     });
-
   } catch (error) {
     console.error('Error en asignación manual:', error);
-    return res.status(500).json({ mensaje: 'Error interno del servidor' });
+    res.status(500).json({ mensaje: 'Error interno del servidor', error: error.message });
   }
 };

@@ -29,7 +29,10 @@ exports.obtenerCajonesConEstado = async (req, res) => {
         id_caj: cajon.id_caj,
         numero_caj: cajon.numero_caj,
         ubicacion_caj: cajon.ubicacion_caj,
-        estado: asignacionActiva ? 'ocupado' : 'libre',
+       estado: asignacionActiva 
+  ? asignacionActiva.estado_asig // puede ser 'activa' o 'pendiente'
+  : 'libre',
+
         usuario_ocupante: asignacionActiva && asignacionActiva.Usuario
           ? asignacionActiva.Usuario.nombre_usu
           : null,
