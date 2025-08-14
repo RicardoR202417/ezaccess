@@ -158,13 +158,13 @@ exports.asignacionManual = async (req, res) => {
     }
 
     // Crear nueva asignación con estado recibido o "activa" por defecto
-    const nuevaAsignacion = await Asignacion.create({
-      id_caj,
-      id_usu,
-      tipo_asig: 'manual',
-      estado_asig: estado_asig || 'activa', // aquí puedes pasar 'pendiente' desde el frontend
-      fecha_asig: new Date()
-    });
+ await Asignacion.create({
+  id_caj,
+  id_usu,
+  tipo_asig: 'manual',
+  estado_asig: 'pendiente'
+});
+
 
     // Si es activa, cambiar estado del cajón a ocupado
     if ((estado_asig || 'activa') === 'activa') {

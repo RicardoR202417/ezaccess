@@ -32,19 +32,21 @@ exports.validarNFC = async (req, res) => {
     include: [{ model: Cajon, attributes: ['id_caj','numero_caj','ubicacion_caj'] }]
   });
 
-  if (asignacionPendiente) {
-    asignacionPendiente.estado_asig = 'activa';
-    await asignacionPendiente.save();
+if (asignacionPendiente) {
+  asignacionPendiente.estado_asig = 'activa';
+  await asignacionPendiente.save();
 
-    return res.json({
-      mensaje: 'Entrada registrada. Cajón confirmado.',
-      tipo: 'entrada',
-      asignacion: {
-        id_asig: asignacionPendiente.id_asig,
-        cajon: asignacionPendiente.Cajon || null
-      }
-    });
-  }
+  return res.json({
+    mensaje: 'Entrada registrada. Cajón confirmado.',
+    tipo: 'entrada',
+    asignacion: {
+      id_asig: asignacionPendiente.id_asig,
+      estado_asig: asignacionPendiente.estado_asig, // 🔹 Agregado
+      cajon: asignacionPendiente.Cajon || null
+    }
+  });
+}
+
 
   // Si no tiene pendiente, usar asignación automática
   await sequelize.query('CALL asignar_cajon_automatico(:p_id_usu)', {
@@ -64,14 +66,16 @@ exports.validarNFC = async (req, res) => {
     });
   }
 
-  return res.json({
-    mensaje: 'Acceso otorgado. Cajón asignado automáticamente.',
-    tipo: 'entrada',
-    asignacion: {
-      id_asig: nuevaAsignacion.id_asig,
-      cajon: nuevaAsignacion.Cajon || null
-    }
-  });
+return res.json({
+  mensaje: 'Acceso otorgado. Cajón asignado automáticamente.',
+  tipo: 'entrada',
+  asignacion: {
+    id_asig: nuevaAsignacion.id_asig,
+    estado_asig: nuevaAsignacion.estado_asig, // 🔹 Agregado
+    cajon: nuevaAsignacion.Cajon || null
+  }
+});
+
 }
 
     // ============= SALIDA =============

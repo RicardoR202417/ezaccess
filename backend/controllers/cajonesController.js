@@ -30,10 +30,11 @@ exports.obtenerCajonesConEstado = async (req, res) => {
         id_caj: cajon.id_caj,
         numero_caj: cajon.numero_caj,
         ubicacion_caj: cajon.ubicacion_caj,
-        estado: asignacionActiva
-  ? (asignacionActiva.estado_asig === 'activa' ? 'ocupado' : 'pendiente')
-  : 'libre', // <- para filtro y color
-        estado_asig: asignacionActiva ? asignacionActiva.estado_asig : null, // <- para botón
+estado: asignacionActiva
+  ? (asignacionActiva.estado_asig === 'pendiente' ? 'pendiente' : 'ocupado')
+  : 'libre',
+estado_asig: asignacionActiva ? asignacionActiva.estado_asig : null,
+ // <- para botón
         usuario_ocupante: asignacionActiva && asignacionActiva.Usuario
           ? asignacionActiva.Usuario.nombre_usu
           : null,
