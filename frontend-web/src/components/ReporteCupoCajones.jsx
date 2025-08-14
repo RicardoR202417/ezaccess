@@ -37,25 +37,52 @@ export default function ReporteCupoCajones({ preview }) {
       }
     };
 
-    const obtenerDatosPorZona = async () => {
-      try {
-        const zonas = ["Zona A", "Zona C", "Zona D", "Zona E"];
-        const resultados = await Promise.all(
-          zonas.map(async (zona) => {
-            const res = await fetch(`https://ezaccess-backend.onrender.com/api/cajones/zona/${zona}`);
-            if (!res.ok) throw new Error(`Error al obtener datos de la zona: ${zona}`);
-            const data = await res.json();
-            return { zona, ...data };
-          })
-        );
-        setZonas(resultados);
-      } catch (error) {
-        console.error("Error al obtener datos por zona:", error);
-        setZonas([]); // Limpia las zonas en caso de error
-      }
-    };
+    const normalizeZona = (zona) => zona.trim().toLowerCase().replace(/\s+/g, '_');
 
-    obtenerDatosCajones();
+  const obtenerDatosPorZona = async () => {
+    try {
+      const zonas = ["Zona A", "Zona C", "Zona D", "Zona E"];
+      
+      const resultados = await Promise.all(
+        zonas.map(async (zonaOriginal) => {
+          try {
+            // Primera: intentar con la ruta original (manteniendo espacios)
+            let url = `https://ezaccess-backend.onrender.com/api/cajones/zona/${encodeURIComponent(zonaOriginal)}`;
+            console.log("URL construida (original):", url);
+            
+            let res = await fetch(url);
+            if (!res.ok) {
+              // Segunda: intentar con zona normalizada
+              const zonaNormalizada = zonaOriginal.toLowerCase().replace(/\s+/g, '_');
+              url = `https://ezaccess-backend.onrender.com/api/cajones/zona/${zonaNormalizada}`;
+              console.log("URL construida (normalizada):", url);
+              res = await fetch(url);
+            }
+            
+            if (!res.ok) {
+              throw new Error(`Error ${res.status} para zona ${zonaOriginal}`);
+            }
+            
+            const data = await res.json();
+            return { zona: data.zona, ...data };
+          } catch (error) {
+            console.error(`Error al obtener datos para ${zonaOriginal}:`, error);
+            // Retornar datos por defecto en caso de error
+            return {
+              zona: zonaOriginal,
+              totalOcupados: 0,
+              totalLibres: 0,
+              totalCajones: 0
+            };
+          }
+        })
+      );
+      setZonas(resultados);
+    } catch (error) {
+      console.error("Error al obtener datos por zona:", error);
+      setZonas([]);
+    }
+  };    obtenerDatosCajones();
     if (!preview) obtenerDatosPorZona(); // Solo obtener datos por zona si no es vista previa
   }, [preview]);
 
