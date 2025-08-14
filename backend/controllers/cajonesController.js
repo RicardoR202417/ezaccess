@@ -1,13 +1,14 @@
 const { Cajon, Asignacion, Usuario, Actuador, Sensor } = require('../models');
 
 // Obtener todos los cajones con su estado (ocupado o libre) y el usuario que lo ocupa
+// Obtener todos los cajones con su estado (ocupado o libre) y el usuario que lo ocupa
 exports.obtenerCajonesConEstado = async (req, res) => {
   try {
     const cajones = await Cajon.findAll({
       include: [
         {
           model: Asignacion,
-          where: { estado_asig: 'activa' },
+          where: { estado_asig: ['activa', 'pendiente'] },
           required: false,
           include: [
             {
@@ -21,18 +22,16 @@ exports.obtenerCajonesConEstado = async (req, res) => {
     });
 
     const cajonesConEstado = cajones.map((cajon) => {
-      // Buscar la primera asignación activa (si existe)
       const asignacionActiva = cajon.Asignacions && cajon.Asignacions.length > 0
         ? cajon.Asignacions[0]
         : null;
+
       return {
         id_caj: cajon.id_caj,
         numero_caj: cajon.numero_caj,
         ubicacion_caj: cajon.ubicacion_caj,
-       estado: asignacionActiva 
-  ? asignacionActiva.estado_asig // puede ser 'activa' o 'pendiente'
-  : 'libre',
-
+        estado: asignacionActiva ? 'ocupado' : 'libre', // <- para filtro y color
+        estado_asig: asignacionActiva ? asignacionActiva.estado_asig : null, // <- para botón
         usuario_ocupante: asignacionActiva && asignacionActiva.Usuario
           ? asignacionActiva.Usuario.nombre_usu
           : null,
@@ -45,69 +44,6 @@ exports.obtenerCajonesConEstado = async (req, res) => {
     res.json(cajonesConEstado);
   } catch (error) {
     console.error('Error al obtener los cajones:', error);
-    res.status(500).json({ mensaje: 'Error del servidor' });
-  }
-};
-
-// Cambiar el estado de un cajón manualmente (activar o finalizar asignación)
-exports.cambiarEstadoCajon = async (req, res) => {
-  const { id_caj } = req.params;
-  const { accion, id_usu } = req.body; // ← ahora id_usu se toma del body
-
-  try {
-    const cajon = await Cajon.findByPk(id_caj);
-    if (!cajon) {
-      return res.status(404).json({ mensaje: 'Cajón no encontrado' });
-    }
-
-    if (accion === 'activar') {
-      if (!id_usu) {
-        return res.status(400).json({ mensaje: 'Falta el id_usu en la solicitud.' });
-      }
-      // Solo se crea una asignación si no existe una activa
-      const asignacionExistente = await Asignacion.findOne({
-        where: {
-          id_caj,
-          estado_asig: 'activa'
-        }
-      });
-
-      if (asignacionExistente) {
-        return res.status(400).json({ mensaje: 'Ya existe una asignación activa para este cajón' });
-      }
-
-      await Asignacion.create({
-        id_caj,
-        id_usu,
-        tipo_asig: 'manual',
-        estado_asig: 'activa'
-      });
-
-      return res.json({ mensaje: 'Asignación activada exitosamente' });
-
-    } else if (accion === 'finalizar') {
-      const asignacionActiva = await Asignacion.findOne({
-        where: {
-          id_caj,
-          estado_asig: 'activa'
-        }
-      });
-
-      if (!asignacionActiva) {
-        return res.status(400).json({ mensaje: 'No hay una asignación activa para este cajón' });
-      }
-
-      asignacionActiva.estado_asig = 'finalizada';
-      await asignacionActiva.save();
-
-      return res.json({ mensaje: 'Asignación finalizada correctamente' });
-
-    } else {
-      return res.status(400).json({ mensaje: 'Acción no válida. Usa "activar" o "finalizar".' });
-    }
-
-  } catch (error) {
-    console.error('Error al cambiar el estado del cajón:', error);
     res.status(500).json({ mensaje: 'Error del servidor' });
   }
 };
