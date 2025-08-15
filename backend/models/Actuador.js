@@ -30,7 +30,7 @@ const Actuador = sequelize.define('Actuador', {
   },
 }, {
   tableName: 'actuadores',
-  timestamps: true,
+  timestamps: false,
   indexes: [
     { unique: true, fields: ['id_caj', 'tipo'] },
   ],
