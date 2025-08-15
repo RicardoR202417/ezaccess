@@ -109,10 +109,12 @@ exports.bajarTope = async (req, res) => {
   // Validar que el cajón existe y tiene actuador tipo 'tope'
   const cajon = await Cajon.findByPk(idCajon, {
     include: {
-      model: Actuador,
-      where: { tipo: 'tope' },
-      required: true,
-    }
+  model: Actuador,
+  as: 'actuadorTope',  // ← ¡este alias es obligatorio!
+  where: { tipo: 'tope' },
+  required: true,
+}
+
   });
 
   if (!cajon) {
