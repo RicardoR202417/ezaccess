@@ -107,25 +107,51 @@ exports.bajarTope = async (req, res) => {
   const idCajon = req.params.id_cajon;
 
   try {
+    const actuador = await Actuador.findOne({
+      where: { id_caj: idCajon, tipo: 'tope' }
+    });
+
+    if (!actuador) {
+      return res.status(404).json({ error: 'No se encontró actuador tipo tope para este cajón' });
+    }
+
+    // Marca el tope para bajar
+    state.topes[idCajon] = 1;
+
+    return res.json({
+      ok: true,
+      mensaje: `Tope del cajón ${idCajon} marcado para bajar.`
+    });
+  } catch (error) {
+    console.error('🔥 Error bajando tope:', error);
+    return res.status(500).json({
+      error: 'Error interno del servidor',
+      detalle: error.message || error.toString()
+    });
+  }
+};
+exports.subirTope = async (req, res) => {
+  try {
+    const idCajon = req.params.id;
+
     const cajon = await Cajon.findByPk(idCajon, {
       include: {
         model: Actuador,
         as: 'actuadorTope',
         where: { tipo: 'tope' },
         required: true,
-      }
+      },
     });
 
     if (!cajon) {
-      return res.status(404).json({ error: 'Cajón o actuador tipo tope no encontrado' });
+      return res.status(404).json({ ok: false, mensaje: 'Cajón no encontrado' });
     }
 
-    state.topes[idCajon] = 1;
+    await cajon.actuadorTope.update({ estado: 0 });
 
-    return res.json({ ok: true, mensaje: `Tope de cajón ${idCajon} marcado para bajar.` });
-
+    res.json({ ok: true, mensaje: `Tope del cajón ${idCajon} marcado para subir.` });
   } catch (error) {
-    console.error('🔥 Error bajando tope:', error.stack); // <-- Para ver en Render el detalle
-    return res.status(500).json({ error: 'Error interno del servidor', detalle: error.message });
+    console.error('🔥 Error subiendo tope:', error);
+    res.status(500).json({ ok: false, mensaje: 'Error al subir tope', detalle: error.message });
   }
 };

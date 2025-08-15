@@ -22,8 +22,10 @@ const Cajon = sequelize.define('Cajon', { // <-- Nombre del modelo en singular
 
 
 Cajon.associate = (models) => {
-  Cajon.hasOne(models.Actuador, { foreignKey: 'id_caj', as: 'actuadorTope' });
-  Cajon.hasOne(models.Actuador, { foreignKey: 'id_caj', as: 'actuadorPluma' });
+  Cajon.hasOne(models.Actuador, {
+    foreignKey: 'id_caj',
+    as: 'actuadorTope', // <- ESTE ES EL ALIAS QUE USAS EN EL CONTROLLER
+  });
 };
 
 

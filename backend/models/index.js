@@ -11,16 +11,12 @@ const Asignacion = require("./Asignacion");
 const Acceso = require("./Acceso");
 const HistorialAsignacion = require("./HistorialAsignacion");
 
-// Relaciones
+// Relaciones entre modelos
 Usuario.hasMany(SolicitudVisita, { foreignKey: "id_usu" });
 SolicitudVisita.belongsTo(Usuario, { foreignKey: "id_usu" });
 
-Cajon.hasOne(Actuador, { foreignKey: "id_caj", as: "actuadorPluma" }); // Entrada o salida
-Cajon.hasOne(Actuador, { foreignKey: "id_caj", as: "actuadorTope" });  // Tope
-Cajon.hasOne(Sensor,   { foreignKey: "id_caj" });
-
-Actuador.belongsTo(Cajon, { foreignKey: "id_caj", as: "cajon" });
-Sensor.belongsTo(Cajon,   { foreignKey: "id_caj" });
+Sensor.belongsTo(Cajon, { foreignKey: "id_caj" });
+Cajon.hasOne(Sensor, { foreignKey: "id_caj" });
 
 Asignacion.belongsTo(Usuario, { foreignKey: "id_usu" });
 Asignacion.belongsTo(Cajon,   { foreignKey: "id_caj" });
@@ -32,10 +28,9 @@ HistorialAsignacion.belongsTo(Usuario, { foreignKey: "id_usu" });
 Cajon.hasMany(HistorialAsignacion, { foreignKey: "id_caj" });
 HistorialAsignacion.belongsTo(Cajon, { foreignKey: "id_caj" });
 
-// Asociaciones explícitas si existen métodos associate
-if (Cajon.associate) Cajon.associate({ Actuador, Sensor });
+// ✅ Ejecutar métodos associate si existen
+if (Cajon.associate) Cajon.associate({ Actuador });
 if (Actuador.associate) Actuador.associate({ Cajon });
-if (Sensor.associate) Sensor.associate?.({ Cajon }); // Opcional
 
 // Exportar
 module.exports = {
