@@ -8,8 +8,12 @@ import {
   ResponsiveContainer,
   LabelList,
   CartesianGrid,
+  Legend
 } from "recharts";
-import { Card, Spinner } from "react-bootstrap";
+import { Card, Spinner, Button } from "react-bootstrap";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import autoTable from "jspdf-autotable";
 
 export default function ReporteCupoCajones({ preview }) {
   const [ocupados, setOcupados] = useState(0);
@@ -91,19 +95,66 @@ export default function ReporteCupoCajones({ preview }) {
     { name: "Ocupados", value: ocupados, fill: "#EF5350" },
   ];
 
+  // Función para exportar a PDF
+  const exportarPDF = async () => {
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text("Reporte de Cupo de Cajones", 14, 18);
+    
+    // Capturar gráfica general
+    const chartElementGeneral = document.getElementById("grafica-cajones-general");
+    if (chartElementGeneral) {
+      const canvasGeneral = await html2canvas(chartElementGeneral);
+      const imgDataGeneral = canvasGeneral.toDataURL("image/png");
+      doc.addImage(imgDataGeneral, "PNG", 10, 28, 180, 70);
+    }
+    
+    // Agregar resumen textual
+    doc.text(`Libres: ${libres} | Ocupados: ${ocupados} | Total: ${libres + ocupados}`, 14, 110);
+    
+    // Si hay datos por zona, agregar en páginas adicionales
+    if (zonas && zonas.length) {
+      for (let i = 0; i < zonas.length; i++) {
+        const zona = zonas[i];
+        if (i > 0 || true) doc.addPage(); // Siempre nueva página para zonas
+        
+        doc.text(`Zona: ${zona.zona}`, 14, 18);
+        
+        const chartElementZona = document.getElementById(`grafica-zona-${zona.zona.replace(/\s+/g, '-').toLowerCase()}`);
+        if (chartElementZona) {
+          const canvasZona = await html2canvas(chartElementZona);
+          const imgDataZona = canvasZona.toDataURL("image/png");
+          doc.addImage(imgDataZona, "PNG", 10, 28, 180, 70);
+        }
+        
+        doc.text(`Libres: ${zona.totalLibres} | Ocupados: ${zona.totalOcupados} | Total: ${zona.totalCajones || (zona.totalLibres + zona.totalOcupados)}`, 14, 110);
+      }
+    }
+    
+    doc.save("reporte_cupo_cajones.pdf");
+  };
+
   return (
     <div>
-      <h5 className="mb-3 text-center">Cupo general de cajones</h5>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h5 className="mb-0">Cupo general de cajones</h5>
+        {!preview && (
+          <Button variant="success" onClick={exportarPDF} disabled={cargando}>
+            Exportar PDF
+          </Button>
+        )}
+      </div>
       <Card className="shadow-sm rounded-4 mb-4">
         <Card.Body>
           {cargando ? (
             <div className="text-center"><Spinner animation="border" /></div>
           ) : (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart
-                data={datosGraficaVertical}
-                margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-              >
+            <div id="grafica-cajones-general">
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart
+                  data={datosGraficaVertical}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis allowDecimals={false} />
@@ -116,6 +167,7 @@ export default function ReporteCupoCajones({ preview }) {
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
+            </div>
           )}
           {!cargando && (
             <div className="mt-3 resumen-cajones text-center">
@@ -139,6 +191,7 @@ export default function ReporteCupoCajones({ preview }) {
             <Card className="shadow-sm rounded-4 mb-4" key={zona.zona}>
               <Card.Body>
                 <h6 className="text-center">{zona.zona}</h6>
+                <div id={`grafica-zona-${zona.zona.replace(/\s+/g, '-').toLowerCase()}`}>
                 <ResponsiveContainer width="100%" height={200}>
                   <BarChart
                     data={[
@@ -156,6 +209,7 @@ export default function ReporteCupoCajones({ preview }) {
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
+                </div>
               </Card.Body>
             </Card>
           ))}
