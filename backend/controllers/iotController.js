@@ -130,3 +130,28 @@ exports.bajarTope = async (req, res) => {
     });
   }
 };
+exports.subirTope = async (req, res) => {
+  try {
+    const idCajon = req.params.id;
+
+    const cajon = await Cajon.findByPk(idCajon, {
+      include: {
+        model: Actuador,
+        as: 'actuadorTope',
+        where: { tipo: 'tope' },
+        required: true,
+      },
+    });
+
+    if (!cajon) {
+      return res.status(404).json({ ok: false, mensaje: 'Cajón no encontrado' });
+    }
+
+    await cajon.actuadorTope.update({ estado: 0 });
+
+    res.json({ ok: true, mensaje: `Tope del cajón ${idCajon} marcado para subir.` });
+  } catch (error) {
+    console.error('🔥 Error subiendo tope:', error);
+    res.status(500).json({ ok: false, mensaje: 'Error al subir tope', detalle: error.message });
+  }
+};
