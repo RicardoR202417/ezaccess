@@ -26,4 +26,6 @@ router.get('/tope/:id_cajon', ctrl.getEstadoTope);
 // Web o backend ordena bajar el tope de un cajón específico
 router.post('/tope/:id_cajon/down', ctrl.bajarTope);
 
+router.post('/tope/:id_cajon/up', ctrl.subirTope);
+
 module.exports = router;
