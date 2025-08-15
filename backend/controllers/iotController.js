@@ -1,22 +1,9 @@
 // controllers/iotController.js
-const state = require('../helpers/state');
 const { Actuador, Cajon } = require('../models');
 
 // ======== ESTADO EN MEMORIA PARA MAQUETA ========
-const state = {
-  plumas: {
-    entrada: 0,           // 1 = abrir entrada
-    salida: 0,            // 1 = abrir salida
-    tope: 0,              // 1 = bajar tope (global para ESP32)
-    tope_reset: 0,        // 1 = subir tope (reset)
-    updatedAt: null,
-  },
+const state = require('../helpers/state');
 
-  // Topes individuales por cajón (para pruebas si se desea por ID)
-  topes: {
-    // id_caj: 1 => marcado para bajar
-  },
-};
 
 // ======== PLUMAS (entrada/salida/tope global) ========
 
