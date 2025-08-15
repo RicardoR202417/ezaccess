@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Container, Row, Col, Card, Button } from "react-bootstrap";
 import NavBarMonitor from "../components/NavBarMonitor";
 import { useNavigate } from "react-router-dom";
@@ -13,30 +13,49 @@ import {
 } from "recharts";
 import WeatherWidget from "../components/WeatherWidget";
 
+// === Ajusta esta URL a tu backend principal (mismo host de cajones) ===
+const API_BASE = "https://ezaccess-backend.onrender.com";
+
 export default function DashboardPage() {
   const navigate = useNavigate();
+
+  // Estado cajones (ya lo tenías)
   const [ocupados, setOcupados] = useState(0);
   const [libres, setLibres] = useState(0);
   const [cargando, setCargando] = useState(true);
+
+  // Estado de plumas (refleja backend IoT)
+  // Valores: "abierta" cuando flag=1 (solicitud emitida/pendiente de consumo por ESP),
+  // "cerrada" cuando flag=0.
   const [plumaEntrada, setPlumaEntrada] = useState("cerrada");
   const [plumaSalida, setPlumaSalida] = useState("cerrada");
 
+  // Control del polling
+  const pollRef = useRef(null);
+
+  // Helper de fetch con token
+  const authFetch = async (url, options = {}) => {
+    const token = localStorage.getItem("token");
+    const headers = {
+      "Content-Type": "application/json",
+      ...(options.headers || {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+    const res = await fetch(url, { ...options, headers });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new Error(`HTTP ${res.status} - ${text || res.statusText}`);
+    }
+    return res.json();
+  };
+
+  // Cargar resumen de cajones (tal como lo tenías)
   useEffect(() => {
     const obtenerDatosCajones = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const res = await fetch("https://ezaccess-backend.onrender.com/api/cajones", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (!res.ok) {
-          throw new Error(`Error HTTP: ${res.status}`);
-        }
-
-        const data = await res.json();
+        const data = await authFetch(`${API_BASE}/api/cajones`);
         const totalOcupados = data.filter((c) => c.estado === "ocupado").length;
         const totalLibres = data.filter((c) => c.estado === "libre").length;
-
         setOcupados(totalOcupados);
         setLibres(totalLibres);
       } catch (error) {
@@ -45,27 +64,61 @@ export default function DashboardPage() {
         setCargando(false);
       }
     };
-
     obtenerDatosCajones();
   }, []);
 
-  const total = ocupados + libres;
-
-  const datosGrafica = [
-    {
-      name: "Cupo",
-      ocupados: ocupados,
-      libres: libres,
-    },
-  ];
-
-  const togglePluma = (tipo) => {
-    if (tipo === "entrada") {
-      setPlumaEntrada((prev) => (prev === "abierta" ? "cerrada" : "abierta"));
-    } else {
-      setPlumaSalida((prev) => (prev === "abierta" ? "cerrada" : "abierta"));
+  // Polling de estado de plumas (cada 1.5s)
+  const leerEstadoPlumas = async () => {
+    try {
+      const data = await authFetch(`${API_BASE}/api/iot/plumas`); // sin oneshot
+      // Backend te da 0|1; mapeamos a texto
+      setPlumaEntrada(data.entrada === 1 ? "abierta" : "cerrada");
+      setPlumaSalida(data.salida === 1 ? "abierta" : "cerrada");
+    } catch (err) {
+      console.error("No se pudo leer /iot/plumas:", err);
     }
   };
+
+  useEffect(() => {
+    // primera lectura inmediata
+    leerEstadoPlumas();
+    // intervalo de polling
+    pollRef.current = setInterval(leerEstadoPlumas, 1500);
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, []);
+
+  // Acción: abrir/cerrar pluma ENTRADA o SALIDA
+  const togglePluma = async (tipo) => {
+    try {
+      // Determina el nuevo valor deseado (optimista)
+      if (tipo === "entrada") {
+        const abrir = plumaEntrada !== "abierta";
+        setPlumaEntrada(abrir ? "abierta" : "cerrada"); // optimista
+        await authFetch(`${API_BASE}/api/iot/plumas/set`, {
+          method: "POST",
+          body: JSON.stringify({ entrada: abrir ? 1 : 0 }),
+        });
+      } else {
+        const abrir = plumaSalida !== "abierta";
+        setPlumaSalida(abrir ? "abierta" : "cerrada"); // optimista
+        await authFetch(`${API_BASE}/api/iot/plumas/set`, {
+          method: "POST",
+          body: JSON.stringify({ salida: abrir ? 1 : 0 }),
+        });
+      }
+      // La lectura real se corregirá en el siguiente poll
+    } catch (err) {
+      console.error("No se pudo enviar orden a /iot/plumas/set:", err);
+      // Revertimos el optimista si falló
+      await leerEstadoPlumas();
+      alert("No se pudo ejecutar la acción en la pluma. Revise conexión.");
+    }
+  };
+
+  const total = ocupados + libres;
+  const datosGrafica = [{ name: "Cupo", ocupados, libres }];
 
   return (
     <div>
@@ -124,9 +177,7 @@ export default function DashboardPage() {
                 <Card.Title className="mb-2">Pluma de Entrada</Card.Title>
                 <Card.Text className="mb-3">
                   Estado actual:{" "}
-                  <strong
-                    className={plumaEntrada === "abierta" ? "text-success" : "text-danger"}
-                  >
+                  <strong className={plumaEntrada === "abierta" ? "text-success" : "text-danger"}>
                     {plumaEntrada.toUpperCase()}
                   </strong>
                 </Card.Text>
@@ -145,9 +196,7 @@ export default function DashboardPage() {
                 <Card.Title className="mb-2">Pluma de Salida</Card.Title>
                 <Card.Text className="mb-3">
                   Estado actual:{" "}
-                  <strong
-                    className={plumaSalida === "abierta" ? "text-success" : "text-danger"}
-                  >
+                  <strong className={plumaSalida === "abierta" ? "text-success" : "text-danger"}>
                     {plumaSalida.toUpperCase()}
                   </strong>
                 </Card.Text>
@@ -162,7 +211,7 @@ export default function DashboardPage() {
           </Col>
         </Row>
 
-        {/* Tercera fila: Gráfico y widget del clima */}
+        {/* Tercera fila: Gráfico y clima */}
         <Row className="mb-4">
           <Col md={6}>
             <Card className="shadow-sm rounded-4">
@@ -172,12 +221,7 @@ export default function DashboardPage() {
                   <p>Cargando gráfico...</p>
                 ) : (
                   <ResponsiveContainer width="100%" height={162}>
-                    <BarChart
-                      layout="vertical"
-                      data={datosGrafica}
-                      stackOffset="expand"
-                      margin={{ left: 20 }}
-                    >
+                    <BarChart layout="vertical" data={datosGrafica} stackOffset="expand" margin={{ left: 20 }}>
                       <defs>
                         <filter id="barShadow" x="-10%" y="-10%" width="130%" height="130%">
                           <feDropShadow dx="2" dy="2" stdDeviation="3" floodColor="#aaa" />
