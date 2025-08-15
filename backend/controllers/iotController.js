@@ -74,51 +74,68 @@ exports.setPlumasEstado = (req, res) => {
 
 // GET /api/iot/tope/:id_cajon?oneshot=true
 // Devuelve “one-shot” para ambas acciones y limpia si oneshot=true
-exports.getEstadoTope = (req, res) => {
-  const idCajon = String(req.params.id_cajon);
+// ======== TERCER SERVO (open/close one-shot y toggle) ========
+
+// GET /api/iot/tercero?oneshot=true
+// Devuelve flags one-shot {tercero_open, tercero_close} y limpia si oneshot=true
+exports.getTerceroEstado = (req, res) => {
   const oneshot = String(req.query.oneshot || '').toLowerCase() === 'true';
 
-  const down = state.topes_down[idCajon] === 1 ? 1 : 0;
-  const up   = state.topes_up[idCajon]   === 1 ? 1 : 0;
+  const payload = {
+    tercero_open:  state.tercero.open ? 1 : 0,
+    tercero_close: state.tercero.close ? 1 : 0,
+    lastState:     state.tercero.lastState ? 1 : 0, // 1 abierto, 0 cerrado (informativo)
+    updatedAt:     state.tercero.updatedAt,
+  };
 
   if (oneshot) {
-    if (down === 1) state.topes_down[idCajon] = 0;
-    if (up   === 1) state.topes_up[idCajon]   = 0;
+    // limpia sólo los flags one-shot (no cambiamos lastState aquí)
+    state.tercero.open  = 0;
+    state.tercero.close = 0;
+    state.tercero.updatedAt = new Date().toISOString();
   }
 
-  return res.json({ id_cajon: idCajon, tope_down: down, tope_up: up, updatedAt: new Date().toISOString() });
+  return res.json(payload);
 };
 
-// POST /api/iot/tope/:id_cajon/down
-exports.bajarTope = async (req, res) => {
-  const idCajon = String(req.params.id_cajon);
-  try {
-    const actuador = await Actuador.findOne({ where: { id_caj: idCajon, tipo: 'tope' } });
-    if (!actuador) return res.status(404).json({ error: 'No se encontró actuador tipo tope para este cajón' });
-
-    state.topes_down[idCajon] = 1; // one-shot para bajar
-    state.topes_up[idCajon]   = 0; // opcional: anula “up” pendiente
-
-    return res.json({ ok: true, mensaje: `Tope del cajón ${idCajon} marcado para BAJAR (one-shot).` });
-  } catch (error) {
-    console.error('🔥 Error bajando tope:', error);
-    return res.status(500).json({ error: 'Error interno del servidor', detalle: error.message || String(error) });
-  }
+// POST /api/iot/tercero/open
+exports.openTercero = (req, res) => {
+  state.tercero.open  = 1;
+  state.tercero.close = 0;                // anula close pendiente
+  state.tercero.updatedAt = new Date().toISOString();
+  return res.json({ ok: true, mensaje: 'Tercer servo marcado para OPEN (one-shot).' });
 };
 
-// POST /api/iot/tope/:id_cajon/up
-exports.subirTope = async (req, res) => {
-  const idCajon = String(req.params.id_cajon);
-  try {
-    const actuador = await Actuador.findOne({ where: { id_caj: idCajon, tipo: 'tope' } });
-    if (!actuador) return res.status(404).json({ error: 'No se encontró actuador tipo tope para este cajón' });
+// POST /api/iot/tercero/close
+exports.closeTercero = (req, res) => {
+  state.tercero.close = 1;
+  state.tercero.open  = 0;                // anula open pendiente
+  state.tercero.updatedAt = new Date().toISOString();
+  return res.json({ ok: true, mensaje: 'Tercer servo marcado para CLOSE (one-shot).' });
+};
 
-    state.topes_up[idCajon]   = 1; // one-shot para subir
-    state.topes_down[idCajon] = 0; // opcional: anula “down” pendiente
-
-    return res.json({ ok: true, mensaje: `Tope del cajón ${idCajon} marcado para SUBIR (one-shot).` });
-  } catch (error) {
-    console.error('🔥 Error subiendo tope:', error);
-    return res.status(500).json({ error: 'Error interno del servidor', detalle: error.message || String(error) });
+// POST /api/iot/tercero/toggle
+// Alterna el estado lógico y emite el one-shot correspondiente
+exports.toggleTercero = (req, res) => {
+  const next = state.tercero.lastState ? 0 : 1;  // si estaba abierto -> cerrar; si cerrado -> abrir
+  if (next === 1) {
+    state.tercero.open  = 1;
+    state.tercero.close = 0;
+  } else {
+    state.tercero.close = 1;
+    state.tercero.open  = 0;
   }
+  state.tercero.updatedAt = new Date().toISOString();
+  return res.json({ ok: true, mensaje: `Toggle: nuevo estado lógico = ${next ? 'ABIERTO' : 'CERRADO'}` });
+};
+
+// (Opcional) Endpoint para que el ESP confirme el estado físico alcanzado
+// POST /api/iot/tercero/ack   body: { isOpen: 0|1 }
+exports.ackTercero = (req, res) => {
+  const { isOpen } = req.body || {};
+  const v = Number(isOpen);
+  if (![0,1].includes(v)) return res.status(400).json({ error: 'isOpen debe ser 0 o 1' });
+  state.tercero.lastState = v;
+  state.tercero.updatedAt = new Date().toISOString();
+  return res.json({ ok: true, lastState: state.tercero.lastState });
 };

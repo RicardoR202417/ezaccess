@@ -19,13 +19,11 @@ router.post('/plumas/salida/open', (req, res) => {
   return ctrl.setPlumasEstado(req, res);
 });
 
-// ======== TOPE (NUEVO) ========
-// ESP32 consulta si debe bajar el tope (por ID de cajón)
-router.get('/tope/:id_cajon', ctrl.getEstadoTope);
-
-// Web o backend ordena bajar el tope de un cajón específico
-router.post('/tope/:id_cajon/down', ctrl.bajarTope);
-
-router.post('/tope/:id_cajon/up', ctrl.subirTope);
+// Tercer servo
+router.get('/tercero',         iotController.getTerceroEstado);
+router.post('/tercero/open',   iotController.openTercero);
+router.post('/tercero/close',  iotController.closeTercero);
+router.post('/tercero/toggle', iotController.toggleTercero);
+router.post('/tercero/ack',    iotController.ackTercero); // opcional
 
 module.exports = router;
