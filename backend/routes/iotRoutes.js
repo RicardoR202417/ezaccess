@@ -1,8 +1,8 @@
-// routes/iotRoutes.js
 const express = require('express');
 const router = express.Router();
 const ctrl = require('../controllers/iotController');
 
+// ======== PLUMAS ========
 // El ESP32 consulta estado (puedes usar ?oneshot=true para limpiar la orden tras leerla)
 router.get('/plumas', ctrl.getPlumasEstado);
 
@@ -19,5 +19,11 @@ router.post('/plumas/salida/open', (req, res) => {
   return ctrl.setPlumasEstado(req, res);
 });
 
-module.exports = router;
+// ======== TOPE (NUEVO) ========
+// ESP32 consulta si debe bajar el tope (por ID de cajón)
+router.get('/tope/:id_cajon', ctrl.getEstadoTope);
 
+// Web o backend ordena bajar el tope de un cajón específico
+router.post('/tope/:id_cajon/down', ctrl.bajarTope);
+
+module.exports = router;
