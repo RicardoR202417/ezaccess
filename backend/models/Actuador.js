@@ -1,4 +1,3 @@
-// models/Actuador.js
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
@@ -40,12 +39,12 @@ const Actuador = sequelize.define('Actuador', {
     { unique: true, fields: ['id_caj', 'tipo'] },
   ],
 });
+
+// ✅ Solo UNA VEZ y con un alias que no choque
 Actuador.associate = (models) => {
   Actuador.belongsTo(models.Cajon, {
     foreignKey: 'id_caj',
-    as: 'cajon',
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
+    as: 'cajonAsociado', // ← alias cambiado para evitar duplicados
   });
 };
 
