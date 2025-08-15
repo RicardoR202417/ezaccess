@@ -1,5 +1,5 @@
 // controllers/iotController.js
-
+const state = require('../helpers/state');
 const { Actuador, Cajon } = require('../models');
 
 // ======== ESTADO EN MEMORIA PARA MAQUETA ========
