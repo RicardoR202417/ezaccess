@@ -107,25 +107,26 @@ exports.bajarTope = async (req, res) => {
   const idCajon = req.params.id_cajon;
 
   try {
-    const cajon = await Cajon.findByPk(idCajon, {
-      include: {
-        model: Actuador,
-        as: 'actuadorTope',
-        where: { tipo: 'tope' },
-        required: true,
-      }
+    const actuador = await Actuador.findOne({
+      where: { id_caj: idCajon, tipo: 'tope' }
     });
 
-    if (!cajon) {
-      return res.status(404).json({ error: 'Cajón o actuador tipo tope no encontrado' });
+    if (!actuador) {
+      return res.status(404).json({ error: 'No se encontró actuador tipo tope para este cajón' });
     }
 
+    // Marca el tope para bajar
     state.topes[idCajon] = 1;
 
-    return res.json({ ok: true, mensaje: `Tope de cajón ${idCajon} marcado para bajar.` });
-
+    return res.json({
+      ok: true,
+      mensaje: `Tope del cajón ${idCajon} marcado para bajar.`
+    });
   } catch (error) {
-    console.error('🔥 Error bajando tope:', error.stack); // <-- Para ver en Render el detalle
-    return res.status(500).json({ error: 'Error interno del servidor', detalle: error.message });
+    console.error('🔥 Error bajando tope:', error);
+    return res.status(500).json({
+      error: 'Error interno del servidor',
+      detalle: error.message || error.toString()
+    });
   }
 };
