@@ -20,4 +20,11 @@ const Cajon = sequelize.define('Cajon', { // <-- Nombre del modelo en singular
   timestamps: false,
 });
 
+
+Cajon.associate = (models) => {
+  Cajon.hasOne(models.Actuador, { foreignKey: 'id_caj', as: 'actuadorTope' });
+  Cajon.hasOne(models.Actuador, { foreignKey: 'id_caj', as: 'actuadorPluma' });
+};
+
+
 module.exports = Cajon;

@@ -353,6 +353,109 @@ ORDER BY total_entradas DESC;
 -- Prueba:
 SELECT * FROM v_top_residentes_30d;
 
+📊 Módulo de Reportes — EZACCESS
+
+Se integró el módulo de reportes que permite consultar tanto el historial de asignaciones como la vista consolidada v_todas_asignaciones desde el backend y acceder a ellos desde el frontend.
+
+1️⃣ Vista SQL v_todas_asignaciones
+
+Ubicación: Base de datos PostgreSQL.
+
+Objetivo: Proporcionar en una sola consulta toda la información relevante de las asignaciones, incluyendo datos agregados y subconsultas:
+
+Datos del usuario, cajón, tipo y estado de asignación.
+
+Conteo de entradas y horas acumuladas en los últimos 30 días.
+
+Diferenciación entre asignaciones manuales y automáticas en 30 días.
+
+Última entrada y última salida del usuario.
+
+Cantidad total de asignaciones por usuario.
+
+Subconsulta para saber si tuvo accesos el día actual.
+
+Validación si tiene otras asignaciones activas.
+
+Beneficios: Optimiza las consultas del dashboard y los reportes, evitando múltiples consultas separadas.
+
+2️⃣ Backend — controllers/reportesController.js
+
+Se añadieron dos controladores:
+
+getHistorial
+
+Consulta el historial de asignaciones.
+
+Filtros opcionales:
+
+usuario → ID del usuario.
+
+numero_caj → Número del cajón.
+
+desde y hasta → Rango de fechas.
+
+Devuelve datos listos para mostrarse en tablas del frontend.
+
+getAsignacionesReporte
+
+Consulta directa a la vista v_todas_asignaciones.
+
+Filtros opcionales:
+
+zona
+
+estado_asig
+
+tipo_asig
+
+minEntradas30d
+
+id_usu
+
+Ordenado por mayor número de entradas, fecha de asignación y nombre de residente.
+
+3️⃣ Rutas — routes/reportes.js
+const express = require("express");
+const router = express.Router();
+const { getHistorial, getAsignacionesReporte } = require("../controllers/reportesController");
+
+router.get("/historial", getHistorial);
+router.get("/asignaciones", getAsignacionesReporte);
+
+module.exports = router;
+
+4️⃣ Integración en server.js
+
+Se añadió:
+
+const reportesRoutes = require('./routes/reportes');
+app.use('/api/reportes', reportesRoutes);
+
+5️⃣ Pruebas en Thunder Client
+Historial de asignaciones
+GET http://localhost:3000/api/reportes/historial
+
+
+Parámetros opcionales:
+
+usuario=1
+numero_caj=5
+desde=2025-08-01
+hasta=2025-08-14
+
+Reporte de asignaciones (vista SQL)
+GET http://localhost:3000/api/reportes/asignaciones
+
+
+Parámetros opcionales:
+
+zona=Zona C
+estado_asig=activa
+tipo_asig=manual
+minEntradas30d=2
+id_usu=1
+
 
 
 

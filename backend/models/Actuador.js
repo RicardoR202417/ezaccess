@@ -1,33 +1,52 @@
+// models/Actuador.js
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
-const Actuador = sequelize.define('actuadores', {
+const Actuador = sequelize.define('Actuador', {
   id_act: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
   },
-  tipo_act: {
-    type: DataTypes.STRING(50),
-    allowNull: false,
-  },
-  estado_act: {
-    type: DataTypes.TEXT,
-    defaultValue: 'bloqueado',
-    validate: {
-      isIn: [['liberado', 'bloqueado']],
-    },
-  },
-  fecha_actualizacion_act: {
-    type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW,
-  },
   id_caj: {
     type: DataTypes.INTEGER,
     allowNull: false,
+    references: { model: 'cajones', key: 'id_caj' },
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  },
+  tipo: {
+    type: DataTypes.ENUM('pluma_entrada', 'pluma_salida', 'tope'),
+    allowNull: false,
+  },
+  gpio: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  estado: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+    validate: { isIn: [[0, 1]] },
+  },
+  nombre: {
+    type: DataTypes.STRING(50),
+    allowNull: true,
   },
 }, {
-  timestamps: false,
+  tableName: 'actuadores',
+  timestamps: true,
+  indexes: [
+    { unique: true, fields: ['id_caj', 'tipo'] },
+  ],
 });
+Actuador.associate = (models) => {
+  Actuador.belongsTo(models.Cajon, {
+    foreignKey: 'id_caj',
+    as: 'cajon',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  });
+};
 
 module.exports = Actuador;
