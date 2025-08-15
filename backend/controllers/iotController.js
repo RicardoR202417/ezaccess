@@ -1,50 +1,75 @@
+// controllers/iotController.js
+
 const { Actuador, Cajon } = require('../models');
 
-// Estado en memoria suficiente para la maqueta.
+// ======== ESTADO EN MEMORIA PARA MAQUETA ========
 const state = {
   plumas: {
-    entrada: 0,
-    salida:  0,
+    entrada: 0,           // 1 = abrir entrada
+    salida: 0,            // 1 = abrir salida
+    tope: 0,              // 1 = bajar tope (global para ESP32)
+    tope_reset: 0,        // 1 = subir tope (reset)
     updatedAt: null,
   },
+
+  // Topes individuales por cajón (para pruebas si se desea por ID)
   topes: {
-    // Estructura dinámica por id_caj: { [id_caj]: 0|1 }
-    // Ejemplo: 1: 1 → bajar tope del cajón 1
-  }
+    // id_caj: 1 => marcado para bajar
+  },
 };
 
-// ===== PLUMAS =====
+// ======== PLUMAS (entrada/salida/tope global) ========
 
+// GET /api/iot/plumas?oneshot=true
 exports.getPlumasEstado = (req, res) => {
   const oneshot = String(req.query.oneshot || '').toLowerCase() === 'true';
 
   const payload = {
-    entrada: state.plumas.entrada,
-    salida:  state.plumas.salida,
-    updatedAt: state.plumas.updatedAt,
+    entrada:     state.plumas.entrada,
+    salida:      state.plumas.salida,
+    tope:        state.plumas.tope,
+    tope_reset:  state.plumas.tope_reset,
+    updatedAt:   state.plumas.updatedAt,
   };
 
-  if (oneshot && (state.plumas.entrada === 1 || state.plumas.salida === 1)) {
+  if (oneshot) {
     state.plumas.entrada = 0;
-    state.plumas.salida  = 0;
+    state.plumas.salida = 0;
+    state.plumas.tope = 0;
+    state.plumas.tope_reset = 0;
     state.plumas.updatedAt = new Date().toISOString();
   }
 
   return res.json(payload);
 };
 
+// POST /api/iot/plumas/set
+// Body: { entrada: 0|1, salida: 0|1, tope: 0|1, tope_reset: 0|1 }
 exports.setPlumasEstado = (req, res) => {
-  const { entrada, salida } = req.body || {};
+  const { entrada, salida, tope, tope_reset } = req.body || {};
 
   if (entrada !== undefined) {
     const val = Number(entrada);
-    if (![0,1].includes(val)) return res.status(400).json({ error: 'entrada debe ser 0 ó 1' });
+    if (![0, 1].includes(val)) return res.status(400).json({ error: 'entrada debe ser 0 ó 1' });
     state.plumas.entrada = val;
   }
+
   if (salida !== undefined) {
     const val = Number(salida);
-    if (![0,1].includes(val)) return res.status(400).json({ error: 'salida debe ser 0 ó 1' });
+    if (![0, 1].includes(val)) return res.status(400).json({ error: 'salida debe ser 0 ó 1' });
     state.plumas.salida = val;
+  }
+
+  if (tope !== undefined) {
+    const val = Number(tope);
+    if (![0, 1].includes(val)) return res.status(400).json({ error: 'tope debe ser 0 ó 1' });
+    state.plumas.tope = val;
+  }
+
+  if (tope_reset !== undefined) {
+    const val = Number(tope_reset);
+    if (![0, 1].includes(val)) return res.status(400).json({ error: 'tope_reset debe ser 0 ó 1' });
+    state.plumas.tope_reset = val;
   }
 
   state.plumas.updatedAt = new Date().toISOString();
@@ -53,13 +78,15 @@ exports.setPlumasEstado = (req, res) => {
     ok: true,
     plumas: {
       entrada: state.plumas.entrada,
-      salida:  state.plumas.salida,
+      salida: state.plumas.salida,
+      tope: state.plumas.tope,
+      tope_reset: state.plumas.tope_reset,
       updatedAt: state.plumas.updatedAt,
     },
   });
 };
 
-// ===== TOPE =====
+// ======== TOPE POR ID DE CAJÓN (control individual por pruebas) ========
 
 // GET /api/iot/tope/:id_cajon?oneshot=true
 exports.getEstadoTope = (req, res) => {
