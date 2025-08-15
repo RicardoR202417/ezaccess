@@ -15,8 +15,7 @@ const HistorialAsignacion = require("./HistorialAsignacion");
 Usuario.hasMany(SolicitudVisita, { foreignKey: "id_usu" });
 SolicitudVisita.belongsTo(Usuario, { foreignKey: "id_usu" });
 
-Cajon.hasOne(Actuador, { foreignKey: "id_caj", as: "actuadorPluma" }); // Entrada o salida
-Cajon.hasOne(Actuador, { foreignKey: "id_caj", as: "actuadorTope" });  // Tope
+  // Tope
 Cajon.hasOne(Sensor,   { foreignKey: "id_caj" });
 
 Actuador.belongsTo(Cajon, { foreignKey: "id_caj", as: "cajon" });
