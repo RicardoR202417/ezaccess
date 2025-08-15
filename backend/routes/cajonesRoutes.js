@@ -13,6 +13,6 @@ router.put('/estado/todos', cajonesController.cambiarEstadoTodos);
 router.put('/:id_caj/estado', cajonesController.cambiarEstadoCajon);
 
 // Ruta para obtener el cupo por zona
-router.get('/zona/:zona', cajonesController.obtenerCupoPorZona);
+router.get('/cajones/zona/:zona', cajonesController.obtenerCupoPorZona);
 
 module.exports = router;

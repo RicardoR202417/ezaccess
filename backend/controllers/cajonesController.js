@@ -1,4 +1,5 @@
 const { Cajon, Asignacion, Usuario, Actuador, Sensor } = require('../models');
+const { Op } = require('sequelize');
 
 // Obtener todos los cajones con su estado (ocupado o libre) y el usuario que lo ocupa
 // Obtener todos los cajones con su estado (ocupado o libre) y el usuario que lo ocupa
@@ -154,10 +155,22 @@ exports.cambiarEstadoTodos = async (req, res) => {
 // Obtener el cupo por zona (ocupados y libres)
 exports.obtenerCupoPorZona = async (req, res) => {
   const { zona } = req.params; // Recibe la zona como parámetro
+  
+  // Mapear zonas normalizadas a valores reales de la DB
+  const zonaMap = {
+    'zona_a': 'Zona A',
+    'zona_c': 'Zona C', 
+    'zona_d': 'Zona D',
+    'zona_e': 'Zona E'
+  };
+  
+  const zonaReal = zonaMap[zona.toLowerCase()] || zona;
+  
+  console.log(`Zona recibida: ${zona}, Zona real para DB: ${zonaReal}`);
 
   try {
     const cajones = await Cajon.findAll({
-      where: { ubicacion_caj: zona }, // Filtra por zona
+      where: { ubicacion_caj: zonaReal }, // Filtra por zona exacta
       include: [
         {
           model: Asignacion,
@@ -167,11 +180,13 @@ exports.obtenerCupoPorZona = async (req, res) => {
       ],
     });
 
+    console.log(`Cajones encontrados para ${zonaReal}:`, cajones.length);
+
     const totalOcupados = cajones.filter((cajon) => cajon.Asignacions && cajon.Asignacions.length > 0).length;
     const totalLibres = cajones.length - totalOcupados;
 
     res.json({
-      zona,
+      zona: zonaReal,
       totalOcupados,
       totalLibres,
       totalCajones: cajones.length,

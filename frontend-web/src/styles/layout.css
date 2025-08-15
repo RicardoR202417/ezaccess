@@ -489,19 +489,29 @@ form .form-control {
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 2px 12px rgba(44, 62, 80, 0.1);
-  padding: 2rem;
-  margin-bottom: 2rem;
-  min-height: 400px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  min-height: 300px;
+  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   overflow: hidden; /* Evita que las gráficas sobresalgan */
+  transition: all 0.3s ease;
+  cursor: pointer;
 }
 
-.grafica-preview-card h5 {
+.grafica-preview-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(44, 62, 80, 0.15);
+}
+
+.grafica-preview-card h5, .grafica-preview-card h6 {
   text-align: center;
-  font-size: 1.4rem;
-  margin-bottom: 1.5rem;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  color: #0d47a1;
+  font-weight: 600;
 }
 
 @media (max-width: 900px) {
