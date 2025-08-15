@@ -1,11 +1,8 @@
 // controllers/iotController.js
 const { Actuador, Cajon } = require('../models');
-
-// ======== ESTADO EN MEMORIA PARA MAQUETA ========
 const state = require('../helpers/state');
 
-
-// ======== PLUMAS (entrada/salida/tope global) ========
+// ======== PLUMAS (entrada/salida/tope global “legacy”) ========
 
 // GET /api/iot/plumas?oneshot=true
 exports.getPlumasEstado = (req, res) => {
@@ -73,74 +70,55 @@ exports.setPlumasEstado = (req, res) => {
   });
 };
 
-// ======== TOPE POR ID DE CAJÓN (control individual por pruebas) ========
+// ======== TOPE POR ID DE CAJÓN (down/up oneshot) ========
 
 // GET /api/iot/tope/:id_cajon?oneshot=true
+// Devuelve “one-shot” para ambas acciones y limpia si oneshot=true
 exports.getEstadoTope = (req, res) => {
-  const idCajon = req.params.id_cajon;
+  const idCajon = String(req.params.id_cajon);
   const oneshot = String(req.query.oneshot || '').toLowerCase() === 'true';
 
-  const estado = state.topes[idCajon] || 0;
+  const down = state.topes_down[idCajon] === 1 ? 1 : 0;
+  const up   = state.topes_up[idCajon]   === 1 ? 1 : 0;
 
-  if (oneshot && estado === 1) {
-    state.topes[idCajon] = 0;
+  if (oneshot) {
+    if (down === 1) state.topes_down[idCajon] = 0;
+    if (up   === 1) state.topes_up[idCajon]   = 0;
   }
 
-  return res.json({ id_cajon: idCajon, tope: estado });
+  return res.json({ id_cajon: idCajon, tope_down: down, tope_up: up, updatedAt: new Date().toISOString() });
 };
 
 // POST /api/iot/tope/:id_cajon/down
 exports.bajarTope = async (req, res) => {
-  const idCajon = req.params.id_cajon;
-
+  const idCajon = String(req.params.id_cajon);
   try {
-    const actuador = await Actuador.findOne({
-      where: { id_caj: idCajon, tipo: 'tope' }
-    });
+    const actuador = await Actuador.findOne({ where: { id_caj: idCajon, tipo: 'tope' } });
+    if (!actuador) return res.status(404).json({ error: 'No se encontró actuador tipo tope para este cajón' });
 
-    if (!actuador) {
-      return res.status(404).json({ error: 'No se encontró actuador tipo tope para este cajón' });
-    }
+    state.topes_down[idCajon] = 1; // one-shot para bajar
+    state.topes_up[idCajon]   = 0; // opcional: anula “up” pendiente
 
-    // Marca el tope para bajar
-    state.topes[idCajon] = 1;
-
-    return res.json({
-      ok: true,
-      mensaje: `Tope del cajón ${idCajon} marcado para bajar.`
-    });
+    return res.json({ ok: true, mensaje: `Tope del cajón ${idCajon} marcado para BAJAR (one-shot).` });
   } catch (error) {
     console.error('🔥 Error bajando tope:', error);
-    return res.status(500).json({
-      error: 'Error interno del servidor',
-      detalle: error.message || error.toString()
-    });
+    return res.status(500).json({ error: 'Error interno del servidor', detalle: error.message || String(error) });
   }
 };
+
+// POST /api/iot/tope/:id_cajon/up
 exports.subirTope = async (req, res) => {
-  const idCajon = req.params.id_cajon;
-
+  const idCajon = String(req.params.id_cajon);
   try {
-    const actuador = await Actuador.findOne({
-      where: { id_caj: idCajon, tipo: 'tope' }
-    });
+    const actuador = await Actuador.findOne({ where: { id_caj: idCajon, tipo: 'tope' } });
+    if (!actuador) return res.status(404).json({ error: 'No se encontró actuador tipo tope para este cajón' });
 
-    if (!actuador) {
-      return res.status(404).json({ error: 'No se encontró actuador tipo tope para este cajón' });
-    }
+    state.topes_up[idCajon]   = 1; // one-shot para subir
+    state.topes_down[idCajon] = 0; // opcional: anula “down” pendiente
 
-    // Marca el tope para subir (resetear)
-    state.topes_reset[idCajon] = 1;
-
-    return res.json({
-      ok: true,
-      mensaje: `Tope del cajón ${idCajon} marcado para subir.`
-    });
+    return res.json({ ok: true, mensaje: `Tope del cajón ${idCajon} marcado para SUBIR (one-shot).` });
   } catch (error) {
     console.error('🔥 Error subiendo tope:', error);
-    return res.status(500).json({
-      error: 'Error interno del servidor',
-      detalle: error.message || error.toString()
-    });
+    return res.status(500).json({ error: 'Error interno del servidor', detalle: error.message || String(error) });
   }
 };
