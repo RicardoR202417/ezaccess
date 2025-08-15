@@ -1,7 +1,6 @@
 const express = require('express');
+const iotController = require('../controllers/iotController');
 const router = express.Router();
-const ctrl = require('../controllers/iotController');
-
 // ======== PLUMAS ========
 // El ESP32 consulta estado (puedes usar ?oneshot=true para limpiar la orden tras leerla)
 router.get('/plumas', ctrl.getPlumasEstado);
