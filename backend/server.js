@@ -1,4 +1,4 @@
-// server.js (robusto)
+// server.js
 require('dotenv').config();
 const express = require('express');
 const http = require('http');
@@ -6,15 +6,15 @@ const cors = require('cors');
 
 const app = express();
 
-// === Marcas para confirmar que se ejecuta ESTE archivo ===
+// Marcas de arranque
 console.log('🧭 Iniciando server.js de EZACCESS');
 console.log('🗂️  __dirname =', __dirname);
 
 // ====== DB (Sequelize) ======
 const sequelize = require('./config/db');
 
-// Forzar carga de al menos un modelo que declare asociaciones
-require('./models/Vehiculo');
+// Carga todas las asociaciones de modelos (index.js dentro de /models)
+require('./models');
 
 // ====== Rutas ======
 const iotRoutes         = require('./routes/iotRoutes');
@@ -25,8 +25,9 @@ const actuadorRoutes    = require('./routes/actuadorRoutes');
 const authRoutes        = require('./routes/authRoutes');
 const rutasProtegidas   = require('./routes/protegidasRoutes');
 const visitaRoutes      = require('./routes/visitaRoutes');
-const reportesRoutes    = require('./routes/reportes');
+const reportesRoutes    = require('./routes/reportes');      // <- incluye /vehicular-clasificado
 const vehiculosRoutes   = require('./routes/vehiculosRoutes');
+const consultasRoutes   = require('./routes/consultas'); // ✅ NUEVA RUTA
 
 // ====== CORS ======
 app.use(cors({
@@ -56,12 +57,13 @@ app.use('/api', visitaRoutes);
 app.use('/api', asignacionRoutes);
 app.use('/api/cajones', cajonesRoutes);
 app.use('/api', actuadorRoutes);
-app.use('/api', nfcRoutes);
-app.use('/api/nfc', nfcRoutes);
-app.use('/api/reportes', reportesRoutes);
+app.use('/api', nfcRoutes);          // alias general
+app.use('/api/nfc', nfcRoutes);      // alias específico (compatibilidad)
+app.use('/api/reportes', reportesRoutes); // /api/reportes/vehicular-clasificado
 app.use('/api/vehiculos', vehiculosRoutes);
 app.use('/api', rutasProtegidas);
 app.use('/api/iot', iotRoutes);
+app.use('/api/consultas', consultasRoutes); // ✅ NUEVA RUTA FUNCIONAL
 
 // ====== 404 & Error handler ======
 app.use((req, res) => {
@@ -78,13 +80,10 @@ const PORT = Number(process.env.PORT) || 5000; // Fuerza 5000 por defecto
 const HOST = process.env.HOST || '0.0.0.0';
 const server = http.createServer(app);
 
-// Errores del servidor (puerto en uso, permisos, etc.)
 server.on('error', (err) => {
   console.error('❌ Error del servidor HTTP:', err.code || err.message, err);
-  // NO hacemos process.exit aquí; dejamos que lo veas en consola
 });
 
-// Confirmación de escucha
 server.on('listening', () => {
   const addr = server.address();
   console.log(`🚀 Servidor corriendo en http://${addr.address}:${addr.port} (pid=${process.pid})`);
@@ -115,7 +114,7 @@ process.on('unhandledRejection', (reason) => {
   console.error('💥 unhandledRejection:', reason);
 });
 
-// Conexión BD y arranque
+// ====== Conexión BD y arranque ======
 (async () => {
   try {
     await sequelize.authenticate();
@@ -123,7 +122,6 @@ process.on('unhandledRejection', (reason) => {
   } catch (err) {
     console.error('❌ Error al conectar a PostgreSQL:', err);
   } finally {
-    // Arranca siempre para ver logs en HTTP aunque la BD falle
     server.listen(PORT, HOST);
   }
 })();

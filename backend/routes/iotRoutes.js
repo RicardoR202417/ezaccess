@@ -1,31 +1,18 @@
 const express = require('express');
 const router = express.Router();
+
+// Importa tu controlador
 const ctrl = require('../controllers/iotController');
 
-// ======== PLUMAS ========
-// El ESP32 consulta estado (puedes usar ?oneshot=true para limpiar la orden tras leerla)
+// ======== Rutas PLUMAS ========
 router.get('/plumas', ctrl.getPlumasEstado);
-
-// La web ordena abrir/cerrar plumas (body: { entrada: 0|1, salida: 0|1 })
 router.post('/plumas/set', ctrl.setPlumasEstado);
 
-// Atajos opcionales (triggers directos)
-router.post('/plumas/entrada/open', (req, res) => {
-  req.body = { entrada: 1 };
-  return ctrl.setPlumasEstado(req, res);
-});
-router.post('/plumas/salida/open', (req, res) => {
-  req.body = { salida: 1 };
-  return ctrl.setPlumasEstado(req, res);
-});
-
-// ======== TOPE (NUEVO) ========
-// ESP32 consulta si debe bajar el tope (por ID de cajón)
-router.get('/tope/:id_cajon', ctrl.getEstadoTope);
-
-// Web o backend ordena bajar el tope de un cajón específico
-router.post('/tope/:id_cajon/down', ctrl.bajarTope);
-
-router.post('/tope/:id_cajon/up', ctrl.subirTope);
+// ======== Rutas TERCER SERVO ========
+router.get('/tercero', ctrl.getTerceroEstado);
+router.post('/tercero/open', ctrl.openTercero);
+router.post('/tercero/close', ctrl.closeTercero);
+router.post('/tercero/toggle', ctrl.toggleTercero);
+router.post('/tercero/ack', ctrl.ackTercero);
 
 module.exports = router;
