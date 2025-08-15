@@ -1,17 +1,20 @@
-// controllers/iotController.js
+const { Actuador, Cajon } = require('../models');
 
 // Estado en memoria suficiente para la maqueta.
-// Si luego quieres persistir/loggear en BD, aquí mismo lo conectamos a Sequelize.
 const state = {
   plumas: {
-    entrada: 0,  // 0 = sin orden, 1 = abrir (one-shot)
+    entrada: 0,
     salida:  0,
     updatedAt: null,
   },
+  topes: {
+    // Estructura dinámica por id_caj: { [id_caj]: 0|1 }
+    // Ejemplo: 1: 1 → bajar tope del cajón 1
+  }
 };
 
-// GET /api/iot/plumas[?oneshot=true]
-// Responde { entrada, salida, updatedAt }. Si ?oneshot=true, limpia órdenes al responder.
+// ===== PLUMAS =====
+
 exports.getPlumasEstado = (req, res) => {
   const oneshot = String(req.query.oneshot || '').toLowerCase() === 'true';
 
@@ -30,8 +33,6 @@ exports.getPlumasEstado = (req, res) => {
   return res.json(payload);
 };
 
-// POST /api/iot/plumas/set
-// Body permitido: { entrada: 0|1, salida: 0|1 }
 exports.setPlumasEstado = (req, res) => {
   const { entrada, salida } = req.body || {};
 
@@ -56,4 +57,43 @@ exports.setPlumasEstado = (req, res) => {
       updatedAt: state.plumas.updatedAt,
     },
   });
+};
+
+// ===== TOPE =====
+
+// GET /api/iot/tope/:id_cajon?oneshot=true
+exports.getEstadoTope = (req, res) => {
+  const idCajon = req.params.id_cajon;
+  const oneshot = String(req.query.oneshot || '').toLowerCase() === 'true';
+
+  const estado = state.topes[idCajon] || 0;
+
+  if (oneshot && estado === 1) {
+    state.topes[idCajon] = 0;
+  }
+
+  return res.json({ id_cajon: idCajon, tope: estado });
+};
+
+// POST /api/iot/tope/:id_cajon/down
+exports.bajarTope = async (req, res) => {
+  const idCajon = req.params.id_cajon;
+
+  // Validar que el cajón existe y tiene actuador tipo 'tope'
+  const cajon = await Cajon.findByPk(idCajon, {
+    include: {
+      model: Actuador,
+      where: { tipo: 'tope' },
+      required: true,
+    }
+  });
+
+  if (!cajon) {
+    return res.status(404).json({ error: 'Cajón o actuador tipo tope no encontrado' });
+  }
+
+  // Marca el tope para bajar (se mantendrá abajo hasta que se reinicie manualmente)
+  state.topes[idCajon] = 1;
+
+  return res.json({ ok: true, mensaje: `Tope de cajón ${idCajon} marcado para bajar.` });
 };
