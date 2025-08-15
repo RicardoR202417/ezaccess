@@ -28,10 +28,6 @@ const Actuador = sequelize.define('Actuador', {
     defaultValue: 0,
     validate: { isIn: [[0, 1]] },
   },
-  nombre: {
-    type: DataTypes.STRING(50),
-    allowNull: true,
-  },
 }, {
   tableName: 'actuadores',
   timestamps: true,
