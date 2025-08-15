@@ -19,7 +19,7 @@ Cajon.hasOne(Actuador, { foreignKey: "id_caj", as: "actuadorPluma" }); // Entrad
 Cajon.hasOne(Actuador, { foreignKey: "id_caj", as: "actuadorTope" });  // Tope
 Cajon.hasOne(Sensor,   { foreignKey: "id_caj" });
 
-Actuador.belongsTo(Cajon, { foreignKey: "id_caj", as: "cajon" }); // Necesario con `as` si usas `hasOne` con alias
+Actuador.belongsTo(Cajon, { foreignKey: "id_caj", as: "cajon" });
 Sensor.belongsTo(Cajon,   { foreignKey: "id_caj" });
 
 Asignacion.belongsTo(Usuario, { foreignKey: "id_usu" });
@@ -31,6 +31,11 @@ HistorialAsignacion.belongsTo(Usuario, { foreignKey: "id_usu" });
 
 Cajon.hasMany(HistorialAsignacion, { foreignKey: "id_caj" });
 HistorialAsignacion.belongsTo(Cajon, { foreignKey: "id_caj" });
+
+// Asociaciones explícitas si existen métodos associate
+if (Cajon.associate) Cajon.associate({ Actuador, Sensor });
+if (Actuador.associate) Actuador.associate({ Cajon });
+if (Sensor.associate) Sensor.associate?.({ Cajon }); // Opcional
 
 // Exportar
 module.exports = {

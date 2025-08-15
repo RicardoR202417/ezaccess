@@ -40,5 +40,13 @@ const Actuador = sequelize.define('Actuador', {
     { unique: true, fields: ['id_caj', 'tipo'] },
   ],
 });
+Actuador.associate = (models) => {
+  Actuador.belongsTo(models.Cajon, {
+    foreignKey: 'id_caj',
+    as: 'cajon',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  });
+};
 
 module.exports = Actuador;
