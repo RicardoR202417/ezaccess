@@ -42,10 +42,12 @@ const Actuador = sequelize.define('Actuador', {
 
 // ✅ Solo UNA VEZ y con un alias que no choque
 Actuador.associate = (models) => {
+  // 🔥 Esta es la correcta para que funcione `as: 'actuadorTope'` en el include
   Actuador.belongsTo(models.Cajon, {
     foreignKey: 'id_caj',
-    as: 'cajonAsociado', // ← alias cambiado para evitar duplicados
+    as: 'actuadorTope', // ← Este alias debe coincidir exactamente con el que usas en findByPk
   });
 };
+
 
 module.exports = Actuador;
